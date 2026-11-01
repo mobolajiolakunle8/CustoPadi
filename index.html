@@ -753,10 +753,11 @@ function authMessage(err) {
   // Firebase often reports domain/CORS/setup issues as "network-request-failed" in the browser.
   if (code === 'auth/network-request-failed') {
     if (!navigator.onLine) return 'No internet. Check your connection and try again.';
-    if (/identitytoolkit|verifypassword|signupsignin|createauthuri|cors|blocked by cors|access-control-allow-origin|failed to fetch|load failed|fetch/i.test(msg)) {
-      return 'This website cannot talk to Firebase Authentication yet. App owner: in Firebase go to Authentication → Settings → Authorized domains and add this live website domain exactly as it appears in the address bar. If the domain is already there, check that your API key is not blocking this website in Google Cloud → APIs & Services → Credentials.';
-    }
-    return 'The sign-up request did not reach Firebase. If your internet is fine, the live website domain is probably not yet allowed in Firebase Authentication → Settings → Authorized domains.';
+    const site = window.location.hostname;
+    const preview = /\.vercel\.app$/.test(site) && /-git-|-[a-z0-9]+-.*\.vercel\.app$/.test(site);
+    return 'Firebase could not be reached from ' + site + '. App owner: in Firebase Authentication → Settings → Authorized domains, add "' + site + '".' +
+      (preview ? ' This looks like a Vercel preview address, so it needs adding separately, or use your main production address.' : '') +
+      ' If "' + site + '" is already listed, the API key is blocking the site: in Google Cloud → APIs & Services → Credentials, add https://' + site + '/* under HTTP referrers and allow the Identity Toolkit API.';
   }
 
   if (!message && (/requests-from-referer|referer.*blocked|api key.*referer|http referrer/i.test(code + ' ' + msg))) {
@@ -764,6 +765,9 @@ function authMessage(err) {
   }
   if (!message && (/authdomain|custom domain|domain not authorized|unauthorized domain/i.test(msg))) {
     message = 'This website address is not yet allowed to log in. App owner: add the live website domain under Firebase Authentication → Settings → Authorized domains.';
+  }
+  if (!message && /unauthorized-domain/i.test(code)) {
+    message = 'Firebase has not authorized ' + window.location.hostname + ' yet. App owner: add "' + window.location.hostname + '" in Firebase Authentication → Settings → Authorized domains.';
   }
   return message || ('Something went wrong. Please try again.' + (code ? ' (' + code + ')' : ''));
 }

@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#178A4A" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="CustoPadi" />
+  <meta name="description" content="CustoPadi — Customer follow-up tool for Nigerian small businesses on WhatsApp." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%23178A4A'/%3E%3Cg transform='translate(6 12)'%3E%3Cg transform='translate(32 30) scale(-1 1)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23ffffff'/%3E%3C/g%3E%3Cg transform='translate(50 30)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23F5A623' stroke='%23178A4A' stroke-width='5' paint-order='stroke fill'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%23178A4A'/%3E%3Cg transform='translate(6 12)'%3E%3Cg transform='translate(32 30) scale(-1 1)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23ffffff'/%3E%3C/g%3E%3Cg transform='translate(50 30)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23F5A623' stroke='%23178A4A' stroke-width='5' paint-order='stroke fill'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="manifest" href='data:application/manifest+json,{"name":"CustoPadi — Customer Follow-up","short_name":"CustoPadi","start_url":".","display":"standalone","background_color":"#f6f8f4","theme_color":"#178A4A","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 96 96%27%3E%3Crect width=%2796%27 height=%2796%27 rx=%2724%27 fill=%27%23178A4A%27/%3E%3Cg transform=%27translate(6 12)%27%3E%3Cg transform=%27translate(32 30) scale(-1 1)%27%3E%3Cpath d=%27M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z%27 fill=%27%23ffffff%27/%3E%3C/g%3E%3Cg transform=%27translate(50 30)%27%3E%3Cpath d=%27M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z%27 fill=%27%23F5A623%27 stroke=%27%23178A4A%27 stroke-width=%275%27 paint-order=%27stroke fill%27/%3E%3C/g%3E%3C/g%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"}]}' />
+  <title>CustoPadi — Stay close to your customers</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style type="text/tailwindcss">
+    @theme {
+      --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+      --color-ink: #1a2e1a;
+      --color-leaf: #178A4A;
+      --color-leaf-deep: #0F6B39;
+      --color-leaf-light: #E7F4EC;
+      --color-cream: #f6f8f4;
+      --color-stone: #5f665a;
+      --color-amber: #B8740A;
+      --color-gold: #F5A623;
+      --color-rose: #d0473a;
+    }
+  </style>
+
+  <style>
+    html { -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: #f6f8f4; color: #1a2e1a; font-size: 16px; }
+    .card { background: #fff; border-radius: 20px; box-shadow: 0 1px 10px rgba(20,40,20,0.06); border: 1px solid rgba(0,0,0,0.04); }
+    .field { width: 100%; min-height: 50px; padding: 12px 14px; background: #f1f5ef; border-radius: 14px; font-size: 16px; color: #1a2e1a; border: 2px solid transparent; outline: none; transition: border-color .15s, background .15s; -webkit-appearance: none; appearance: none; }
+    .field:focus { border-color: #178A4A; background: #fff; }
+    .field::placeholder { color: #9aa294; }
+    select.field { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235f665a' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    .label { display: block; font-size: 15px; font-weight: 600; color: #3f463b; margin-bottom: 6px; }
+    .btn { min-height: 48px; padding: 0 18px; border-radius: 14px; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .1s, background .15s, opacity .15s; cursor: pointer; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #178A4A; color: #fff; box-shadow: 0 4px 12px rgba(23,138,74,0.24); }
+    .btn-primary:hover { background: #0F6B39; }
+    .btn-ghost { background: #eef2ec; color: #3f463b; }
+    .btn-outline { background: #fff; color: #178A4A; border: 2px solid #178A4A; }
+    .brand-word { font-weight: 800; letter-spacing: -0.035em; line-height: 1; }
+    .btn-danger { background: #fdecea; color: #d0473a; }
+    .btn:disabled { opacity: .6; pointer-events: none; }
+    .wa-btn { min-height: 48px; padding: 0 16px; border-radius: 14px; background: #178A4A; color: #fff; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0; }
+    .wa-btn:active { transform: scale(0.96); }
+    .wa-btn.done { background: #E7F4EC; color: #0F6B39; }
+    .chip { min-height: 48px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 15px; white-space: nowrap; background: #fff; color: #3f463b; border: 1px solid rgba(0,0,0,0.08); }
+    .chip.active { background: #178A4A; color: #fff; border-color: #178A4A; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .fade-up { animation: fadeUp .3s ease-out both; }
+    @keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
+    .sheet-panel { animation: sheetUp .28s cubic-bezier(.2,.8,.2,1) both; }
+    .tab-bar { background: rgba(255,255,255,0.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid rgba(0,0,0,0.06); padding-bottom: env(safe-area-inset-bottom); }
+    .nav-btn { min-height: 60px; }
+    .nav-btn.active { color: #178A4A; }
+    .nav-btn.active .nav-ico { background: #E7F4EC; }
+    .seg button { min-height: 48px; }
+    .seg button.active { background: #fff; color: #1a2e1a; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+<!-- ===================================================== -->
+<!-- AUTH: REGISTER / LOG IN                                -->
+<!-- ===================================================== -->
+<div id="authView" class="hidden min-h-screen max-w-md mx-auto">
+  <div class="bg-gradient-to-br from-leaf to-leaf-deep text-white px-6 pt-12 pb-20 rounded-b-[2.25rem] relative overflow-hidden">
+    <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10"></div>
+    <div class="absolute bottom-6 -left-8 w-24 h-24 rounded-full bg-white/10"></div>
+    <div class="relative">
+      <div class="inline-flex items-center gap-2.5 bg-white rounded-2xl pl-3 pr-4 py-2.5 shadow-lg mb-5">
+        <svg viewBox="0 0 88 72" class="w-10 h-9 shrink-0" aria-hidden="true">
+          <g transform="translate(30 30) scale(-1 1)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#178A4A"/></g>
+          <g transform="translate(58 30)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#F5A623" stroke="#fff" stroke-width="5" paint-order="stroke fill"/></g>
+        </svg>
+        <span class="text-[27px] brand-word"><span class="text-leaf">Custo</span><span class="text-gold">Padi</span></span>
+      </div>
+      <h1 class="text-[28px] font-extrabold leading-tight mb-2">Never forget a customer.<br>Bring them back.</h1>
+      <p class="text-white/90 text-[16px] leading-relaxed">Your customer padi. Know who to message today and send a warm WhatsApp in one tap.</p>
+    </div>
+  </div>
+
+  <div class="px-4 -mt-12 pb-10 relative">
+    <div class="card p-5">
+      <div class="seg flex bg-cream rounded-2xl p-1 mb-5">
+        <button id="segRegister" onclick="setAuthMode('register')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Create account</button>
+        <button id="segLogin" onclick="setAuthMode('login')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Log in</button>
+      </div>
+
+      <!-- Register -->
+      <form id="registerForm" onsubmit="register(event)" novalidate>
+        <h2 class="text-[20px] font-bold mb-1">Register your business</h2>
+        <p class="text-stone text-[15px] mb-5">It takes less than a minute. It's free.</p>
+        <div class="space-y-4">
+          <div>
+            <label class="label" for="regBiz">Business name</label>
+            <input id="regBiz" class="field" type="text" placeholder="e.g. Ada's Fabrics" autocomplete="organization" maxlength="60" />
+          </div>
+          <div>
+            <label class="label" for="regOwner">Your name</label>
+            <input id="regOwner" class="field" type="text" placeholder="e.g. Adaeze Obi" autocomplete="name" maxlength="50" />
+          </div>
+          <div>
+            <label class="label" for="regPhone">Your WhatsApp number</label>
+            <input id="regPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567 or 2348031234567" autocomplete="tel" />
+          </div>
+          <div>
+            <label class="label" for="regType">What do you sell?</label>
+            <select id="regType" class="field">
+              <option>Fashion &amp; clothing</option>
+              <option>Food &amp; drinks</option>
+              <option>Hair &amp; beauty</option>
+              <option>Phones &amp; gadgets</option>
+              <option>Provisions &amp; groceries</option>
+              <option>Shoes &amp; bags</option>
+              <option>Services</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label" for="regPin">4-digit PIN</label>
+              <input id="regPin" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="new-password" />
+            </div>
+            <div>
+              <label class="label" for="regPin2">Type PIN again</label>
+              <input id="regPin2" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="new-password" />
+            </div>
+          </div>
+          <label class="flex items-start gap-3 bg-leaf-light/60 rounded-2xl p-4 cursor-pointer min-h-[48px]">
+            <input id="regSamples" type="checkbox" checked class="mt-1 w-5 h-5 accent-leaf shrink-0" />
+            <span class="text-[15px] leading-snug"><b>Add 8 sample customers</b><br><span class="text-stone">So you can try CustoPadi before adding your own. You can delete them anytime.</span></span>
+          </label>
+        </div>
+        <p id="regError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+        <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your records stay on this phone. Remember your PIN.</p>
+      </form>
+
+      <!-- Login -->
+      <form id="loginForm" class="hidden" onsubmit="login(event)" novalidate>
+        <h2 class="text-[20px] font-bold mb-1">Welcome back</h2>
+        <p class="text-stone text-[15px] mb-5">Log in with your WhatsApp number and PIN.</p>
+        <div id="savedBiz" class="hidden mb-5">
+          <p class="text-[14px] font-semibold text-stone mb-2">Businesses on this phone</p>
+          <div id="savedBizList" class="space-y-2"></div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="label" for="logPhone">WhatsApp number</label>
+            <input id="logPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
+          </div>
+          <div>
+            <label class="label" for="logPin">PIN</label>
+            <input id="logPin" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="current-password" />
+          </div>
+        </div>
+        <p id="logError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+        <button type="submit" class="btn btn-primary w-full mt-5">Log in <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone text-center mt-4">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
+      </form>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 mt-5 text-center">
+      <div class="p-3"><i class="fa-solid fa-calendar-check text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Who to message today</p></div>
+      <div class="p-3"><i class="fa-brands fa-whatsapp text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
+      <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
+    </div>
+
+    <div class="mt-4 flex gap-2">
+      <button type="button" onclick="openSheet('launch')" class="btn btn-ghost flex-1 !text-[15px]">
+        <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Install on phone / Launch guide
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- MAIN APP                                               -->
+<!-- ===================================================== -->
+<div id="appView" class="hidden max-w-md mx-auto min-h-screen">
+  <header class="sticky top-0 z-30 bg-cream/95 backdrop-blur-xl px-4 pt-3 pb-2 border-b border-black/5">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0 select-none" aria-label="CustoPadi">
+        <svg viewBox="0 0 88 72" class="w-9 h-8 shrink-0" aria-hidden="true">
+          <g transform="translate(30 30) scale(-1 1)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#178A4A"/></g>
+          <g transform="translate(58 30)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#F5A623" stroke="#f6f8f4" stroke-width="5" paint-order="stroke fill"/></g>
+        </svg>
+        <span class="text-[23px] brand-word truncate"><span class="text-leaf">Custo</span><span class="text-gold">Padi</span></span>
+      </div>
+      <button onclick="openBusinessSheet()" aria-label="My business and settings" class="w-12 h-12 rounded-full bg-white border border-black/5 flex items-center justify-center shadow-sm shrink-0">
+        <i class="fa-solid fa-gear text-stone"></i>
+      </button>
+    </div>
+    <button onclick="openBusinessSheet()" class="mt-1 w-full flex items-center gap-2 min-h-[44px] text-left rounded-xl px-1 -mx-1 active:bg-black/5">
+      <div id="hdrAvatar" class="w-8 h-8 rounded-lg bg-leaf text-white flex items-center justify-center font-extrabold text-[12px] shrink-0">CP</div>
+      <p id="hdrBiz" class="font-bold text-[15px] leading-tight truncate">Your business</p>
+      <span class="w-1 h-1 rounded-full bg-stone/40 shrink-0"></span>
+      <p id="hdrHello" class="text-[14px] text-stone truncate flex-1">Hello</p>
+      <i class="fa-solid fa-chevron-right text-[11px] text-stone/50 shrink-0"></i>
+    </button>
+  </header>
+
+  <main class="px-4 pt-2 pb-32">
+
+    <!-- TODAY -->
+    <section id="screen-today" class="screen">
+      <div id="onboarding" class="hidden mb-5"></div>
+
+      <div class="card p-5 mb-5 relative overflow-hidden">
+        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-leaf via-leaf to-gold"></div>
+        <p class="text-[15px] font-semibold text-stone mb-1">Who to message today</p>
+        <p class="leading-tight"><span id="todayCount" class="text-[44px] font-extrabold text-leaf tracking-tight">0</span> <span id="todayCountLabel" class="text-[18px] font-bold">people to follow up today</span></p>
+        <div class="flex items-center gap-2 mt-3 text-[15px] text-stone flex-wrap">
+          <span>Not bought in</span>
+          <select id="daysSelect" onchange="setDays(this.value)" class="field !w-auto !min-h-[44px] !py-2 font-bold !text-ink">
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="21">21 days</option>
+            <option value="30">30 days</option>
+            <option value="45">45 days</option>
+            <option value="60">60 days</option>
+            <option value="90">90 days</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="todayList" class="space-y-3 mb-8"></div>
+
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fa-solid fa-cake-candles text-amber text-lg"></i>
+        <h2 class="font-bold text-[18px]">Birthdays this week</h2>
+      </div>
+      <div id="birthdayList" class="space-y-3"></div>
+    </section>
+
+    <!-- CUSTOMERS -->
+    <section id="screen-customers" class="screen hidden">
+      <h2 class="font-extrabold text-[22px] mb-3">Your customers</h2>
+      <div class="relative mb-3">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone/60"></i>
+        <input id="customerSearch" type="search" placeholder="Search name, phone or tag" class="field !pl-11 !bg-white border-black/5" oninput="renderCustomers()" />
+      </div>
+      <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 mb-3 -mx-4 px-4" id="chips"></div>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-stone mb-4">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-leaf"></span>Bought in 30 days</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber"></span>31–60 days</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose"></span>61+ days</span>
+      </div>
+      <div id="customerList" class="space-y-3"></div>
+    </section>
+
+    <!-- ADD -->
+    <section id="screen-add" class="screen hidden">
+      <h2 class="font-extrabold text-[22px] mb-1">Add</h2>
+      <p class="text-stone text-[16px] mb-5">What would you like to add?</p>
+      <div id="addChoices" class="grid grid-cols-2 gap-3 mb-5">
+        <button onclick="showNewForm()" class="card p-5 text-left min-h-[140px] flex flex-col justify-between active:scale-[.98] transition">
+          <span class="w-12 h-12 rounded-2xl bg-leaf-light text-leaf flex items-center justify-center text-xl"><i class="fa-solid fa-user-plus"></i></span>
+          <span><span class="block font-bold text-[18px]">New customer</span><span class="text-[14px] text-stone">Name and phone</span></span>
+        </button>
+        <button onclick="showSaleForm()" class="card p-5 text-left min-h-[140px] flex flex-col justify-between active:scale-[.98] transition">
+          <span class="w-12 h-12 rounded-2xl bg-amber/15 text-amber flex items-center justify-center text-xl"><i class="fa-solid fa-naira-sign"></i></span>
+          <span><span class="block font-bold text-[18px]">Log a sale</span><span class="text-[14px] text-stone">Who bought what</span></span>
+        </button>
+      </div>
+
+      <form id="newForm" class="hidden card p-5 fade-up" onsubmit="addCustomer(event)" novalidate>
+        <h3 class="font-bold text-[19px] mb-4">New customer</h3>
+        <div class="space-y-4">
+          <div><label class="label" for="ncName">Name</label><input id="ncName" class="field" type="text" placeholder="e.g. Chiamaka Okafor" maxlength="50" /></div>
+          <div><label class="label" for="ncPhone">WhatsApp number</label><input id="ncPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" /></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="label" for="ncBirthday">Birthday <span class="font-normal text-stone">(optional)</span></label><input id="ncBirthday" class="field" type="date" /></div>
+            <div><label class="label" for="ncTag">Tag</label><select id="ncTag" class="field"><option>New</option><option>Regular</option><option>VIP</option></select></div>
+          </div>
+          <div><label class="label" for="ncNotes">Notes <span class="font-normal text-stone">(optional)</span></label><textarea id="ncNotes" class="field resize-none" rows="2" placeholder="e.g. Size 12, likes bright colours" maxlength="300"></textarea></div>
+        </div>
+        <p id="ncError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+        <div class="flex gap-3 mt-5">
+          <button type="button" onclick="hideForms()" class="btn btn-ghost flex-1">Cancel</button>
+          <button type="submit" class="btn btn-primary flex-1">Save customer</button>
+        </div>
+      </form>
+
+      <form id="saleForm" class="hidden card p-5 fade-up" onsubmit="addSale(event)" novalidate>
+        <h3 class="font-bold text-[19px] mb-4">Log a sale</h3>
+        <div id="saleEmpty" class="hidden text-center py-4">
+          <div class="w-16 h-16 rounded-full bg-leaf-light text-leaf mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-user-plus"></i></div>
+          <p class="font-bold text-[17px] mb-1">No customers yet</p>
+          <p class="text-stone mb-4">Add a customer first, then log what they bought.</p>
+          <button type="button" onclick="showNewForm()" class="btn btn-primary">Add a customer</button>
+        </div>
+        <div id="saleFields" class="space-y-4">
+          <div><label class="label" for="saleCustomer">Customer</label><select id="saleCustomer" class="field"></select></div>
+          <div><label class="label" for="saleItem">What did they buy?</label><input id="saleItem" class="field" type="text" placeholder="e.g. Ankara gown" maxlength="60" /></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="label" for="saleAmount">Amount (₦)</label><input id="saleAmount" class="field" type="number" inputmode="numeric" min="1" placeholder="12500" /></div>
+            <div><label class="label" for="saleDate">Date</label><input id="saleDate" class="field" type="date" /></div>
+          </div>
+          <p id="saleError" class="hidden text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+          <div class="flex gap-3 pt-1">
+            <button type="button" onclick="hideForms()" class="btn btn-ghost flex-1">Cancel</button>
+            <button type="submit" class="btn btn-primary flex-1">Save sale</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- MESSAGES -->
+    <section id="screen-messages" class="screen hidden">
+      <h2 class="font-extrabold text-[22px] mb-1">Your messages</h2>
+      <p class="text-stone text-[16px] mb-3">Change any message to sound like you. It saves by itself.</p>
+      <div class="bg-leaf-light/70 rounded-2xl p-4 mb-5 text-[15px] leading-relaxed">
+        <b class="text-leaf-deep">{name}</b> becomes the customer's first name.<br>
+        <b class="text-leaf-deep">{business}</b> becomes <span id="msgBizName" class="font-semibold">your business name</span>.
+      </div>
+      <div id="templateList" class="space-y-4"></div>
+    </section>
+
+    <!-- STATS -->
+    <section id="screen-stats" class="screen hidden">
+      <h2 class="font-extrabold text-[22px] mb-1">How business is going</h2>
+      <p id="statsMonth" class="text-stone text-[16px] mb-5">This month</p>
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <div class="card p-4 text-center"><p id="statMonth" class="text-[30px] font-extrabold leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Customers this month</p></div>
+        <div class="card p-4 text-center"><p id="statBack" class="text-[30px] font-extrabold text-leaf leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Came back</p></div>
+        <div class="card p-4 text-center"><p id="statSlip" class="text-[30px] font-extrabold text-amber leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Slipping away</p></div>
+      </div>
+      <div class="card p-5">
+        <div class="flex items-baseline justify-between mb-1">
+          <h3 class="font-bold text-[18px]">Sales per week</h3>
+          <span class="text-[14px] text-stone">Last 6 weeks</span>
+        </div>
+        <p id="chartTotal" class="text-[15px] text-stone mb-4">Total: ₦0</p>
+        <div id="chartArea"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom tab bar -->
+  <nav class="tab-bar fixed bottom-0 inset-x-0 z-30">
+    <div class="max-w-md mx-auto grid grid-cols-5">
+      <button onclick="switchTab('today')" data-tab="today" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-stone"><span class="nav-ico w-12 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-sun text-[18px]"></i></span><span class="text-[13px] font-bold">Today</span></button>
+      <button onclick="switchTab('customers')" data-tab="customers" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-stone"><span class="nav-ico w-12 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-user-group text-[18px]"></i></span><span class="text-[13px] font-bold">Customers</span></button>
+      <button onclick="switchTab('add')" data-tab="add" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-stone"><span class="nav-ico w-12 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-circle-plus text-[20px]"></i></span><span class="text-[13px] font-bold">Add</span></button>
+      <button onclick="switchTab('messages')" data-tab="messages" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-stone"><span class="nav-ico w-12 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-comment-dots text-[18px]"></i></span><span class="text-[13px] font-bold">Messages</span></button>
+      <button onclick="switchTab('stats')" data-tab="stats" class="nav-btn flex flex-col items-center justify-center gap-0.5 text-stone"><span class="nav-ico w-12 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-chart-simple text-[18px]"></i></span><span class="text-[13px] font-bold">Stats</span></button>
+    </div>
+  </nav>
+</div>
+
+<!-- ===================================================== -->
+<!-- SHEETS                                                 -->
+<!-- ===================================================== -->
+<div id="sheet-customer" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('customer')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[90vh] overflow-y-auto p-5 pb-8">
+    <div class="flex justify-between items-center mb-3">
+      <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto"></div>
+    </div>
+    <button onclick="closeSheet('customer')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="customerSheetBody"></div>
+  </div>
+</div>
+
+<div id="sheet-picker" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('picker')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[88vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <button onclick="closeSheet('picker')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <h3 id="pickerTitle" class="font-bold text-[20px] mb-1 pr-10">Message</h3>
+    <p class="text-stone text-[15px] mb-4">Pick a message. WhatsApp will open and <b>you press Send</b>.</p>
+    <div id="pickerList" class="space-y-3"></div>
+  </div>
+</div>
+
+<div id="sheet-business" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('business')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <button onclick="closeSheet('business')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+
+    <div class="flex items-center gap-3 mb-5 pr-10">
+      <div id="bizAvatar" class="w-14 h-14 rounded-2xl bg-leaf text-white flex items-center justify-center font-extrabold text-[20px] shrink-0">K</div>
+      <div class="min-w-0">
+        <p id="bizSheetName" class="font-extrabold text-[20px] leading-tight truncate">Business</p>
+        <p id="bizSheetMeta" class="text-stone text-[15px] truncate"></p>
+      </div>
+    </div>
+
+    <div id="storageWarn" class="hidden bg-amber/15 text-[15px] rounded-2xl p-4 mb-4"><i class="fa-solid fa-triangle-exclamation text-amber mr-1"></i> This browser is not saving data. Your records will be lost when you close this page.</div>
+
+    <form onsubmit="saveBusiness(event)" class="space-y-4 mb-6" novalidate>
+      <h4 class="font-bold text-[17px]">Business details</h4>
+      <div><label class="label" for="bizName">Business name</label><input id="bizName" class="field" maxlength="60" /></div>
+      <div><label class="label" for="bizOwner">Your name</label><input id="bizOwner" class="field" maxlength="50" /></div>
+      <div><label class="label" for="bizType">What you sell</label>
+        <select id="bizType" class="field">
+          <option>Fashion &amp; clothing</option><option>Food &amp; drinks</option><option>Hair &amp; beauty</option><option>Phones &amp; gadgets</option><option>Provisions &amp; groceries</option><option>Shoes &amp; bags</option><option>Services</option><option>Other</option>
+        </select>
+      </div>
+      <div><label class="label">WhatsApp number</label><div id="bizPhone" class="field !bg-cream text-stone flex items-center"></div></div>
+      <p id="bizError" class="hidden text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+      <button type="submit" class="btn btn-primary w-full">Save changes</button>
+    </form>
+
+    <form onsubmit="changePin(event)" class="space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
+      <h4 class="font-bold text-[17px]">Change PIN</h4>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="label" for="pinOld">Current PIN</label><input id="pinOld" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" /></div>
+        <div><label class="label" for="pinNew">New PIN</label><input id="pinNew" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" /></div>
+      </div>
+      <p id="pinError" class="hidden text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+      <button type="submit" class="btn btn-ghost w-full">Update PIN</button>
+    </form>
+
+    <div class="border-t border-black/5 pt-5 mb-6 space-y-3">
+      <h4 class="font-bold text-[17px]">Backup &amp; phone app</h4>
+      <p class="text-[14px] text-stone leading-snug">Save a copy of your customers and sales so you never lose them if you change your phone.</p>
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" onclick="exportBackup()" class="btn btn-ghost !text-[15px]"><i class="fa-solid fa-download text-leaf"></i> Save backup</button>
+        <label class="btn btn-ghost !text-[15px] cursor-pointer">
+          <i class="fa-solid fa-upload text-leaf"></i> Restore backup
+          <input type="file" accept=".json,application/json" class="hidden" onchange="importBackup(event)" />
+        </label>
+      </div>
+      <button type="button" onclick="closeSheet('business'); openSheet('launch')" class="btn btn-ghost w-full !text-[15px]">
+        <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Install on phone / Share CustoPadi
+      </button>
+    </div>
+
+    <div class="border-t border-black/5 pt-5 space-y-3">
+      <button onclick="logout()" class="btn btn-outline w-full"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+      <button onclick="deleteBusiness()" class="btn btn-danger w-full"><i class="fa-solid fa-trash"></i> Delete this business</button>
+    </div>
+  </div>
+</div>
+
+<div id="sheet-launch" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('launch')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <button onclick="closeSheet('launch')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+
+    <div class="inline-flex items-center gap-2 mb-3">
+      <svg viewBox="0 0 88 72" class="w-8 h-7 shrink-0" aria-hidden="true">
+        <g transform="translate(30 30) scale(-1 1)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#178A4A"/></g>
+        <g transform="translate(58 30)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#F5A623" stroke="#fff" stroke-width="5" paint-order="stroke fill"/></g>
+      </svg>
+      <span class="text-[19px] brand-word"><span class="text-leaf">Custo</span><span class="text-gold">Padi</span></span>
+    </div>
+    <h3 class="font-extrabold text-[21px] mb-1 pr-10">Install &amp; Launch CustoPadi</h3>
+    <p class="text-stone text-[15px] mb-5">Put CustoPadi on your phone screen or publish it online for other businesses.</p>
+
+    <div id="pwaInstallBox" class="hidden bg-leaf-light rounded-2xl p-4 mb-4">
+      <p class="font-bold text-[16px] text-ink mb-2">Add CustoPadi to your home screen</p>
+      <button type="button" onclick="triggerInstall()" class="btn btn-primary w-full"><i class="fa-solid fa-download"></i> Install CustoPadi app now</button>
+    </div>
+
+    <div class="bg-cream rounded-2xl p-4 mb-4 space-y-3">
+      <h4 class="font-bold text-[16px] flex items-center gap-2"><i class="fa-solid fa-mobile-screen text-leaf"></i> Put CustoPadi on your phone screen</h4>
+      <div class="text-[15px] space-y-2 leading-relaxed">
+        <p><b>On Android (Chrome):</b> Tap the 3 dots <b>⋮</b> at the top right, then tap <b>Add to Home screen</b> (or <b>Install app</b>).</p>
+        <p><b>On iPhone (Safari):</b> Tap the <b>Share</b> button <i class="fa-solid fa-arrow-up-from-bracket text-xs"></i> at the bottom, then tap <b>Add to Home Screen</b>.</p>
+      </div>
+    </div>
+
+    <div class="bg-cream rounded-2xl p-4 mb-4 space-y-3">
+      <h4 class="font-bold text-[16px] flex items-center gap-2"><i class="fa-brands fa-whatsapp text-leaf text-lg"></i> Share CustoPadi with other businesses</h4>
+      <p class="text-[15px] text-stone leading-snug">Send the link on WhatsApp so other shop owners can register their business on their own phone.</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="shareCustoPadiWhatsApp()" class="btn btn-primary !text-[15px]"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+        <button type="button" onclick="copyCustoPadiLink()" class="btn btn-ghost !text-[15px]"><i class="fa-regular fa-copy"></i> Copy link</button>
+      </div>
+    </div>
+
+    <div class="bg-leaf-light/60 rounded-2xl p-4 space-y-2.5 text-[15px] leading-relaxed">
+      <h4 class="font-bold text-[16px] text-leaf-deep flex items-center gap-2"><i class="fa-solid fa-globe"></i> How to publish CustoPadi online for free</h4>
+      <p>CustoPadi is a single file (<code class="bg-white px-1.5 py-0.5 rounded font-bold">index.html</code>). You can host it free in 2 minutes:</p>
+      <ol class="list-decimal pl-5 space-y-1.5">
+        <li><b>Netlify Drop (easiest):</b> Put <code class="bg-white px-1 rounded">index.html</code> inside a folder, go to <b>app.netlify.com/drop</b>, and drag the folder onto the page. You get a live <code class="bg-white px-1 rounded">https://...netlify.app</code> link immediately.</li>
+        <li><b>Vercel or Cloudflare Pages:</b> Upload the folder at <b>vercel.com</b> or <b>pages.cloudflare.com</b> for a free custom link.</li>
+        <li><b>GitHub Pages:</b> Upload <code class="bg-white px-1 rounded">index.html</code> to a GitHub repository and turn on <b>Settings → Pages</b>.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed left-4 right-4 bottom-28 z-[60] max-w-md mx-auto hidden">
+  <div class="bg-ink text-white px-5 py-4 rounded-2xl shadow-xl text-[16px] font-medium flex items-center gap-3">
+    <i class="fa-solid fa-circle-check text-[#4ade80]"></i><span id="toastText">Done</span>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   STORAGE (localStorage with in-memory fallback)
+   ========================================================= */
+const Store = (() => {
+  const mem = {};
+  let ok = false;
+  try { localStorage.setItem('__keep_t', '1'); localStorage.removeItem('__keep_t'); ok = true; } catch (e) {}
+  return {
+    get(key, fallback) {
+      try {
+        const raw = ok ? localStorage.getItem(key) : mem[key];
+        return raw == null ? fallback : JSON.parse(raw);
+      } catch (e) { return fallback; }
+    },
+    set(key, val) {
+      const raw = JSON.stringify(val);
+      if (ok) { try { localStorage.setItem(key, raw); return; } catch (e) { ok = false; } }
+      mem[key] = raw;
+    },
+    remove(key) { try { if (ok) localStorage.removeItem(key); } catch (e) {} delete mem[key]; },
+    persistent() { return ok; }
+  };
+})();
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const toDateStr = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const todayStr = () => toDateStr(new Date());
+function startOfToday() { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+function parseDate(s) { if (!s) return null; const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); }
+function daysAgoStr(n) { const d = startOfToday(); d.setDate(d.getDate() - n); return toDateStr(d); }
+function daysSince(s) { const d = parseDate(s); return d ? Math.round((startOfToday() - d) / 86400000) : 0; }
+function fmtMoney(n) { return '₦' + Math.round(Number(n) || 0).toLocaleString('en-US'); }
+function fmtShortMoney(n) {
+  if (n >= 1e6) return '₦' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'm';
+  if (n >= 1e3) return '₦' + (n / 1e3).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, '') + 'k';
+  return '₦' + Math.round(n);
+}
+function fmtDate(s) { const d = parseDate(s); return d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
+function fmtDayMonth(s) { const d = parseDate(s); return d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) : ''; }
+function initials(name) { return String(name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?'; }
+function firstName(name) { return String(name || '').trim().split(/\s+/)[0] || ''; }
+function plural(n, one, many) { return n === 1 ? one : many; }
+
+function normalizePhone(raw) {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.startsWith('0') && d.length === 11) d = '234' + d.slice(1);
+  else if (d.length === 10 && /^[789]/.test(d)) d = '234' + d;
+  return d;
+}
+const validPhone = p => /^234\d{10}$/.test(p);
+function prettyPhone(p) { return p && p.length === 13 ? '+234 ' + p.slice(3, 6) + ' ' + p.slice(6, 9) + ' ' + p.slice(9) : p; }
+
+function showError(id, msg) { const el = $(id); el.textContent = msg; el.classList.remove('hidden'); }
+function hideError(id) { $(id).classList.add('hidden'); }
+
+let toastTimer;
+function toast(msg) {
+  const t = $('toast');
+  $('toastText').textContent = msg;
+  t.classList.remove('hidden'); t.classList.add('fade-up');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), 2600);
+}
+
+/* PIN hashing: SHA-256 when available, otherwise a simple local hash */
+function cyrb53(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+const canSha = !!(window.crypto && crypto.subtle && window.TextEncoder);
+async function hashPin(pin, salt, algo) {
+  const text = salt + ':' + pin;
+  if (algo === 'sha256' && canSha) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return cyrb53(text);
+}
+
+/* =========================================================
+   DEFAULT CONTENT
+   ========================================================= */
+const DEFAULT_TEMPLATES = [
+  { id: 'thanks', title: 'Thank you', icon: 'fa-heart', body: "Hi {name}! Thank you so much for buying from {business}. I really appreciate you. If you need anything at all, just message me here 🙏" },
+  { id: 'miss', title: 'We miss you', icon: 'fa-hand-holding-heart', body: "Hello {name}, it's been a while! I hope you and your family are doing well. We miss you at {business}. Should I send you pictures of what we have now?" },
+  { id: 'birthday', title: 'Birthday', icon: 'fa-cake-candles', body: "Happy birthday, {name}! 🎉 Wishing you long life, good health and plenty of joy. Thank you for always supporting {business}. Enjoy your day!" },
+  { id: 'new', title: 'New arrival', icon: 'fa-box-open', body: "Hi {name}! New goods just arrived at {business} and I thought of you. Can I send you some pictures before they finish?" },
+  { id: 'review', title: 'Ask for a review', icon: 'fa-star', body: "Hi {name}, thank you for buying from {business}. Please, how did you find it? A few words from you will really help my small business grow. Thank you!" }
+];
+
+function sampleCustomers() {
+  const t = startOfToday();
+  const bdaySoon = (offset, year) => { const d = new Date(t); d.setDate(d.getDate() + offset); return year + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+  const P = (ago, item, amount) => ({ id: uid(), date: daysAgoStr(ago), item, amount });
+  const list = [
+    { name: 'Chiamaka Okafor', phone: '2348031234567', birthday: bdaySoon(2, 1993), tag: 'VIP', notes: 'Loves Ankara gowns. Size 12. Prefers delivery to Lekki.', purchases: [P(3, 'Ankara gown', 18500), P(26, 'Head tie', 4500), P(52, 'Lace fabric (5 yards)', 32000)] },
+    { name: 'Emeka Nwosu', phone: '2348059876543', birthday: '1987-08-14', tag: 'Regular', notes: 'Buys kaftans for church. Pays by transfer.', purchases: [P(9, 'Kaftan', 15000), P(40, 'Kaftan', 15000)] },
+    { name: 'Aisha Bello', phone: '2347062345678', birthday: bdaySoon(5, 1996), tag: 'Regular', notes: 'Likes plain colours. Ask her when abayas are back.', purchases: [P(34, 'Abaya', 22000), P(70, 'Hijab set', 6500)] },
+    { name: 'Tunde Bakare', phone: '2348123456789', birthday: '1980-02-03', tag: 'VIP', notes: 'Orders polo shirts for his staff in bulk.', purchases: [P(45, 'Polo shirts (10 pcs)', 65000), P(110, 'Polo shirts (6 pcs)', 39000)] },
+    { name: 'Ngozi Eze', phone: '2349034567812', birthday: '1991-11-21', tag: 'New', notes: 'Found us on Instagram.', purchases: [P(1, 'Bubu dress', 12500)] },
+    { name: 'Ibrahim Musa', phone: '2348167890123', birthday: '1985-06-30', tag: 'Regular', notes: "Remind him about his wife's birthday in December.", purchases: [P(64, 'Senator material', 28000), P(95, 'Cap', 5000)] },
+    { name: 'Funmilayo Adeyemi', phone: '2347038765432', birthday: '1979-04-09', tag: 'Regular', notes: 'Buys aso-ebi for family parties. Always asks for discount.', purchases: [P(17, 'Aso-oke set', 45000), P(31, 'Gele', 8000), P(14, 'Beads', 7500)] },
+    { name: 'Blessing Udoh', phone: '2349051239876', birthday: '1998-09-17', tag: 'New', notes: 'Student. Likes affordable pieces.', purchases: [P(88, 'Jeans', 9500)] }
+  ];
+  return list.map(c => ({
+    ...c, id: uid(), lastContacted: null,
+    createdAt: c.purchases.map(p => p.date).sort()[0] || todayStr()
+  }));
+}
+
+function freshData(withSamples) {
+  return {
+    customers: withSamples ? sampleCustomers() : [],
+    templates: DEFAULT_TEMPLATES.map(t => ({ ...t })),
+    settings: { followUpDays: 30 },
+    progress: { customer: false, sale: false, sent: false },
+    onboardingDone: false,
+    sentCount: 0
+  };
+}
+
+/* =========================================================
+   ACCOUNTS
+   ========================================================= */
+let ACCOUNT = null;
+let DATA = null;
+const getAccounts = () => Store.get('keep_accounts', []);
+const saveAccounts = a => Store.set('keep_accounts', a);
+const dataKey = id => 'keep_data_' + id;
+function saveData() { if (ACCOUNT && DATA) Store.set(dataKey(ACCOUNT.id), DATA); }
+
+function setAuthMode(mode) {
+  $('registerForm').classList.toggle('hidden', mode !== 'register');
+  $('loginForm').classList.toggle('hidden', mode !== 'login');
+  $('segRegister').classList.toggle('active', mode === 'register');
+  $('segLogin').classList.toggle('active', mode === 'login');
+  hideError('regError'); hideError('logError');
+  if (mode === 'login') renderSavedBiz();
+}
+
+function renderSavedBiz() {
+  const accs = getAccounts();
+  $('savedBiz').classList.toggle('hidden', accs.length === 0);
+  $('savedBizList').innerHTML = accs.map(a => `
+    <button type="button" onclick="pickSavedBiz('${a.id}')" class="w-full flex items-center gap-3 p-3 rounded-2xl bg-cream min-h-[56px] text-left active:scale-[.98] transition">
+      <span class="w-10 h-10 rounded-xl bg-leaf text-white font-extrabold flex items-center justify-center shrink-0">${esc(initials(a.businessName))}</span>
+      <span class="min-w-0 flex-1"><span class="block font-bold truncate">${esc(a.businessName)}</span><span class="text-[14px] text-stone">${esc(prettyPhone(a.phone))}</span></span>
+      <i class="fa-solid fa-chevron-right text-stone/40"></i>
+    </button>`).join('');
+}
+function pickSavedBiz(id) {
+  const a = getAccounts().find(x => x.id === id);
+  if (!a) return;
+  $('logPhone').value = a.phone;
+  $('logPin').value = '';
+  $('logPin').focus();
+}
+
+async function register(e) {
+  e.preventDefault();
+  hideError('regError');
+  const businessName = $('regBiz').value.trim();
+  const ownerName = $('regOwner').value.trim();
+  const phone = normalizePhone($('regPhone').value);
+  const businessType = $('regType').value;
+  const pin = $('regPin').value.trim();
+  const pin2 = $('regPin2').value.trim();
+
+  if (businessName.length < 2) return showError('regError', 'Please type your business name.');
+  if (ownerName.length < 2) return showError('regError', 'Please type your name.');
+  if (!validPhone(phone)) return showError('regError', 'Please type a correct Nigerian number, like 08031234567.');
+  if (!/^\d{4}$/.test(pin)) return showError('regError', 'Your PIN must be 4 numbers.');
+  if (pin !== pin2) return showError('regError', "The two PINs don't match. Please type them again.");
+  const accounts = getAccounts();
+  if (accounts.some(a => a.phone === phone)) return showError('regError', 'This number already has a CustoPadi account on this phone. Please log in instead.');
+
+  $('regSubmit').disabled = true;
+  const algo = canSha ? 'sha256' : 'simple';
+  const salt = uid() + uid();
+  const pinHash = await hashPin(pin, salt, algo);
+  const account = { id: 'b' + uid(), businessName, ownerName, phone, businessType, salt, pinHash, algo, createdAt: todayStr() };
+  accounts.push(account);
+  saveAccounts(accounts);
+
+  const data = freshData($('regSamples').checked);
+  Store.set(dataKey(account.id), data);
+  $('registerForm').reset(); $('regSamples').checked = true;
+  $('regSubmit').disabled = false;
+  startApp(account);
+  toast('Welcome to CustoPadi, ' + firstName(ownerName) + '!');
+}
+
+async function login(e) {
+  e.preventDefault();
+  hideError('logError');
+  const phone = normalizePhone($('logPhone').value);
+  const pin = $('logPin').value.trim();
+  if (!validPhone(phone)) return showError('logError', 'Please type your WhatsApp number, like 08031234567.');
+  if (!/^\d{4}$/.test(pin)) return showError('logError', 'Please type your 4-number PIN.');
+  const acc = getAccounts().find(a => a.phone === phone);
+  if (!acc) return showError('logError', 'No account with this number on this phone. Create an account first.');
+  const h = await hashPin(pin, acc.salt, acc.algo);
+  if (h !== acc.pinHash) { $('logPin').value = ''; return showError('logError', 'Wrong PIN. Please try again.'); }
+  $('loginForm').reset();
+  startApp(acc);
+  toast('Welcome back, ' + firstName(acc.ownerName) + '!');
+}
+
+function startApp(acc) {
+  ACCOUNT = acc;
+  Store.set('keep_session', acc.id);
+  DATA = Store.get(dataKey(acc.id), null) || freshData(false);
+  // fill any missing fields (older data)
+  const base = freshData(false);
+  DATA.customers = DATA.customers || [];
+  DATA.templates = DATA.templates && DATA.templates.length ? DATA.templates : base.templates;
+  DATA.settings = Object.assign(base.settings, DATA.settings || {});
+  DATA.progress = Object.assign(base.progress, DATA.progress || {});
+  DATA.sentCount = DATA.sentCount || 0;
+  saveData();
+  $('authView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  renderHeader();
+  switchTab('today');
+}
+
+function showAuth(mode) {
+  $('appView').classList.add('hidden');
+  $('authView').classList.remove('hidden');
+  setAuthMode(mode || (getAccounts().length ? 'login' : 'register'));
+  window.scrollTo(0, 0);
+}
+
+function logout() {
+  closeAllSheets();
+  Store.remove('keep_session');
+  ACCOUNT = null; DATA = null;
+  showAuth('login');
+  toast('You are logged out');
+}
+
+function deleteBusiness() {
+  if (!confirm('Delete "' + ACCOUNT.businessName + '" and ALL its customers and sales from this phone? This cannot be undone.')) return;
+  if (!confirm('Are you very sure? Everything for this business will be gone.')) return;
+  Store.remove(dataKey(ACCOUNT.id));
+  saveAccounts(getAccounts().filter(a => a.id !== ACCOUNT.id));
+  closeAllSheets();
+  Store.remove('keep_session');
+  ACCOUNT = null; DATA = null;
+  showAuth();
+  toast('Business deleted');
+}
+
+/* =========================================================
+   BUSINESS SHEET
+   ========================================================= */
+function renderHeader() {
+  $('hdrAvatar').textContent = initials(ACCOUNT.businessName);
+  $('hdrBiz').textContent = ACCOUNT.businessName;
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  $('hdrHello').textContent = greet + ', ' + firstName(ACCOUNT.ownerName);
+  $('msgBizName').textContent = ACCOUNT.businessName;
+}
+
+function openBusinessSheet() {
+  $('bizAvatar').textContent = initials(ACCOUNT.businessName);
+  $('bizSheetName').textContent = ACCOUNT.businessName;
+  $('bizSheetMeta').textContent = ACCOUNT.businessType + ' · ' + DATA.customers.length + ' ' + plural(DATA.customers.length, 'customer', 'customers');
+  $('bizName').value = ACCOUNT.businessName;
+  $('bizOwner').value = ACCOUNT.ownerName;
+  $('bizType').value = ACCOUNT.businessType;
+  $('bizPhone').textContent = prettyPhone(ACCOUNT.phone);
+  $('pinOld').value = ''; $('pinNew').value = '';
+  hideError('bizError'); hideError('pinError');
+  $('storageWarn').classList.toggle('hidden', Store.persistent());
+  openSheet('business');
+}
+
+function updateAccount(changes) {
+  const accs = getAccounts();
+  const i = accs.findIndex(a => a.id === ACCOUNT.id);
+  if (i < 0) return;
+  accs[i] = Object.assign(accs[i], changes);
+  saveAccounts(accs);
+  ACCOUNT = accs[i];
+}
+
+function saveBusiness(e) {
+  e.preventDefault();
+  hideError('bizError');
+  const name = $('bizName').value.trim(), owner = $('bizOwner').value.trim();
+  if (name.length < 2) return showError('bizError', 'Please type your business name.');
+  if (owner.length < 2) return showError('bizError', 'Please type your name.');
+  updateAccount({ businessName: name, ownerName: owner, businessType: $('bizType').value });
+  renderHeader();
+  $('bizAvatar').textContent = initials(name);
+  $('bizSheetName').textContent = name;
+  closeSheet('business');
+  rerender();
+  toast('Business details saved');
+}
+
+async function changePin(e) {
+  e.preventDefault();
+  hideError('pinError');
+  const oldPin = $('pinOld').value.trim(), newPin = $('pinNew').value.trim();
+  if (!/^\d{4}$/.test(oldPin)) return showError('pinError', 'Type your current 4-number PIN.');
+  if (!/^\d{4}$/.test(newPin)) return showError('pinError', 'Your new PIN must be 4 numbers.');
+  const h = await hashPin(oldPin, ACCOUNT.salt, ACCOUNT.algo);
+  if (h !== ACCOUNT.pinHash) return showError('pinError', 'Your current PIN is not correct.');
+  const algo = canSha ? 'sha256' : 'simple';
+  const salt = uid() + uid();
+  updateAccount({ salt, algo, pinHash: await hashPin(newPin, salt, algo) });
+  $('pinOld').value = ''; $('pinNew').value = '';
+  toast('PIN updated');
+}
+
+function exportBackup() {
+  if (!ACCOUNT || !DATA) return;
+  const payload = {
+    keepBackup: 1,
+    app: 'CustoPadi',
+    exportedAt: todayStr(),
+    business: { businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone, businessType: ACCOUNT.businessType },
+    data: DATA
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  const safeName = ACCOUNT.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'custopadi';
+  a.href = URL.createObjectURL(blob);
+  a.download = safeName + '-custopadi-backup-' + todayStr() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  toast('Backup saved to your phone');
+}
+
+function importBackup(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const incoming = parsed && parsed.data && Array.isArray(parsed.data.customers) ? parsed.data : (Array.isArray(parsed.customers) ? parsed : null);
+      if (!incoming) return toast('This file is not a CustoPadi backup.');
+      if (!confirm('Replace your current customers and sales with the backup file (' + incoming.customers.length + ' customers)?')) return;
+      const base = freshData(false);
+      DATA = {
+        customers: incoming.customers || [],
+        templates: incoming.templates && incoming.templates.length ? incoming.templates : base.templates,
+        settings: Object.assign(base.settings, incoming.settings || {}),
+        progress: Object.assign(base.progress, incoming.progress || {}),
+        onboardingDone: !!incoming.onboardingDone,
+        sentCount: incoming.sentCount || 0
+      };
+      saveData();
+      closeSheet('business');
+      rerender();
+      toast('Backup restored (' + DATA.customers.length + ' customers)');
+    } catch (err) {
+      toast('Could not read that backup file.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================================================
+   INSTALL & SHARE KEEP
+   ========================================================= */
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const box = $('pwaInstallBox');
+  if (box) box.classList.remove('hidden');
+});
+
+async function triggerInstall() {
+  if (!deferredInstallPrompt) return toast('Use your browser menu to Add to Home screen');
+  deferredInstallPrompt.prompt();
+  const res = await deferredInstallPrompt.userChoice;
+  if (res && res.outcome === 'accepted') {
+    $('pwaInstallBox').classList.add('hidden');
+    toast('CustoPadi is installing on your phone!');
+  }
+  deferredInstallPrompt = null;
+}
+
+function shareCustoPadiWhatsApp() {
+  const link = window.location.href.startsWith('http') ? window.location.href : '';
+  const msg = "Hi! I use *CustoPadi* to remember my customers and follow up with them on WhatsApp. You can register your business free here" + (link ? ': ' + link : '.');
+  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  const w = window.open(url, '_blank');
+  if (!w) window.location.href = url;
+}
+
+function copyCustoPadiLink() {
+  const link = window.location.href;
+  const done = () => toast('App link copied');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
+  } else fallbackCopy(link, done);
+}
+
+/* =========================================================
+   SHEETS & NAV
+   ========================================================= */
+function openSheet(name) { $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function closeSheet(name) {
+  $('sheet-' + name).classList.add('hidden');
+  if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
+}
+function closeAllSheets() { ['customer', 'picker', 'business', 'launch'].forEach(closeSheet); }
+
+let CURRENT_TAB = 'today';
+function switchTab(name) {
+  CURRENT_TAB = name;
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  const el = $('screen-' + name);
+  el.classList.remove('hidden', 'fade-up'); void el.offsetWidth; el.classList.add('fade-up');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  window.scrollTo(0, 0);
+  if (name === 'add') hideForms();
+  rerender();
+}
+function rerender() {
+  if (!DATA) return;
+  if (CURRENT_TAB === 'today') renderToday();
+  if (CURRENT_TAB === 'customers') renderCustomers();
+  if (CURRENT_TAB === 'messages') renderTemplates();
+  if (CURRENT_TAB === 'stats') renderStats();
+}
+
+/* =========================================================
+   CUSTOMER HELPERS
+   ========================================================= */
+function lastDate(c) {
+  if (c.purchases && c.purchases.length) return c.purchases.reduce((m, p) => p.date > m ? p.date : m, c.purchases[0].date);
+  return c.createdAt;
+}
+function lastPurchase(c) {
+  if (!c.purchases || !c.purchases.length) return null;
+  return c.purchases.reduce((m, p) => p.date > m.date ? p : m, c.purchases[0]);
+}
+function totalSpent(c) { return (c.purchases || []).reduce((s, p) => s + (Number(p.amount) || 0), 0); }
+function statusOf(days) {
+  if (days <= 30) return { key: 'active', label: 'Active', dot: 'bg-leaf', text: 'text-leaf' };
+  if (days <= 60) return { key: 'slipping', label: 'Slipping', dot: 'bg-amber', text: 'text-amber' };
+  return { key: 'lost', label: 'Lost', dot: 'bg-rose', text: 'text-rose' };
+}
+function getCustomer(id) { return DATA.customers.find(c => c.id === id); }
+function daysText(d, c) {
+  if (!c.purchases.length) return 'No purchase yet';
+  if (d === 0) return 'Bought today';
+  if (d === 1) return 'Bought yesterday';
+  return d + ' days since last buy';
+}
+
+/* =========================================================
+   TODAY
+   ========================================================= */
+function setDays(v) { DATA.settings.followUpDays = parseInt(v, 10) || 30; saveData(); renderToday(); }
+
+function renderOnboarding() {
+  const el = $('onboarding');
+  if (DATA.onboardingDone) { el.classList.add('hidden'); return; }
+  const p = DATA.progress;
+  const steps = [
+    { done: p.customer, title: 'Add your customers', desc: 'Put in the people who buy from you.', btn: 'Add a customer', action: "goAdd('customer')" },
+    { done: p.sale, title: 'Log a sale', desc: 'Write down what they bought and how much.', btn: 'Log a sale', action: "goAdd('sale')" },
+    { done: p.sent, title: 'Send your first follow-up', desc: 'Tap WhatsApp on a customer. You press Send.', btn: 'Message someone', action: 'firstFollowUp()' }
+  ];
+  const doneCount = steps.filter(s => s.done).length;
+  el.classList.remove('hidden');
+  el.innerHTML = `
+    <div class="bg-gradient-to-br from-leaf to-leaf-deep rounded-[22px] p-5 text-white shadow-lg shadow-leaf/20">
+      <div class="flex items-start justify-between gap-3 mb-1">
+        <h2 class="font-extrabold text-[19px] leading-tight">${doneCount === 3 ? "You're all set! 🎉" : 'Get started in 3 steps'}</h2>
+        <span class="text-[14px] font-bold bg-white/20 rounded-full px-3 py-1 shrink-0">${doneCount} of 3</span>
+      </div>
+      <p class="text-white/90 text-[15px] mb-4">${doneCount === 3 ? 'You now know how CustoPadi works. Check this page every day.' : 'CustoPadi helps you remember customers and bring them back.'}</p>
+      <div class="space-y-2">
+        ${steps.map((s, i) => `
+          <div class="bg-white rounded-2xl p-3 flex items-center gap-3 text-ink">
+            <span class="w-9 h-9 rounded-full flex items-center justify-center font-bold shrink-0 ${s.done ? 'bg-leaf text-white' : 'bg-leaf-light text-leaf'}">${s.done ? '<i class="fa-solid fa-check"></i>' : i + 1}</span>
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-[16px] ${s.done ? 'line-through text-stone' : ''}">${s.title}</p>
+              ${s.done ? '' : `<p class="text-[14px] text-stone leading-snug">${s.desc}</p>`}
+            </div>
+            ${s.done ? '' : `<button onclick="${s.action}" class="btn btn-primary !min-h-[44px] !px-3 !text-[14px] shrink-0">${s.btn}</button>`}
+          </div>`).join('')}
+      </div>
+      <button onclick="hideOnboarding()" class="w-full min-h-[48px] mt-2 text-white/90 font-semibold text-[15px]">${doneCount === 3 ? 'Close' : 'Hide this'}</button>
+    </div>`;
+}
+function hideOnboarding() { DATA.onboardingDone = true; saveData(); renderOnboarding(); }
+function goAdd(kind, preId) {
+  switchTab('add');
+  if (kind === 'customer') showNewForm(); else showSaleForm(preId);
+}
+function firstFollowUp() {
+  if (!DATA.customers.length) return goAdd('customer');
+  const days = DATA.settings.followUpDays;
+  const due = DATA.customers.find(c => daysSince(lastDate(c)) >= days);
+  openPicker((due || DATA.customers[0]).id);
+}
+
+function renderToday() {
+  renderOnboarding();
+  $('daysSelect').value = String(DATA.settings.followUpDays);
+  const days = DATA.settings.followUpDays;
+  const due = DATA.customers
+    .map(c => ({ c, d: daysSince(lastDate(c)) }))
+    .filter(x => x.d >= days)
+    .sort((a, b) => b.d - a.d);
+
+  $('todayCount').textContent = due.length;
+  $('todayCountLabel').textContent = due.length === 1 ? 'person to follow up today' : 'people to follow up today';
+
+  const list = $('todayList');
+  if (!DATA.customers.length) {
+    list.innerHTML = emptyState('fa-user-plus', 'No customers yet', 'Add the people who buy from you. CustoPadi will remind you when to check on them.', 'Add your first customer', "goAdd('customer')");
+  } else if (!due.length) {
+    list.innerHTML = emptyState('fa-face-smile', 'All caught up!', `Everyone has bought from you in the last ${days} days. Well done!`, 'See all customers', "switchTab('customers')");
+  } else {
+    list.innerHTML = due.map(({ c, d }) => {
+      const lp = lastPurchase(c);
+      const messaged = c.lastContacted === todayStr();
+      const s = statusOf(d);
+      return `
+        <div class="card p-4 flex items-center gap-3">
+          <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
+            <span class="relative shrink-0">
+              <span class="w-12 h-12 rounded-full bg-leaf-light text-leaf font-extrabold flex items-center justify-center">${esc(initials(c.name))}</span>
+              <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${s.dot}"></span>
+            </span>
+            <span class="min-w-0">
+              <span class="block font-bold text-[17px] truncate">${esc(c.name)}</span>
+              <span class="block text-[15px] ${s.text} font-semibold">${esc(daysText(d, c))}</span>
+              ${lp ? `<span class="block text-[14px] text-stone truncate">Last: ${esc(lp.item)}</span>` : ''}
+            </span>
+          </button>
+          <button onclick="openPicker('${c.id}','miss')" class="wa-btn ${messaged ? 'done' : ''}">
+            ${messaged ? '<i class="fa-solid fa-check"></i> Sent' : '<i class="fa-brands fa-whatsapp text-[18px]"></i> WhatsApp'}
+          </button>
+        </div>`;
+    }).join('');
+  }
+
+  // Birthdays in the next 7 days (including today)
+  const t = startOfToday();
+  const bdays = DATA.customers.filter(c => c.birthday).map(c => {
+    const b = parseDate(c.birthday);
+    let next = new Date(t.getFullYear(), b.getMonth(), b.getDate());
+    if (next < t) next = new Date(t.getFullYear() + 1, b.getMonth(), b.getDate());
+    return { c, inDays: Math.round((next - t) / 86400000), next };
+  }).filter(x => x.inDays <= 6).sort((a, b) => a.inDays - b.inDays);
+
+  $('birthdayList').innerHTML = bdays.length ? bdays.map(({ c, inDays, next }) => {
+    const when = inDays === 0 ? 'Today! 🎉' : inDays === 1 ? 'Tomorrow' : next.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+    const messaged = c.lastContacted === todayStr();
+    return `
+      <div class="card p-4 flex items-center gap-3">
+        <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
+          <span class="w-12 h-12 rounded-full bg-amber/15 text-amber flex items-center justify-center shrink-0"><i class="fa-solid fa-cake-candles text-lg"></i></span>
+          <span class="min-w-0">
+            <span class="block font-bold text-[17px] truncate">${esc(c.name)}</span>
+            <span class="block text-[15px] ${inDays === 0 ? 'text-amber font-bold' : 'text-stone'}">${esc(when)}</span>
+          </span>
+        </button>
+        <button onclick="openPicker('${c.id}','birthday')" class="wa-btn ${messaged ? 'done' : ''}">
+          ${messaged ? '<i class="fa-solid fa-check"></i> Sent' : '<i class="fa-brands fa-whatsapp text-[18px]"></i> WhatsApp'}
+        </button>
+      </div>`;
+  }).join('') : `
+    <div class="card p-5 text-center">
+      <p class="text-[16px] font-semibold mb-1">No birthdays this week</p>
+      <p class="text-[15px] text-stone">Add birthdays to your customers and we'll remind you here.</p>
+    </div>`;
+}
+
+function emptyState(icon, title, text, btn, action) {
+  return `
+    <div class="card p-6 text-center">
+      <div class="w-16 h-16 rounded-full bg-leaf-light text-leaf mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid ${icon}"></i></div>
+      <p class="font-bold text-[18px] mb-1">${title}</p>
+      <p class="text-[15px] text-stone mb-4 leading-relaxed">${text}</p>
+      ${btn ? `<button onclick="${action}" class="btn btn-primary">${btn}</button>` : ''}
+    </div>`;
+}
+
+/* =========================================================
+   CUSTOMERS
+   ========================================================= */
+let FILTER = 'all';
+function setFilter(f) { FILTER = f; renderCustomers(); }
+
+function renderCustomers() {
+  const all = DATA.customers.map(c => ({ c, d: daysSince(lastDate(c)) })).map(x => ({ ...x, s: statusOf(x.d) }));
+  const counts = { all: all.length, active: 0, slipping: 0, lost: 0 };
+  all.forEach(x => counts[x.s.key]++);
+  $('chips').innerHTML = [['all', 'All'], ['active', 'Active'], ['slipping', 'Slipping'], ['lost', 'Lost']]
+    .map(([k, l]) => `<button onclick="setFilter('${k}')" class="chip ${FILTER === k ? 'active' : ''}">${l} (${counts[k]})</button>`).join('');
+
+  const q = $('customerSearch').value.toLowerCase().trim();
+  const qDigits = q.replace(/\D/g, '');
+  let list = all.filter(x => FILTER === 'all' || x.s.key === FILTER);
+  if (q) list = list.filter(({ c }) =>
+    c.name.toLowerCase().includes(q) || (c.tag || '').toLowerCase().includes(q) ||
+    (qDigits.length >= 3 && (c.phone.includes(qDigits) || c.phone.includes(normalizePhone(qDigits)))));
+  list.sort((a, b) => a.c.name.localeCompare(b.c.name));
+
+  const el = $('customerList');
+  if (!DATA.customers.length) {
+    el.innerHTML = emptyState('fa-user-group', 'No customers yet', 'Your customer list will show here. Start with the people who buy from you most.', 'Add a customer', "goAdd('customer')");
+    return;
+  }
+  if (!list.length) {
+    el.innerHTML = emptyState('fa-magnifying-glass', 'No one found', q ? 'No customer matches "' + esc(q) + '". Check the spelling or try another filter.' : 'No customers in this group right now. That can be good news!', 'Show everyone', "clearCustomerSearch()");
+    return;
+  }
+  const tagStyle = { VIP: 'bg-amber/15 text-amber', Regular: 'bg-leaf-light text-leaf-deep', New: 'bg-sky-100 text-sky-700' };
+  el.innerHTML = list.map(({ c, d, s }) => `
+    <button onclick="openCustomer('${c.id}')" class="card w-full p-4 flex items-center gap-3 text-left active:scale-[.99] transition">
+      <span class="relative shrink-0">
+        <span class="w-12 h-12 rounded-full bg-leaf-light text-leaf font-extrabold flex items-center justify-center">${esc(initials(c.name))}</span>
+        <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${s.dot}" title="${s.label}"></span>
+      </span>
+      <span class="flex-1 min-w-0">
+        <span class="flex items-center gap-2">
+          <span class="font-bold text-[17px] truncate">${esc(c.name)}</span>
+          <span class="text-[12px] font-bold px-2 py-0.5 rounded-full shrink-0 ${tagStyle[c.tag] || tagStyle.New}">${esc(c.tag || 'New')}</span>
+        </span>
+        <span class="block text-[15px] text-stone">${esc(daysText(d, c))} · ${fmtMoney(totalSpent(c))}</span>
+      </span>
+      <i class="fa-solid fa-chevron-right text-stone/40"></i>
+    </button>`).join('');
+}
+function clearCustomerSearch() { $('customerSearch').value = ''; FILTER = 'all'; renderCustomers(); }
+
+function openCustomer(id) {
+  const c = getCustomer(id);
+  if (!c) return;
+  const d = daysSince(lastDate(c));
+  const s = statusOf(d);
+  const purchases = [...c.purchases].sort((a, b) => b.date.localeCompare(a.date));
+  $('customerSheetBody').innerHTML = `
+    <div class="flex items-center gap-3 mb-5 pr-10">
+      <span class="w-16 h-16 rounded-2xl bg-leaf-light text-leaf font-extrabold text-[22px] flex items-center justify-center shrink-0">${esc(initials(c.name))}</span>
+      <div class="min-w-0">
+        <h3 class="font-extrabold text-[22px] leading-tight">${esc(c.name)}</h3>
+        <p class="flex items-center gap-2 text-[15px] mt-1"><span class="w-2.5 h-2.5 rounded-full ${s.dot}"></span><span class="${s.text} font-semibold">${s.label}</span><span class="text-stone">· ${esc(daysText(d, c))}</span></p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2 mb-4">
+      <a href="tel:+${esc(c.phone)}" class="bg-cream rounded-2xl p-3 block"><p class="text-[13px] text-stone font-semibold">Phone</p><p class="font-bold text-[15px]">${esc(prettyPhone(c.phone))}</p></a>
+      <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Total spent</p><p class="font-bold text-[16px] text-leaf">${fmtMoney(totalSpent(c))}</p></div>
+      <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Birthday</p><p class="font-bold text-[15px]">${c.birthday ? esc(fmtDayMonth(c.birthday)) : '<span class="text-stone font-normal">Not added</span>'}</p></div>
+      <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Tag</p><p class="font-bold text-[15px]">${esc(c.tag || 'New')}</p></div>
+    </div>
+    <div class="bg-amber/10 rounded-2xl p-4 mb-5">
+      <p class="text-[13px] font-bold text-amber mb-1">NOTES</p>
+      <p class="text-[16px] leading-relaxed">${c.notes ? esc(c.notes) : '<span class="text-stone">No notes yet.</span>'}</p>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <button onclick="closeSheet('customer'); goAdd('sale','${c.id}')" class="btn btn-outline"><i class="fa-solid fa-plus"></i> Add purchase</button>
+      <button onclick="openPicker('${c.id}')" class="btn btn-primary"><i class="fa-brands fa-whatsapp text-[18px]"></i> Message</button>
+    </div>
+    <h4 class="font-bold text-[17px] mb-3">Purchase history <span class="text-stone font-normal text-[15px]">(${purchases.length})</span></h4>
+    <div class="space-y-2 mb-6">
+      ${purchases.length ? purchases.map(p => `
+        <div class="bg-cream rounded-2xl pl-4 pr-1 py-2 flex items-center gap-3">
+          <div class="flex-1 min-w-0"><p class="font-semibold text-[16px] truncate">${esc(p.item)}</p><p class="text-[14px] text-stone">${esc(fmtDate(p.date))}</p></div>
+          <p class="font-bold text-[16px]">${fmtMoney(p.amount)}</p>
+          <button onclick="deletePurchase('${c.id}','${p.id}')" aria-label="Remove this sale" class="w-12 h-12 flex items-center justify-center text-stone/60 hover:text-rose"><i class="fa-regular fa-trash-can"></i></button>
+        </div>`).join('') : `<div class="bg-cream rounded-2xl p-4 text-center text-stone text-[15px]">No purchases yet. Tap "Add purchase" when they buy.</div>`}
+    </div>
+    <button onclick="deleteCustomer('${c.id}')" class="w-full min-h-[48px] text-rose font-semibold text-[15px]"><i class="fa-regular fa-trash-can mr-1"></i> Delete this customer</button>`;
+  openSheet('customer');
+}
+
+function deletePurchase(cid, pid) {
+  const c = getCustomer(cid);
+  if (!c || !confirm('Remove this sale?')) return;
+  c.purchases = c.purchases.filter(p => p.id !== pid);
+  saveData(); openCustomer(cid); rerender();
+  toast('Sale removed');
+}
+function deleteCustomer(cid) {
+  const c = getCustomer(cid);
+  if (!c || !confirm('Delete ' + c.name + ' and all their sales?')) return;
+  DATA.customers = DATA.customers.filter(x => x.id !== cid);
+  saveData(); closeSheet('customer'); rerender();
+  toast(firstName(c.name) + ' deleted');
+}
+
+/* =========================================================
+   ADD
+   ========================================================= */
+function hideForms() {
+  $('newForm').classList.add('hidden');
+  $('saleForm').classList.add('hidden');
+  $('addChoices').classList.remove('hidden');
+}
+function showNewForm() {
+  $('newForm').reset(); hideError('ncError');
+  $('ncBirthday').max = todayStr();
+  $('saleForm').classList.add('hidden');
+  $('newForm').classList.remove('hidden');
+  $('addChoices').classList.add('hidden');
+  setTimeout(() => $('ncName').focus(), 50);
+}
+function showSaleForm(preId) {
+  hideError('saleError');
+  $('newForm').classList.add('hidden');
+  $('saleForm').classList.remove('hidden');
+  $('addChoices').classList.add('hidden');
+  const has = DATA.customers.length > 0;
+  $('saleEmpty').classList.toggle('hidden', has);
+  $('saleFields').classList.toggle('hidden', !has);
+  if (!has) return;
+  const sorted = [...DATA.customers].sort((a, b) => a.name.localeCompare(b.name));
+  $('saleCustomer').innerHTML = (preId ? '' : '<option value="">Choose a customer</option>') +
+    sorted.map(c => `<option value="${c.id}" ${c.id === preId ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  $('saleItem').value = ''; $('saleAmount').value = '';
+  $('saleDate').value = todayStr(); $('saleDate').max = todayStr();
+  setTimeout(() => (preId ? $('saleItem') : $('saleCustomer')).focus(), 50);
+}
+
+function addCustomer(e) {
+  e.preventDefault();
+  hideError('ncError');
+  const name = $('ncName').value.trim().replace(/\s+/g, ' ');
+  const phone = normalizePhone($('ncPhone').value);
+  if (name.length < 2) return showError('ncError', "Please type the customer's name.");
+  if (!validPhone(phone)) return showError('ncError', 'Please type a correct number, like 08031234567.');
+  const dup = DATA.customers.find(c => c.phone === phone);
+  if (dup) return showError('ncError', 'This number is already saved for ' + dup.name + '.');
+  const c = { id: uid(), name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, purchases: [] };
+  DATA.customers.push(c);
+  DATA.progress.customer = true;
+  saveData();
+  hideForms();
+  toast(firstName(name) + ' added. Log what they bought?');
+  showSaleForm(c.id);
+}
+
+function addSale(e) {
+  e.preventDefault();
+  hideError('saleError');
+  const c = getCustomer($('saleCustomer').value);
+  const item = $('saleItem').value.trim();
+  const amount = Math.round(parseFloat($('saleAmount').value));
+  const date = $('saleDate').value || todayStr();
+  if (!c) return showError('saleError', 'Please choose the customer.');
+  if (!item) return showError('saleError', 'Please type what they bought.');
+  if (!amount || amount <= 0) return showError('saleError', 'Please type the amount in naira.');
+  if (date > todayStr()) return showError('saleError', 'The date cannot be in the future.');
+  c.purchases.push({ id: uid(), date, item, amount });
+  if (c.purchases.length > 3 && c.tag === 'New') c.tag = 'Regular';
+  DATA.progress.sale = true;
+  saveData();
+  hideForms();
+  toast(fmtMoney(amount) + ' sale saved for ' + firstName(c.name));
+}
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+let saveTimers = {};
+function renderTemplates() {
+  $('msgBizName').textContent = ACCOUNT.businessName;
+  $('templateList').innerHTML = DATA.templates.map(t => `
+    <div class="card p-4">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-10 h-10 rounded-xl bg-leaf-light text-leaf flex items-center justify-center shrink-0"><i class="fa-solid ${t.icon || 'fa-comment'}"></i></span>
+        <h3 class="font-bold text-[17px] flex-1">${esc(t.title)}</h3>
+        <span id="saved-${t.id}" class="text-[14px] text-leaf font-semibold opacity-0 transition-opacity"><i class="fa-solid fa-check"></i> Saved</span>
+      </div>
+      <textarea id="tpl-${t.id}" class="field resize-none leading-relaxed" rows="4" oninput="updateTemplate('${t.id}', this.value)">${esc(t.body)}</textarea>
+      ${t.body.includes('{name}') ? '' : '<p class="text-[14px] text-amber mt-2"><i class="fa-solid fa-circle-info"></i> Tip: add {name} so it feels personal.</p>'}
+      <div class="flex gap-2 mt-3">
+        <button onclick="copyTemplate('${t.id}')" class="btn btn-ghost flex-1 !text-[15px]"><i class="fa-regular fa-copy"></i> Copy</button>
+        <button onclick="resetTemplate('${t.id}')" class="btn btn-ghost flex-1 !text-[15px]"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+      </div>
+    </div>`).join('');
+}
+function updateTemplate(id, val) {
+  const t = DATA.templates.find(x => x.id === id);
+  if (!t) return;
+  t.body = val;
+  clearTimeout(saveTimers[id]);
+  saveTimers[id] = setTimeout(() => {
+    saveData();
+    const s = $('saved-' + id);
+    if (s) { s.style.opacity = 1; setTimeout(() => s.style.opacity = 0, 1200); }
+  }, 400);
+}
+function resetTemplate(id) {
+  const def = DEFAULT_TEMPLATES.find(x => x.id === id);
+  const t = DATA.templates.find(x => x.id === id);
+  if (!def || !t) return;
+  if (t.body !== def.body && !confirm('Go back to the original message?')) return;
+  t.body = def.body; saveData(); renderTemplates();
+  toast('Message reset');
+}
+function copyTemplate(id) {
+  const t = DATA.templates.find(x => x.id === id);
+  const text = t.body.replace(/\{business\}/gi, ACCOUNT.businessName);
+  const done = () => toast('Message copied');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) { toast('Could not copy. Please copy by hand.'); }
+  ta.remove();
+}
+
+/* =========================================================
+   TEMPLATE PICKER → WHATSAPP
+   ========================================================= */
+let PICK_ID = null;
+function fillTemplate(body, c) {
+  return body.replace(/\{name\}/gi, firstName(c.name)).replace(/\{business\}/gi, ACCOUNT.businessName);
+}
+function openPicker(customerId, suggested) {
+  const c = getCustomer(customerId);
+  if (!c) return;
+  PICK_ID = customerId;
+  $('pickerTitle').textContent = 'Message ' + firstName(c.name);
+  let tpls = [...DATA.templates];
+  if (suggested) tpls.sort((a, b) => (b.id === suggested) - (a.id === suggested));
+  $('pickerList').innerHTML = tpls.map(t => `
+    <button onclick="sendTemplate('${t.id}')" class="w-full text-left rounded-2xl p-4 border-2 ${t.id === suggested ? 'border-leaf bg-leaf-light/40' : 'border-black/5 bg-white'} active:scale-[.99] transition">
+      <span class="flex items-center gap-2 mb-2">
+        <i class="fa-solid ${t.icon || 'fa-comment'} text-leaf"></i>
+        <span class="font-bold text-[17px]">${esc(t.title)}</span>
+        ${t.id === suggested ? '<span class="text-[12px] font-bold bg-leaf text-white rounded-full px-2 py-0.5">Suggested</span>' : ''}
+      </span>
+      <span class="block text-[15px] text-stone leading-relaxed mb-3">${esc(fillTemplate(t.body, c))}</span>
+      <span class="inline-flex items-center gap-2 text-leaf font-bold text-[15px]"><i class="fa-brands fa-whatsapp text-[18px]"></i> Open in WhatsApp</span>
+    </button>`).join('');
+  openSheet('picker');
+}
+function sendTemplate(tid) {
+  const c = getCustomer(PICK_ID);
+  const t = DATA.templates.find(x => x.id === tid);
+  if (!c || !t) return;
+  const url = 'https://wa.me/' + c.phone + '?text=' + encodeURIComponent(fillTemplate(t.body, c));
+  c.lastContacted = todayStr();
+  DATA.progress.sent = true;
+  DATA.sentCount++;
+  saveData();
+  closeSheet('picker');
+  const w = window.open(url, '_blank');
+  if (!w) window.location.href = url;
+  toast('WhatsApp opened. Press Send when ready.');
+  if (!$('sheet-customer').classList.contains('hidden')) openCustomer(c.id);
+  rerender();
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+function renderStats() {
+  const t = startOfToday();
+  const monthStart = toDateStr(new Date(t.getFullYear(), t.getMonth(), 1));
+  $('statsMonth').textContent = t.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  let thisMonth = 0, cameBack = 0, slipping = 0;
+  DATA.customers.forEach(c => {
+    const boughtThisMonth = c.purchases.some(p => p.date >= monthStart);
+    const boughtBefore = c.purchases.some(p => p.date < monthStart);
+    if (boughtThisMonth) thisMonth++;
+    if (boughtThisMonth && boughtBefore) cameBack++;
+    if (statusOf(daysSince(lastDate(c))).key === 'slipping') slipping++;
+  });
+  $('statMonth').textContent = thisMonth;
+  $('statBack').textContent = cameBack;
+  $('statSlip').textContent = slipping;
+
+  // 6 weeks, oldest first. Week 0 = last 7 days including today.
+  const weeks = [];
+  for (let i = 5; i >= 0; i--) {
+    const end = new Date(t); end.setDate(end.getDate() - i * 7);
+    const start = new Date(end); start.setDate(start.getDate() - 6);
+    weeks.push({ start: toDateStr(start), end: toDateStr(end), label: i === 0 ? 'This week' : start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), total: 0 });
+  }
+  DATA.customers.forEach(c => c.purchases.forEach(p => {
+    const w = weeks.find(w => p.date >= w.start && p.date <= w.end);
+    if (w) w.total += Number(p.amount) || 0;
+  }));
+  const grand = weeks.reduce((s, w) => s + w.total, 0);
+  $('chartTotal').textContent = 'Total: ' + fmtMoney(grand);
+
+  if (!grand) {
+    $('chartArea').innerHTML = `
+      <div class="text-center py-6">
+        <div class="w-16 h-16 rounded-full bg-leaf-light text-leaf mx-auto flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-chart-simple"></i></div>
+        <p class="font-bold text-[17px] mb-1">No sales in the last 6 weeks</p>
+        <p class="text-stone text-[15px] mb-4">Log your sales and your chart will grow here.</p>
+        <button onclick="goAdd('sale')" class="btn btn-primary">Log a sale</button>
+      </div>`;
+    return;
+  }
+  const max = Math.max(...weeks.map(w => w.total));
+  const H = 170;
+  $('chartArea').innerHTML = `
+    <div class="flex items-end gap-2 border-b-2 border-black/5" style="height:${H + 26}px">
+      ${weeks.map((w, i) => {
+        const h = w.total ? Math.max(8, Math.round(w.total / max * H)) : 3;
+        const last = i === weeks.length - 1;
+        return `<div class="flex-1 flex flex-col items-center justify-end h-full">
+          <span class="text-[12px] font-bold mb-1 ${w.total ? 'text-ink' : 'text-stone/50'}">${w.total ? fmtShortMoney(w.total) : '₦0'}</span>
+          <div class="w-full max-w-[44px] rounded-t-lg ${last ? 'bg-gradient-to-t from-gold to-amber' : 'bg-leaf/45'}" style="height:${h}px" title="${fmtMoney(w.total)}"></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="flex gap-2 mt-2">
+      ${weeks.map((w, i) => `<span class="flex-1 text-center text-[12px] leading-tight ${i === weeks.length - 1 ? 'text-leaf font-bold' : 'text-stone'}">${esc(w.label)}</span>`).join('')}
+    </div>
+    <p class="text-[14px] text-stone mt-3">Each bar is 7 days. The amber bar is the last 7 days.</p>`;
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllSheets(); });
+// Only allow digits in PIN boxes
+['regPin', 'regPin2', 'logPin', 'pinOld', 'pinNew'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); }));
+
+(function init() {
+  const sid = Store.get('keep_session', null);
+  const acc = getAccounts().find(a => a.id === sid);
+  if (acc) startApp(acc); else showAuth();
+})();
+</script>
+</body>
+</html>

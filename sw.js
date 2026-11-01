@@ -1,6 +1,6 @@
 // CustoPadi offline helper. Lets the app open even without internet.
 // It must NOT touch Firebase's live connections (login, database, analytics).
-const CACHE = 'custopadi-v3';
+const CACHE = 'custopadi-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 const CACHE_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 

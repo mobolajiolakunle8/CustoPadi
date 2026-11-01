@@ -185,8 +185,6 @@
         </div>
         <p id="regError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
-        <button type="button" onclick="runFirebaseCheck()" class="btn btn-ghost w-full mt-2 !text-[15px]"><i class="fa-solid fa-stethoscope text-leaf"></i> Check Firebase connection</button>
-        <div id="regCheck" class="hidden mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed"></div>
         <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Only you can see your customers. Keep your password safe.</p>
       </form>
 
@@ -213,8 +211,6 @@
         <p id="logError" class="hidden mt-2 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <p id="logInfo" class="hidden mt-2 text-leaf-deep text-[15px] font-medium bg-leaf-light rounded-xl px-4 py-3"></p>
         <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-4">Log in <i class="fa-solid fa-arrow-right"></i></button>
-        <button type="button" onclick="runFirebaseCheck()" class="btn btn-ghost w-full mt-2 !text-[15px]"><i class="fa-solid fa-stethoscope text-leaf"></i> Check Firebase connection</button>
-        <div id="logCheck" class="hidden mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed"></div>
         <p class="text-[14px] text-stone text-center mt-4">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
       </form>
     </div>
@@ -607,12 +603,6 @@ function togglePw(id, btn) {
   btn.innerHTML = show ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
 }
-function showCheck(id, ok, msg) {
-  const el = $(id);
-  el.className = (ok ? 'mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed bg-leaf-light text-leaf-deep' : 'mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed bg-rose/10 text-rose');
-  el.innerHTML = msg;
-  el.classList.remove('hidden');
-}
 
 let toastTimer;
 function toast(msg) {
@@ -754,6 +744,12 @@ function authMessage(err) {
   };
   let message = map[code];
 
+  // "OPERATION_NOT_ALLOWED / identity provider configuration is not found" = Email/Password sign-in is switched off in Firebase.
+  if (code === 'auth/operation-not-allowed' || code === 'auth/configuration-not-found' ||
+      /operation_not_allowed|operation-not-allowed|identity provider configuration|configuration-not-found|configuration_not_found/i.test(msg)) {
+    return 'New accounts are not open yet. App owner: in the Firebase console open Authentication → Sign-in method, click Email/Password, switch on "Enable" and press Save. Then try again.';
+  }
+
   // Firebase often reports domain/CORS/setup issues as "network-request-failed" in the browser.
   if (code === 'auth/network-request-failed') {
     if (!navigator.onLine) return 'No internet. Check your connection and try again.';
@@ -872,8 +868,6 @@ function showAuth(mode) {
   $('appView').classList.add('hidden');
   $('authView').classList.remove('hidden');
   hideInstallPrompt();
-  $('regCheck').classList.add('hidden');
-  $('logCheck').classList.add('hidden');
   const last = Store.get('cp_last_email', '');
   if (last && !$('logEmail').value) $('logEmail').value = last;
   setAuthMode(mode || (last ? 'login' : 'register'));
@@ -968,58 +962,6 @@ async function forgotPassword() {
     await FB.A.sendPasswordResetEmail(FB.auth, email);
     const info = $('logInfo'); info.textContent = 'We sent a reset link to ' + email + '. Check your inbox (and spam folder), then come back and log in.'; info.classList.remove('hidden');
   } catch (err) { showError('logError', authMessage(err)); }
-}
-
-async function runFirebaseCheck() {
-  const targets = ['regCheck', 'logCheck'];
-  targets.forEach(id => $(id).classList.add('hidden'));
-  if (!FB) {
-    targets.forEach(id => showCheck(id, false, 'Firebase has not finished loading yet. Reload the page and try again.'));
-    return;
-  }
-  try {
-    // 1) Basic Firebase Auth endpoint reachability
-    const authPing = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=' + encodeURIComponent(FB.auth.app.options.apiKey), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier: 'check@example.com', continueUri: window.location.origin, providerId: 'password' })
-    });
-
-    if (authPing.status === 403) {
-      const text = await authPing.text();
-      if (/requests from referer|referer|api key/i.test(text)) {
-        targets.forEach(id => showCheck(id, false, 'Firebase is reachable, but this website is blocked by your API key restrictions. In Google Cloud → APIs & Services → Credentials, open the API key and allow this domain: <b>' + window.location.origin + '</b>.'));
-        return;
-      }
-    }
-
-    if (!authPing.ok) {
-      const text = await authPing.text();
-      targets.forEach(id => showCheck(id, false, 'Firebase Authentication answered with <b>' + authPing.status + '</b>. Details: ' + esc(text.slice(0, 220))));
-      return;
-    }
-
-    // 2) Firestore profile document read test (most useful after login)
-    if (USER) {
-      try {
-        await FB.F.getDoc(profileRef());
-      } catch (err) {
-        targets.forEach(id => showCheck(id, false, 'Authentication works, but the database is blocked. In Firebase → Firestore Database → Rules, publish the CustoPadi rules.'));
-        return;
-      }
-    }
-
-    const authDomain = window.location.hostname;
-    targets.forEach(id => showCheck(id, true, 'Good news: Firebase Authentication is reachable from <b>' + authDomain + '</b>. If sign-up still fails, check the exact red error message for a domain or password rule issue.'));
-  } catch (err) {
-    console.error('Firebase check failed:', err);
-    const text = String((err && err.message) || err || '');
-    if (/failed to fetch|networkerror|load failed/i.test(text)) {
-      targets.forEach(id => showCheck(id, false, 'This website could not reach Firebase from the browser. If your internet is fine, the likely cause is a blocked domain or API key restriction. Add <b>' + window.location.origin + '</b> to Firebase Authentication → Settings → Authorized domains, and allow it in Google Cloud → APIs & Services → Credentials if you restricted the API key.'));
-      return;
-    }
-    targets.forEach(id => showCheck(id, false, 'Firebase check failed: ' + esc(text)));
-  }
 }
 
 function logout() {

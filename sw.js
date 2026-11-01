@@ -1,57 +1,97 @@
-// CustoPadi offline helper. Lets the app open even without internet.
-// It must NOT touch Firebase's live connections (login, database, analytics).
-const CACHE = 'custopadi-v4';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
-const CACHE_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+// Cache public app files only. Firebase requests and user records never enter this cache.
+const VERSION = 'CP-AUTH-5';
+const CACHE = 'custopadi-v5-auth';
+const ROOT = new URL('./', self.location.href);
+const PAGE = new URL('index.html', ROOT).href;
+const STATIC_HOSTS = new Set(['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com']);
+const LOCAL_FILES = new Set(['manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'logo.png', 'logo.svg', 'logo.webp', 'logo.jpg', 'logo.jpeg']);
+const SDK = 'https://www.gstatic.com/firebasejs/12.18.0/';
 
-function cacheable(url) {
-  if (url.origin === self.location.origin) return true;
-  if (CACHE_HOSTS.includes(url.host)) return true;
-  if (url.host === 'www.gstatic.com' && url.pathname.startsWith('/firebasejs/')) return true;
-  return false; // firestore.googleapis.com, identitytoolkit, analytics, etc. go straight to the network
+function isAppPage(url) {
+  return url.origin === ROOT.origin && (url.pathname === ROOT.pathname || url.pathname === new URL(PAGE).pathname);
+}
+function isStaticAsset(url) {
+  if (url.origin === ROOT.origin && url.pathname.startsWith(ROOT.pathname)) {
+    return LOCAL_FILES.has(url.pathname.slice(ROOT.pathname.length));
+  }
+  return STATIC_HOSTS.has(url.hostname) || (url.hostname === 'www.gstatic.com' && url.pathname.startsWith('/firebasejs/'));
+}
+async function fetchWithTimeout(request, milliseconds = 15000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), milliseconds);
+  try { return await fetch(request, { signal: controller.signal, cache: 'no-store' }); }
+  finally { clearTimeout(timeout); }
+}
+async function savePublicFile(cache, request, response) {
+  if (response && (response.ok || response.type === 'opaque')) {
+    try { await cache.put(request, response.clone()); } catch (error) { /* A full cache must not break a live response. */ }
+  }
 }
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE)
-      .then(c => Promise.all(CORE.map(u => c.add(u).catch(() => {}))))
-      .then(() => self.skipWaiting())
-  );
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    const page = await fetchWithTimeout(PAGE);
+    if (!page.ok || !page.headers.get('content-type')?.includes('text/html')) throw new Error('App page unavailable');
+    await cache.put(PAGE, page);
+    const optional = [
+      ...Array.from(LOCAL_FILES).filter(name => !name.startsWith('logo.')).map(name => new URL(name, ROOT).href),
+      'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4',
+      SDK + 'firebase-app.js', SDK + 'firebase-auth.js', SDK + 'firebase-firestore.js'
+    ];
+    await Promise.all(optional.map(async url => {
+      try { await savePublicFile(cache, url, await fetchWithTimeout(url)); } catch (error) {}
+    }));
+    await self.skipWaiting();
+  })());
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    // Only retire CustoPadi asset caches, not other caches, IndexedDB, or localStorage.
+    await Promise.all(keys.filter(key => key.startsWith('custopadi-') && key !== CACHE).map(key => caches.delete(key)));
+    await self.clients.claim();
+    const windows = await self.clients.matchAll({ type: 'window' });
+    windows.forEach(client => client.postMessage({ type: 'CUSTOPADI_UPDATED', version: VERSION }));
+  })());
 });
 
-self.addEventListener('fetch', e => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
+async function loadPage(request) {
+  const cache = await caches.open(CACHE);
+  try {
+    const response = await fetchWithTimeout(request);
+    if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
+      await savePublicFile(cache, PAGE, response);
+      return response;
+    }
+    return (await cache.match(PAGE)) || response;
+  } catch (error) {
+    return (await cache.match(PAGE)) || new Response('CustoPadi is not available offline yet. Reconnect and refresh.', {
+      status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+    });
+  }
+}
 
-  // Pages: try the internet first, fall back to the saved copy when offline.
-  if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req)
-        .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return res; })
-        .catch(() => caches.match('./index.html'))
-    );
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (isAppPage(url) && (request.mode === 'navigate' || request.destination === 'document')) {
+    event.respondWith(loadPage(request));
     return;
   }
-
-  if (!cacheable(url)) return;
-
-  // App files, fonts, styles, Firebase code: use saved copy, update in background.
-  e.respondWith(
-    caches.match(req).then(cached => {
-      const net = fetch(req).then(res => {
-        if (res && (res.ok || res.type === 'opaque')) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
-        return res;
-      }).catch(() => cached);
-      return cached || net;
-    })
-  );
+  // Identity Toolkit, Secure Token, Firestore, API routes, and analytics use the real network.
+  if (!isStaticAsset(url)) return;
+  const refresh = caches.open(CACHE).then(async cache => {
+    try {
+      const response = await fetchWithTimeout(request);
+      await savePublicFile(cache, request, response);
+      return response;
+    } catch (error) {
+      return (await cache.match(request)) || new Response('', { status: 503, statusText: 'Offline' });
+    }
+  });
+  event.waitUntil(refresh.then(() => {}).catch(() => {}));
+  event.respondWith(caches.open(CACHE).then(async cache => (await cache.match(request)) || refresh));
 });

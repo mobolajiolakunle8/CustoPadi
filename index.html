@@ -74,6 +74,34 @@
     .ico-sun { color: #F5A623; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { width: 36px; height: 36px; border-radius: 50%; border: 4px solid #E5F3EA; border-top-color: #178A45; animation: spin .8s linear infinite; }
+    button, a.btn, summary { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+    input, select, textarea { min-width: 0; }
+    textarea { resize: vertical; }
+    .label { font-size: 16px; }
+    .sheet-panel { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+    .sheet-panel h3 { padding-right: 40px; }
+    .sheet-panel p, .customer-note { overflow-wrap: anywhere; }
+    .contact-choice { display: flex; gap: 12px; align-items: center; min-height: 64px; padding: 12px 0; border-bottom: 1px solid #e8ece6; cursor: pointer; }
+    .contact-choice input, .consent-input { width: 22px; height: 22px; accent-color: #178A45; flex-shrink: 0; }
+    label:has(input[type="file"]:focus-visible) { outline: 3px solid #F5A623; outline-offset: 3px; }
+    .chart-bar { transform-origin: bottom; animation: barGrow .55s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    .round-progress { height: 6px; overflow: hidden; background: #e5f3ea; border-radius: 8px; }
+    .round-progress span { display: block; height: 100%; background: #178A45; transition: width .3s ease; }
+    .tool-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+    .tool-table th, .tool-table td { padding: 12px 8px; border-bottom: 1px solid #e8ece6; text-align: left; overflow-wrap: anywhere; }
+    .tool-table th { color: #5d655a; font-weight: 600; }
+    .tool-table td:last-child { white-space: nowrap; }
+    @media (max-width: 360px) {
+      .followup-main { flex-wrap: wrap; }
+      .followup-main > .wa-btn { width: 100%; justify-content: center; }
+      .onboard-step { flex-wrap: wrap; }
+      .onboard-step > button { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
   </style>
 </head>
 
@@ -98,10 +126,10 @@
 
 <!-- Top bars: offline notice and setup problems -->
 <div id="topBars" class="fixed top-0 inset-x-0 z-[65]">
-  <div id="netBanner" class="hidden bg-ink text-white text-center text-[14px] font-semibold py-2 px-4"><i class="fa-solid fa-wifi mr-1 opacity-70"></i> You're offline. Your changes are saved and will sync when you're back online.</div>
+  <div id="netBanner" class="hidden bg-ink text-white text-center text-[16px] font-semibold py-2 px-4"><i class="fa-solid fa-wifi mr-1 opacity-70"></i> Offline. Check the save status before closing the app.</div>
   <div id="setupBanner" class="hidden bg-rose text-white text-[14px] font-semibold py-2 pl-4 pr-1 flex items-start gap-2">
     <span id="setupBannerText" class="flex-1 leading-snug py-1"></span>
-    <button onclick="dismissSetupBanner()" aria-label="Close" class="w-10 h-10 flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
+    <button onclick="dismissSetupBanner()" aria-label="Close" class="w-12 h-12 flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
   </div>
 </div>
 
@@ -109,6 +137,7 @@
 <div id="splash" class="fixed inset-0 z-[70] bg-white flex flex-col items-center justify-center gap-5 px-8 text-center">
   <svg viewBox="0 0 640 130" class="h-12 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
   <div id="splashSpinner" class="spinner"></div>
+  <button onclick="startDemo()" class="btn btn-ghost">Explore a sample business</button>
   <div id="splashError" class="hidden max-w-sm">
     <p id="splashErrTitle" class="font-bold text-[18px] mb-1">Could not connect</p>
     <p id="splashErrText" class="text-stone text-[15px] leading-relaxed">Check your internet and try again.</p>
@@ -226,6 +255,7 @@
     </div>
 
     <div class="mt-3">
+      <button type="button" onclick="startDemo()" class="btn btn-outline w-full mb-3">Try with sample customers</button>
       <button type="button" onclick="openSheet('launch')" class="btn btn-ghost w-full !text-[15px]">
         <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Put CustoPadi on your phone
       </button>
@@ -238,9 +268,12 @@
 <!-- ===================================================== -->
 <div id="appView" class="hidden max-w-md mx-auto min-h-screen">
   <header class="app-header sticky z-30 bg-cream/90 backdrop-blur-xl px-4 pt-3 pb-2 flex items-center justify-between gap-3">
-    <button onclick="switchTab('today')" aria-label="CustoPadi home" class="min-h-[48px] flex items-center">
-      <svg viewBox="0 0 640 130" class="h-9 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
-    </button>
+    <div class="min-w-0">
+      <button onclick="switchTab('today')" aria-label="CustoPadi home" class="min-h-[48px] flex items-center">
+        <svg viewBox="0 0 640 130" class="h-9 w-auto max-w-full" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
+      </button>
+      <p id="syncStatus" class="text-[14px] text-stone" role="status" aria-live="polite">Checking saves...</p>
+    </div>
     <button onclick="openBusinessSheet()" aria-label="My business and settings" class="relative w-12 h-12 rounded-full bg-leaf text-white flex items-center justify-center shrink-0 shadow-sm">
       <span id="hdrAvatar" class="font-extrabold text-[16px]">K</span>
       <span class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-white border border-black/10 flex items-center justify-center"><i class="fa-solid fa-gear text-[10px] text-stone"></i></span>
@@ -276,6 +309,9 @@
         </div>
       </div>
 
+      <div id="todayActions" class="hidden mb-4">
+        <button onclick="openRoundSetup('today')" class="btn btn-outline w-full"><i class="fa-brands fa-whatsapp"></i> Follow up one by one</button>
+      </div>
       <div id="todayList" class="space-y-3 mb-8"></div>
 
       <div class="flex items-center gap-2 mb-3">
@@ -283,16 +319,28 @@
         <h2 class="font-bold text-[18px]">Birthdays this week</h2>
       </div>
       <div id="birthdayList" class="space-y-3"></div>
+      <section class="mt-8" aria-labelledby="plannedHeading">
+        <h2 id="plannedHeading" class="font-bold text-[18px] mb-2">Coming up next</h2>
+        <p class="text-stone text-[16px] mb-3">Your next seven days. Plans appear here when you open the app, not as phone notifications.</p>
+        <div id="upcomingPlans" class="space-y-3"></div>
+      </section>
     </section>
 
     <!-- CUSTOMERS -->
     <section id="screen-customers" class="screen hidden">
-      <h2 class="font-extrabold text-[22px] mb-3">Your customers</h2>
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <h2 class="font-extrabold text-[22px]">Your customers</h2>
+        <button onclick="openCustomerTools()" class="btn btn-ghost !px-3"><i class="fa-solid fa-file-csv"></i> CSV tools</button>
+      </div>
       <div class="relative mb-3">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone/60"></i>
         <input id="customerSearch" type="search" placeholder="Search name, phone or tag" class="field !pl-11 !bg-white border-black/5" oninput="renderCustomers()" />
       </div>
       <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 mb-3 -mx-4 px-4" id="chips"></div>
+      <div class="flex items-center gap-3 mb-4">
+        <label for="customerSort" class="text-stone text-[16px] shrink-0">Sort by</label>
+        <select id="customerSort" class="field" onchange="renderCustomers()"><option value="name">Name</option><option value="spent">Most spent</option><option value="oldest">Longest since buying</option><option value="newest">Recently added</option></select>
+      </div>
       <div class="flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-stone mb-4">
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-leaf"></span>Bought in 30 days</span>
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber"></span>31–60 days</span>
@@ -317,7 +365,7 @@
       </div>
 
       <form id="newForm" class="hidden card p-5 fade-up" onsubmit="addCustomer(event)" novalidate>
-        <h3 class="font-bold text-[19px] mb-4">New customer</h3>
+        <h3 id="customerFormTitle" class="font-bold text-[19px] mb-4">New customer</h3>
         <div class="space-y-4">
           <div><label class="label" for="ncName">Name</label><input id="ncName" class="field" type="text" placeholder="e.g. Chiamaka Okafor" maxlength="50" /></div>
           <div><label class="label" for="ncPhone">WhatsApp number</label><input id="ncPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" /></div>
@@ -326,11 +374,12 @@
             <div><label class="label" for="ncTag">Tag</label><select id="ncTag" class="field"><option>New</option><option>Regular</option><option>VIP</option></select></div>
           </div>
           <div><label class="label" for="ncNotes">Notes <span class="font-normal text-stone">(optional)</span></label><textarea id="ncNotes" class="field resize-none" rows="2" placeholder="e.g. Size 12, likes bright colours" maxlength="300"></textarea></div>
+          <label class="contact-choice !border-0"><input id="ncContactAllowed" type="checkbox" class="consent-input" checked><span><b class="block">Can receive WhatsApp follow-ups</b><span class="text-stone text-[16px]">Turn this off if they ask not to be contacted. Only message people who have agreed.</span></span></label>
         </div>
         <p id="ncError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <div class="flex gap-3 mt-5">
-          <button type="button" onclick="hideForms()" class="btn btn-ghost flex-1">Cancel</button>
-          <button type="submit" class="btn btn-primary flex-1">Save customer</button>
+          <button type="button" onclick="cancelCustomerForm()" class="btn btn-ghost flex-1">Cancel</button>
+          <button id="customerSubmit" type="submit" class="btn btn-primary flex-1">Save customer</button>
         </div>
       </form>
 
@@ -362,6 +411,7 @@
     <section id="screen-messages" class="screen hidden">
       <h2 class="font-extrabold text-[22px] mb-1">Your messages</h2>
       <p class="text-stone text-[16px] mb-3">Change any message to sound like you. It saves by itself.</p>
+      <button id="roundLaunch" onclick="openRoundSetup('all')" class="btn btn-outline w-full mb-4"><i class="fa-solid fa-user-group"></i> Message a few customers</button>
       <div class="bg-leaf-light/80 rounded-2xl p-4 mb-5 text-[15px] leading-relaxed">
         <b class="text-leaf-deep">{name}</b> becomes the customer's first name.<br>
         <b class="text-leaf-deep">{business}</b> becomes <span id="msgBizName" class="font-semibold">your business name</span>.
@@ -372,11 +422,14 @@
     <!-- STATS -->
     <section id="screen-stats" class="screen hidden">
       <h2 class="font-extrabold text-[22px] mb-1">How business is going</h2>
-      <p id="statsMonth" class="text-stone text-[16px] mb-5">This month</p>
+      <div class="flex items-center gap-3 mt-3 mb-3"><label for="statsPeriod" class="text-stone text-[16px] shrink-0">Show</label><select id="statsPeriod" class="field" onchange="renderStats()"><option value="month">This month</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></div>
+      <p id="statsMonth" class="text-stone text-[16px] mb-3">This month</p>
+      <p id="periodRevenue" class="text-[32px] font-extrabold text-leaf leading-tight" aria-live="polite">₦0</p>
+      <p id="periodSalesNote" class="text-stone text-[16px] mt-1 mb-5">No sales yet.</p>
       <div class="grid grid-cols-3 gap-3 mb-5">
-        <div class="card p-4 text-center"><p id="statMonth" class="text-[30px] font-extrabold leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Customers this month</p></div>
+        <div class="card p-4 text-center"><p id="statMonth" class="text-[30px] font-extrabold leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Customers who bought</p></div>
         <div class="card p-4 text-center"><p id="statBack" class="text-[30px] font-extrabold text-leaf leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Came back</p></div>
-        <div class="card p-4 text-center"><p id="statSlip" class="text-[30px] font-extrabold text-amber leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Slipping away</p></div>
+        <button onclick="showSlippingCustomers()" class="card p-4 text-center"><span id="statSlip" class="block text-[30px] font-extrabold text-amber leading-none mb-2">0</span><span class="text-[14px] text-stone leading-snug">Slipping away now</span></button>
       </div>
       <div class="card p-5">
         <div class="flex items-baseline justify-between mb-1">
@@ -386,6 +439,8 @@
         <p id="chartTotal" class="text-[15px] text-stone mb-4">Total: ₦0</p>
         <div id="chartArea"></div>
       </div>
+      <section class="mt-7" aria-labelledby="topItemsHeading"><h3 id="topItemsHeading" class="font-bold text-[18px] mb-2">What sells most</h3><p class="text-stone text-[16px] mb-2">Top items by money earned in the selected period.</p><div id="topItems"></div></section>
+      <button onclick="exportSalesCSV()" class="btn btn-outline w-full mt-5"><i class="fa-solid fa-download"></i> Download these sales</button>
     </section>
   </main>
 
@@ -440,10 +495,17 @@
       </div>
     </div>
 
-    <div class="bg-leaf-light/70 rounded-2xl p-4 mb-5 text-[15px] leading-snug flex gap-3">
+    <div class="bg-leaf-light/70 rounded-2xl p-4 mb-5 text-[16px] leading-relaxed flex gap-3">
       <i class="fa-solid fa-cloud text-leaf text-lg mt-0.5"></i>
-      <div><b>Saved online.</b> Your customers are backed up to your account, so you can log in on any phone with your email and password.</div>
+      <div class="min-w-0"><b id="cloudStatusTitle">Checking saves</b><p id="cloudStatusDetail">Waiting for Firebase to confirm your records.</p><button id="retrySaves" onclick="retrySaves()" class="hidden btn btn-outline mt-3">Retry saves</button><button id="recoveryDownload" onclick="exportRecovery()" class="hidden btn btn-outline mt-3">Download recovery copy</button><button id="clearRecovery" onclick="clearRecoveryCopy()" class="hidden btn btn-ghost mt-3">Discard earlier recovery copy</button></div>
     </div>
+
+    <form onsubmit="saveFollowUpSettings(event)" class="mb-6 space-y-3">
+      <h4 class="font-bold text-[17px]">After a follow-up is done</h4>
+      <label class="label" for="followUpGap">Wait before reminding me again</label>
+      <select id="followUpGap" class="field"><option value="3">3 days</option><option value="7">7 days</option><option value="14">14 days</option><option value="30">30 days</option></select>
+      <button type="submit" class="btn btn-ghost w-full">Save reminder setting</button>
+    </form>
 
     <form onsubmit="saveBusiness(event)" class="space-y-4 mb-6" novalidate>
       <h4 class="font-bold text-[17px]">Business details</h4>
@@ -470,14 +532,17 @@
 
     <div class="border-t border-black/5 pt-5 mb-6 space-y-3">
       <h4 class="font-bold text-[17px]">Backup &amp; phone app</h4>
-      <p class="text-[14px] text-stone leading-snug">Your records are already saved online. You can also keep a copy file on your phone.</p>
+      <p class="text-[16px] text-stone leading-relaxed">Check the save status above. Downloads contain private customer details, so keep them somewhere safe. CSV lists do not include purchase history; a full backup does.</p>
       <div class="grid grid-cols-2 gap-3">
         <button type="button" onclick="exportBackup()" class="btn btn-ghost !text-[15px]"><i class="fa-solid fa-download text-leaf"></i> Save backup</button>
-        <label class="btn btn-ghost !text-[15px] cursor-pointer">
+        <label class="btn btn-ghost !text-[15px] cursor-pointer relative">
           <i class="fa-solid fa-upload text-leaf"></i> Restore backup
-          <input type="file" accept=".json,application/json" class="hidden" onchange="importBackup(event)" />
+          <input type="file" accept=".json,application/json" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" onchange="importBackup(event)" aria-label="Choose a full backup to restore" />
         </label>
       </div>
+      <button onclick="closeSheet('business'); openCustomerTools()" class="btn btn-ghost w-full"><i class="fa-solid fa-file-csv"></i> Import or export customer lists</button>
+      <button onclick="runAppChecks()" class="btn btn-ghost w-full"><i class="fa-solid fa-check-double"></i> Check app tools</button>
+      <p id="localChecksResult" class="text-stone text-[16px]" role="status" aria-live="polite">Checks phone formats, dates, CSV files and reminder calculations on this device. It does not test Firebase access.</p>
       <button id="legacyBtn" type="button" onclick="offerLegacyImport()" class="hidden btn btn-outline w-full !text-[15px]"><i class="fa-solid fa-people-arrows"></i> Bring customers from the old version on this phone</button>
       <button type="button" onclick="closeSheet('business'); openSheet('launch')" class="btn btn-ghost w-full !text-[15px]">
         <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Put on phone / Share CustoPadi
@@ -485,6 +550,7 @@
     </div>
 
     <div class="border-t border-black/5 pt-5 space-y-3">
+      <details class="text-[16px] text-stone"><summary class="min-h-[48px] flex items-center cursor-pointer font-bold text-ink">About your data</summary><p class="mt-2 leading-relaxed">Live accounts use Firebase Authentication and Firestore. The owner must publish owner-only database rules. CustoPadi also keeps a recovery copy in this browser. This is not encryption: avoid sharing your browser session and protect downloaded files. Message delivery is never tracked; only you can confirm sending in WhatsApp.</p></details>
       <button onclick="logout()" class="btn btn-outline w-full"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
       <button onclick="deleteBusiness()" class="btn btn-danger w-full"><i class="fa-solid fa-trash"></i> Delete this business</button>
     </div>
@@ -553,8 +619,33 @@
   </div>
 </div>
 
+<div id="sheet-round" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('round')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-5"></div>
+    <button onclick="closeSheet('round')" aria-label="Close message list" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="roundBody"></div>
+  </div>
+</div>
+
+<div id="sheet-tools" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('tools')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-5"></div>
+    <button onclick="closeSheet('tools')" aria-label="Close CSV tools" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <h3 class="font-extrabold text-[22px] mb-2">Your customer lists</h3>
+    <p class="text-stone text-[16px] mb-5">Move a list from a spreadsheet without typing every name again.</p>
+    <button onclick="exportCustomersCSV()" class="btn btn-outline w-full mb-3"><i class="fa-solid fa-download"></i> Download all customers</button>
+    <button onclick="downloadCSVExample()" class="btn btn-ghost w-full mb-5">Download an example CSV</button>
+    <p class="text-[16px] text-stone mb-4">A CSV needs <b>Name</b> and <b>Phone</b>. Optional: Birthday (YYYY-MM-DD), Tag, Notes, Contact allowed, Next follow up, Follow up note. Numbers can start with 0 or 234. Up to 400 rows and 2 MB per file. Existing phone numbers are skipped, never overwritten.</p>
+    <label class="btn btn-primary w-full relative cursor-pointer"><i class="fa-solid fa-upload"></i> Choose a CSV file<input id="csvFile" type="file" accept=".csv,text/csv" onchange="previewCSV(event)" class="absolute inset-0 w-full opacity-0 cursor-pointer" aria-label="Choose a customer CSV file"></label>
+    <div id="csvPreview" class="mt-5" aria-live="polite"><p class="text-stone text-[16px]">Choose a file to check the names and numbers before adding anyone.</p></div>
+    <p class="text-stone text-[16px] mt-5">These files contain personal information. Only import customers you have permission to keep or contact.</p>
+  </div>
+</div>
+
 <!-- Toast -->
-<div id="toast" class="fixed left-4 right-4 bottom-28 z-[60] max-w-md mx-auto hidden">
+<div id="toast" class="fixed left-4 right-4 bottom-28 z-[60] max-w-md mx-auto hidden" role="status" aria-live="polite">
   <div class="bg-ink text-white px-5 py-4 rounded-2xl shadow-xl text-[16px] font-medium flex items-center gap-3">
     <i class="fa-solid fa-circle-check text-[#F5A623]"></i><span id="toastText">Done</span>
   </div>
@@ -570,14 +661,15 @@ const Store = (() => {
   try { localStorage.setItem('__cp_t', '1'); localStorage.removeItem('__cp_t'); ok = true; } catch (e) {}
   return {
     get(key, fallback) {
-      try { const raw = ok ? localStorage.getItem(key) : mem[key]; return raw == null ? fallback : JSON.parse(raw); } catch (e) { return fallback; }
+      try { const raw = Object.prototype.hasOwnProperty.call(mem, key) ? mem[key] : (ok ? localStorage.getItem(key) : null); return raw == null ? fallback : JSON.parse(raw); } catch (e) { return fallback; }
     },
     set(key, val) {
       const raw = JSON.stringify(val);
-      if (ok) { try { localStorage.setItem(key, raw); return; } catch (e) { ok = false; } }
       mem[key] = raw;
+      if (ok) { try { localStorage.setItem(key, raw); return; } catch (e) { ok = false; } }
     },
-    remove(key) { try { if (ok) localStorage.removeItem(key); } catch (e) {} delete mem[key]; }
+    remove(key) { try { if (ok) localStorage.removeItem(key); } catch (e) {} delete mem[key]; },
+    persistent() { return ok; }
   };
 })();
 
@@ -592,9 +684,18 @@ const clean = o => JSON.parse(JSON.stringify(o));
 const toDateStr = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 const todayStr = () => toDateStr(new Date());
 function startOfToday() { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
-function parseDate(s) { if (!s) return null; const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); }
+function validDate(s) {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return y >= 1900 && y <= 2199 && date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
+function parseDate(s) { const day = String(s || '').slice(0, 10); if (!validDate(day)) return null; const [y, m, d] = day.split('-').map(Number); return new Date(y, m - 1, d); }
 function daysAgoStr(n) { const d = startOfToday(); d.setDate(d.getDate() - n); return toDateStr(d); }
-function daysSince(s) { const d = parseDate(s); return d ? Math.round((startOfToday() - d) / 86400000) : 0; }
+function daysSince(s) { const d = parseDate(s); return d ? Math.max(0, Math.round((startOfToday() - d) / 86400000)) : 0; }
+function dateAfter(days) { const d = startOfToday(); d.setDate(d.getDate() + days); return toDateStr(d); }
+const safeKey = id => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,120}$/.test(id);
+const plainText = (value, max = 300) => String(value ?? '').replace(/\u0000/g, '').slice(0, max);
 function fmtMoney(n) { return '₦' + Math.round(Number(n) || 0).toLocaleString('en-US'); }
 function fmtShortMoney(n) {
   if (n >= 1e6) return '₦' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'm';
@@ -610,6 +711,7 @@ const validEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
 function normalizePhone(raw) {
   let d = String(raw || '').replace(/\D/g, '');
+  if (d.startsWith('00234')) d = d.slice(2);
   if (d.startsWith('0') && d.length === 11) d = '234' + d.slice(1);
   else if (d.length === 10 && /^[789]/.test(d)) d = '234' + d;
   return d;
@@ -637,10 +739,11 @@ function toast(msg) {
 
 /* Offline notice + setup problems shown at the top */
 function updateBars() {
-  $('netBanner').classList.toggle('hidden', navigator.onLine);
+  $('netBanner').classList.toggle('hidden', navigator.onLine || DEMO);
   document.documentElement.style.setProperty('--bars', $('topBars').offsetHeight + 'px');
+  renderSyncStatus();
 }
-window.addEventListener('online', () => { updateBars(); toast('Back online. Syncing your changes…'); });
+window.addEventListener('online', () => { updateBars(); toast(DEMO ? 'Back online. The sample business stays in this browser.' : 'Back online. Checking your saves...'); });
 window.addEventListener('offline', updateBars);
 function setupProblem(msg) {
   if (!appShown) { showBootError('Setup not finished', msg, true); return; }
@@ -689,14 +792,14 @@ function sampleCustomers() {
     { name: 'Funmilayo Adeyemi', phone: '2347038765432', birthday: '1979-04-09', tag: 'Regular', notes: 'Buys aso-ebi for family parties. Always asks for discount.', purchases: [P(17, 'Aso-oke set', 45000), P(31, 'Gele', 8000), P(14, 'Beads', 7500)] },
     { name: 'Blessing Udoh', phone: '2349051239876', birthday: '1998-09-17', tag: 'New', notes: 'Student. Likes affordable pieces.', purchases: [P(88, 'Jeans', 9500)] }
   ];
-  return list.map(c => ({ ...c, id: uid(), lastContacted: null, createdAt: c.purchases.map(p => p.date).sort()[0] || todayStr() }));
+  return list.map(c => normalizeCustomer(uid(), { ...c, isSample: true, lastContacted: null, createdAt: c.purchases.map(p => p.date).sort()[0] || todayStr() }));
 }
 
 function freshData() {
   return {
     customers: [],
     templates: DEFAULT_TEMPLATES.map(t => ({ ...t })),
-    settings: { followUpDays: 30 },
+    settings: { followUpDays: 30, followUpGap: 7 },
     progress: { customer: false, sale: false, sent: false },
     onboardingDone: false,
     sentCount: 0
@@ -705,17 +808,38 @@ function freshData() {
 
 function normalizeCustomer(id, d) {
   d = d || {};
+  const day = value => validDate(String(value || '').slice(0, 10)) ? String(value).slice(0, 10) : '';
   return {
-    id,
-    name: String(d.name || ''),
-    phone: String(d.phone || ''),
-    birthday: d.birthday ? String(d.birthday).slice(0, 10) : '',
-    tag: d.tag || 'New',
-    notes: String(d.notes || ''),
-    createdAt: d.createdAt ? String(d.createdAt).slice(0, 10) : todayStr(),
-    lastContacted: d.lastContacted || null,
-    purchases: (Array.isArray(d.purchases) ? d.purchases : []).map(p => ({ id: p.id || uid(), date: String(p.date || '').slice(0, 10), item: String(p.item || ''), amount: Number(p.amount) || 0 }))
+    id: safeKey(id) ? String(id) : uid(),
+    name: plainText(d.name, 50).trim(),
+    phone: normalizePhone(d.phone),
+    birthday: day(d.birthday),
+    tag: ['New', 'Regular', 'VIP'].includes(d.tag) ? d.tag : 'New',
+    notes: plainText(d.notes),
+    createdAt: day(d.createdAt) || todayStr(),
+    lastContacted: day(d.lastContacted) || null,
+    lastConfirmed: day(d.lastConfirmed),
+    contactAllowed: d.contactAllowed !== false,
+    nextFollowUp: day(d.nextFollowUp),
+    followUpNote: plainText(d.followUpNote, 200),
+    snoozedUntil: day(d.snoozedUntil),
+    lastCompleted: day(d.lastCompleted),
+    isSample: d.isSample === true,
+    activity: (Array.isArray(d.activity) ? d.activity : []).filter(a => a && ['opened', 'sent', 'done', 'planned', 'snoozed'].includes(a.type) && Number.isFinite(a.at) && a.at > 0 && a.at <= Date.now() + 86400000).slice(-50).map(a => ({ id: safeKey(a.id) ? a.id : uid(), type: a.type, at: a.at, note: plainText(a.note, 200) })),
+    purchases: (Array.isArray(d.purchases) ? d.purchases : []).filter(p => p && day(p.date) && Number.isFinite(Number(p.amount)) && Number(p.amount) > 0 && Number(p.amount) <= 1e12).map(p => ({ id: safeKey(p.id) ? p.id : uid(), date: day(p.date), item: plainText(p.item, 60), amount: Math.round(Number(p.amount)) }))
   };
+}
+
+function normalizeTemplates(list) {
+  return DEFAULT_TEMPLATES.map((def, index) => {
+    const saved = Array.isArray(list) ? list.find(t => t && (t.id === def.id || t.id === 't' + (index + 1))) : null;
+    return { ...def, body: saved && typeof saved.body === 'string' ? saved.body.slice(0, 4000) : def.body };
+  });
+}
+
+function normalizeSettings(value = {}) {
+  value = value && typeof value === 'object' ? value : {};
+  return { followUpDays: [7, 14, 21, 30, 45, 60, 90].includes(Number(value.followUpDays)) ? Number(value.followUpDays) : 30, followUpGap: [3, 7, 14, 30].includes(Number(value.followUpGap)) ? Number(value.followUpGap) : 7 };
 }
 
 /* =========================================================
@@ -725,6 +849,110 @@ function normalizeCustomer(id, d) {
 let FB = null, BOOTED = false;
 let USER = null, ACCOUNT = null, DATA = null;
 let unsubProfile = null, unsubCustomers = null, appShown = false, creatingProfile = false, pendingProfile = null;
+let DEMO = false, sessionVersion = 0, loadTimer = null;
+let SYNC = { profile: null, customers: null, pending: 0, error: '', lastSaved: '' };
+let failedWrites = [], RECOVERY_COPY = null;
+let EDIT_ID = null, DETAIL_ID = null, ROUND = null, CSV_DRAFT = null;
+
+function persistDemo() {
+  if (DEMO && DATA && ACCOUNT) Store.set('cp_demo_v2', { data: DATA, account: ACCOUNT });
+  renderSyncStatus();
+}
+
+function startDemo() {
+  closeAllSheets();
+  leaveListeners();
+  DEMO = true;
+  USER = { uid: 'demo-local', email: '' };
+  const saved = Store.get('cp_demo_v2', null);
+  DATA = freshData();
+  DATA.customers = saved && Array.isArray(saved.data?.customers) ? saved.data.customers.map(c => normalizeCustomer(c.id, c)) : sampleCustomers();
+  if (saved?.data) {
+    DATA.templates = normalizeTemplates(saved.data.templates);
+    DATA.settings = normalizeSettings(saved.data.settings);
+    DATA.progress = { ...DATA.progress, ...saved.data.progress };
+    DATA.onboardingDone = !!saved.data.onboardingDone;
+    DATA.sentCount = Number(saved.data.sentCount) || 0;
+  }
+  ACCOUNT = { uid: USER.uid, businessName: saved?.account?.businessName || "Ada's Fabrics", ownerName: saved?.account?.ownerName || 'Adaeze', businessType: saved?.account?.businessType || 'Fashion & clothing', phone: saved?.account?.phone || '2348030000000', email: 'Demo business' };
+  dismissSetupBanner();
+  showApp();
+  persistDemo();
+  toast('Sample business. Changes stay in this browser.');
+}
+
+function checkpointLocal() {
+  if (!USER || !DATA || !ACCOUNT || DEMO || RECOVERY_COPY || SYNC.error) return;
+  Store.set('cp_recovery_' + USER.uid, { app: 'CustoPadi', business: clean(ACCOUNT), data: clean(DATA), savedAt: new Date().toISOString(), dirty: SYNC.pending > 0 || !!SYNC.profile?.hasPendingWrites || !!SYNC.customers?.hasPendingWrites });
+}
+
+function renderSyncStatus() {
+  if (!$('syncStatus')) return;
+  let title = 'Checking saves', detail = 'Waiting for Firebase to confirm your records.';
+  if (DEMO) {
+    title = Store.persistent() ? 'Demo: saved in this browser' : 'Demo: kept for this visit only';
+    detail = 'This sample business is not an online account. Create your own account to save with Firebase. No automatic phone notifications or WhatsApp sending.';
+  } else if (SYNC.error) {
+    title = 'Some changes are not saved online'; detail = SYNC.error + ' Keep this page open. Retry, or download a recovery copy before leaving.';
+  } else if (SYNC.pending || SYNC.profile?.hasPendingWrites || SYNC.customers?.hasPendingWrites) {
+    title = navigator.onLine ? 'Saving changes...' : 'Waiting to save online'; detail = 'Firebase has not confirmed all changes yet. Keep this browser open until you see All changes saved.';
+  } else if (!navigator.onLine) {
+    title = 'Offline: showing saved records'; detail = 'You are viewing a local copy. New changes will need an internet connection to be confirmed online.';
+  } else if (SYNC.profile && SYNC.customers && !SYNC.profile.fromCache && !SYNC.customers.fromCache) {
+    title = 'All changes saved'; detail = 'Firebase has confirmed the current records. You can log in to this account from another phone.';
+  } else {
+    title = 'Checking online copy...'; detail = 'These records may be from the browser cache. Waiting for Firebase to confirm them.';
+  }
+  if (!Store.persistent()) detail += ' Browser storage is unavailable, so keep this page open or download a backup.';
+  if (RECOVERY_COPY) detail += ' An earlier visit has a recovery copy waiting. Download it before clearing it.';
+  $('syncStatus').textContent = title;
+  $('syncStatus').classList.toggle('text-rose', !!SYNC.error);
+  $('cloudStatusTitle').textContent = title;
+  $('cloudStatusDetail').textContent = detail;
+  $('retrySaves').classList.toggle('hidden', DEMO || (!SYNC.error && !failedWrites.length));
+  $('recoveryDownload').classList.toggle('hidden', DEMO || (!RECOVERY_COPY && !SYNC.error));
+  $('clearRecovery').classList.toggle('hidden', DEMO || !RECOVERY_COPY || !!failedWrites.length || SYNC.pending > 0);
+}
+
+function trackWrite(task) {
+  if (!USER) return Promise.resolve(false);
+  if (DEMO) { persistDemo(); return Promise.resolve(true); }
+  const owner = USER.uid, version = sessionVersion;
+  SYNC.pending++;
+  checkpointLocal(); renderSyncStatus();
+  return Promise.resolve().then(task).then(() => {
+    if (USER?.uid !== owner || sessionVersion !== version) return true;
+    SYNC.pending = Math.max(0, SYNC.pending - 1);
+    if (!SYNC.pending && !failedWrites.length && !SYNC.readError) { SYNC.error = ''; SYNC.lastSaved = new Date().toISOString(); }
+    checkpointLocal(); renderSyncStatus();
+    return true;
+  }).catch(err => {
+    if (USER?.uid === owner && sessionVersion === version) {
+      SYNC.pending = Math.max(0, SYNC.pending - 1);
+      failedWrites.push(task);
+      SYNC.error = 'A save was rejected (' + plainText(err.code || 'connection error', 70) + ').';
+      RECOVERY_COPY = Store.get('cp_recovery_' + owner, null);
+      renderSyncStatus(); dataError(err);
+    }
+    return false;
+  });
+}
+
+async function retrySaves() {
+  if (!USER || DEMO) return;
+  if (!navigator.onLine) return toast('Connect to the internet first.');
+  if (SYNC.pending) return toast('A save is still waiting. Please give it a moment.');
+  const owner = USER.uid;
+  const tasks = failedWrites.splice(0);
+  SYNC.error = '';
+  $('retrySaves').disabled = true;
+  await FB.F.enableNetwork(FB.db).catch(dataError);
+  const results = await Promise.all(tasks.map(trackWrite));
+  $('retrySaves').disabled = false;
+  if (USER?.uid !== owner) return;
+  if (results.every(Boolean)) { dismissSetupBanner(); enterApp(USER); toast('Checking your online records again.'); }
+  else renderSyncStatus();
+}
 
 const profileRef = uid => FB.F.doc(FB.db, 'businesses', uid || USER.uid);
 const customersCol = uid => FB.F.collection(FB.db, 'businesses', uid || USER.uid, 'customers');
@@ -733,15 +961,17 @@ const customerRef = (id, uid) => FB.F.doc(FB.db, 'businesses', uid || USER.uid, 
 window.boot = function (fb) {
   FB = fb; BOOTED = true;
   FB.A.onAuthStateChanged(FB.auth, user => {
+    if (DEMO) return;
     if (user) { if (USER && USER.uid === user.uid && unsubProfile) return; enterApp(user); }
     else { leaveListeners(); showAuth(); }
   }, err => { console.error(err); showAuth(); });
 };
 window.bootFailed = function (err) {
   console.error(err);
+  if (DEMO) return;
   showBootError('Could not load CustoPadi', 'Check your internet connection and try again.', false);
 };
-setTimeout(() => { if (!BOOTED) showBootError('This is taking too long', 'Your internet may be slow. Check your connection and try again.', false); }, 45000);
+setTimeout(() => { if (!BOOTED && !DEMO) showBootError('This is taking too long', 'Your internet may be slow. Check your connection, or explore a sample business.', false); }, 45000);
 
 function authMessage(err) {
   const code = (err && err.code) || '';
@@ -782,8 +1012,9 @@ function defaultProfile(user) {
 function applyProfile(p) {
   const base = freshData();
   ACCOUNT = { uid: USER.uid, email: USER.email || p.email || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || '', businessType: p.businessType || 'Other', createdAt: p.createdAt || '' };
-  DATA.templates = Array.isArray(p.templates) && p.templates.length ? p.templates.map(t => ({ ...t })) : base.templates;
-  DATA.settings = Object.assign({}, base.settings, p.settings || {});
+  const typingTemplate = document.activeElement?.id?.startsWith('tpl-') || Object.keys(saveTimers).length > 0;
+  if (!typingTemplate) DATA.templates = normalizeTemplates(p.templates);
+  DATA.settings = normalizeSettings(p.settings);
   DATA.progress = Object.assign({}, base.progress, p.progress || {});
   DATA.onboardingDone = !!p.onboardingDone;
   DATA.sentCount = p.sentCount || 0;
@@ -791,52 +1022,108 @@ function applyProfile(p) {
 }
 
 function enterApp(user) {
-  USER = user;
+  closeAllSheets();
   leaveListeners(false);
+  EDIT_ID = DETAIL_ID = ROUND = CSV_DRAFT = null;
+  $('customerSearch').value = ''; FILTER = 'all';
+  DEMO = false; USER = user;
+  const version = sessionVersion;
+  SYNC = { profile: null, customers: null, pending: 0, error: '', lastSaved: '' };
+  failedWrites = [];
+  const recovery = Store.get('cp_recovery_' + user.uid, null);
+  RECOVERY_COPY = recovery?.dirty ? recovery : null;
   appShown = false; creatingProfile = false;
   DATA = freshData(); ACCOUNT = null;
+  showSplash();
   let gotP = false, gotC = false;
-  const ready = () => { if (gotP && gotC) { if (!appShown) showApp(); else rerender(); } };
-  unsubProfile = FB.F.onSnapshot(profileRef(), snap => {
+  const current = () => USER?.uid === user.uid && sessionVersion === version;
+  const ready = () => {
+    if (gotP && gotC) {
+      clearTimeout(loadTimer);
+      if (!appShown) showApp(); else rerender();
+      checkpointLocal();
+    }
+    renderSyncStatus();
+  };
+  loadTimer = setTimeout(() => { if (current() && !appShown) showBootError('Still checking your account', navigator.onLine ? 'The database is taking longer than expected. Check that Firestore and its owner-only rules are enabled, then try again.' : 'No saved account was found on this browser. Connect to the internet and try again.', true); }, 20000);
+  unsubProfile = FB.F.onSnapshot(profileRef(), { includeMetadataChanges: true }, snap => {
+    if (!current()) return;
+    SYNC.profile = snap.metadata;
     if (!snap.exists()) {
-      if (!creatingProfile) {
+      if (!creatingProfile && !snap.metadata.fromCache && !pendingProfile) {
         creatingProfile = true;
-        const p = pendingProfile || defaultProfile(user); pendingProfile = null;
-        FB.F.setDoc(profileRef(), clean(p)).catch(dataError);
+        const p = defaultProfile(user), ref = profileRef(user.uid);
+        trackWrite(() => FB.F.setDoc(ref, clean(p)));
       }
       return;
     }
     applyProfile(snap.data());
     gotP = true; ready();
-  }, dataError);
-  unsubCustomers = FB.F.onSnapshot(customersCol(), snap => {
+  }, err => { if (current()) { clearTimeout(loadTimer); SYNC.readError = true; SYNC.error = 'Could not read your business records.'; renderSyncStatus(); dataError(err); } });
+  unsubCustomers = FB.F.onSnapshot(customersCol(), { includeMetadataChanges: true }, snap => {
+    if (!current()) return;
+    SYNC.customers = snap.metadata;
     DATA.customers = snap.docs.map(d => normalizeCustomer(d.id, d.data()));
     gotC = true; ready();
-  }, dataError);
+  }, err => { if (current()) { clearTimeout(loadTimer); SYNC.readError = true; SYNC.error = 'Could not read your customers.'; renderSyncStatus(); dataError(err); } });
 }
 
 function leaveListeners(resetState = true) {
+  sessionVersion++;
+  clearTimeout(loadTimer);
+  Object.values(saveTimers).forEach(clearTimeout); saveTimers = {};
   if (unsubProfile) unsubProfile(); if (unsubCustomers) unsubCustomers();
   unsubProfile = unsubCustomers = null;
-  if (resetState) { USER = null; ACCOUNT = null; DATA = null; appShown = false; }
+  if (resetState) {
+    USER = null; ACCOUNT = null; DATA = null; appShown = false;
+    EDIT_ID = DETAIL_ID = ROUND = CSV_DRAFT = null;
+    failedWrites = []; RECOVERY_COPY = null;
+    SYNC = { profile: null, customers: null, pending: 0, error: '', lastSaved: '' };
+    ['customerSheetBody', 'pickerList', 'roundBody', 'customerList', 'templateList'].forEach(id => $(id).replaceChildren());
+    $('customerSearch').value = ''; FILTER = 'all';
+  }
 }
 
 /* Writes. They work offline too and sync later. */
-function saveProfile() {
-  if (!FB || !USER || !DATA || !ACCOUNT) return;
-  FB.F.setDoc(profileRef(), clean({
+function saveProfile(patch) {
+  if (!USER || !DATA || !ACCOUNT) return;
+  if (DEMO) { persistDemo(); return Promise.resolve(true); }
+  const ref = profileRef();
+  const value = patch || clean({
     businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone, businessType: ACCOUNT.businessType, email: ACCOUNT.email,
     templates: DATA.templates, settings: DATA.settings, progress: DATA.progress, onboardingDone: DATA.onboardingDone, sentCount: DATA.sentCount, updatedAt: Date.now()
-  }), { merge: true }).catch(dataError);
+  });
+  return trackWrite(() => FB.F.updateDoc(ref, { ...value, updatedAt: Date.now() }));
 }
-function saveCustomer(c) { if (FB && USER) FB.F.setDoc(customerRef(c.id), clean(c)).catch(dataError); }
-function removeCustomer(id) { if (FB && USER) FB.F.deleteDoc(customerRef(id)).catch(dataError); }
-function writeCustomers(uid, list, deleteIds) {
-  const F = FB.F; let batch = F.writeBatch(FB.db), n = 0;
-  const flush = () => { batch.commit().catch(dataError); batch = F.writeBatch(FB.db); n = 0; };
-  (deleteIds || []).forEach(id => { batch.delete(customerRef(id, uid)); if (++n >= 400) flush(); });
-  list.forEach(c => { batch.set(customerRef(c.id, uid), clean(c)); if (++n >= 400) flush(); });
-  if (n) flush();
+function saveCustomer(c, patch) {
+  if (!USER) return;
+  if (DEMO) { persistDemo(); return Promise.resolve(true); }
+  const ref = customerRef(c.id), value = patch ? { ...patch } : clean(c);
+  return trackWrite(() => patch ? FB.F.updateDoc(ref, value) : FB.F.setDoc(ref, value));
+}
+function removeCustomer(id) {
+  if (DEMO) { persistDemo(); return Promise.resolve(true); }
+  const ref = customerRef(id);
+  return trackWrite(() => FB.F.deleteDoc(ref));
+}
+function writeCustomers(owner, list, deleteIds = []) {
+  if (DEMO) {
+    const ids = new Set([...deleteIds, ...list.map(c => c.id)]);
+    DATA.customers = DATA.customers.filter(c => !ids.has(c.id)).concat(list);
+    persistDemo(); rerender(); return Promise.resolve(true);
+  }
+  if (!FB || USER?.uid !== owner) return Promise.resolve(false);
+  const operations = [...deleteIds.map(id => ({ id, remove: true })), ...list.map(c => ({ id: c.id, value: clean(c) }))];
+  const tasks = [];
+  for (let i = 0; i < operations.length; i += 400) {
+    const chunk = operations.slice(i, i + 400);
+    tasks.push(trackWrite(() => {
+      const batch = FB.F.writeBatch(FB.db);
+      chunk.forEach(op => { const ref = customerRef(op.id, owner); if (op.remove) batch.delete(ref); else batch.set(ref, op.value); });
+      return batch.commit();
+    }));
+  }
+  return Promise.all(tasks).then(results => results.every(Boolean));
 }
 
 /* ---------- Register / log in / log out ---------- */
@@ -864,6 +1151,7 @@ function showApp() {
   $('splash').classList.add('hidden');
   $('authView').classList.add('hidden');
   $('appView').classList.remove('hidden');
+  restoreRound();
   renderHeader();
   switchTab('today');
   updateBars();
@@ -884,6 +1172,7 @@ async function register(e) {
   if (!validEmail(email)) return showError('regError', 'Please type a correct email address.');
   if (pw.length < 6) return showError('regError', 'Your password must be at least 6 characters.');
   if (!FB) return showError('regError', 'Still loading. Please wait a moment and try again.');
+  if (!navigator.onLine) return showError('regError', 'Connect to the internet to create your account.');
 
   const base = freshData();
   const profile = { businessName, ownerName, phone, businessType, email, createdAt: todayStr(), templates: base.templates, settings: base.settings, progress: base.progress, onboardingDone: false, sentCount: 0 };
@@ -893,14 +1182,21 @@ async function register(e) {
   try {
     const cred = await FB.A.createUserWithEmailAndPassword(FB.auth, email, pw);
     const user = cred.user;
+    if (USER?.uid !== user.uid) enterApp(user);
     Store.set('cp_last_email', email);
-    FB.F.setDoc(profileRef(user.uid), clean(profile)).catch(dataError);
-    if (withSamples) writeCustomers(user.uid, sampleCustomers());
+    const seeds = withSamples ? sampleCustomers() : [];
+    const owner = user.uid;
+    trackWrite(() => {
+      const batch = FB.F.writeBatch(FB.db);
+      batch.set(profileRef(owner), clean(profile));
+      seeds.forEach(c => batch.set(customerRef(c.id, owner), clean(c)));
+      return batch.commit();
+    });
     pendingProfile = null;
-    showSplash();
+    if (!appShown) showSplash();
     $('registerForm').reset(); $('regSamples').checked = true;
     toast('Welcome to CustoPadi, ' + firstName(ownerName) + '!');
-    setTimeout(() => offerLegacyImport(true), 2500);
+    setTimeout(() => { if (USER?.uid === owner) offerLegacyImport(true); }, 2500);
   } catch (err) {
     pendingProfile = null;
     showError('regError', authMessage(err));
@@ -917,10 +1213,11 @@ async function login(e) {
   if (!FB) return showError('logError', 'Still loading. Please wait a moment and try again.');
   const btn = $('logSubmit'); btn.disabled = true;
   try {
-    await FB.A.signInWithEmailAndPassword(FB.auth, email, pw);
+    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, email, pw);
+    if (USER?.uid !== cred.user.uid) enterApp(cred.user);
     Store.set('cp_last_email', email);
     $('logPw').value = '';
-    showSplash();
+    if (!appShown) showSplash();
     toast('Welcome back!');
   } catch (err) {
     $('logPw').value = '';
@@ -939,12 +1236,19 @@ async function forgotPassword() {
   } catch (err) { showError('logError', authMessage(err)); }
 }
 
-function logout() {
+async function logout() {
+  flushTemplates();
+  if (!DEMO && (SYNC.pending || SYNC.error || failedWrites.length) && !confirm('Some changes are not saved online yet. Cancel to download a recovery copy in business settings, or continue logging out?')) return;
+  if (DEMO) {
+    persistDemo(); DEMO = false; closeAllSheets(); leaveListeners(); showAuth('login');
+    return toast('You left the sample business.');
+  }
   closeAllSheets();
   dismissSetupBanner();
-  if (FB) FB.A.signOut(FB.auth).catch(() => { leaveListeners(); showAuth('login'); });
-  else { leaveListeners(); showAuth('login'); }
-  toast('You are logged out');
+  try {
+    if (FB) await FB.A.signOut(FB.auth);
+    leaveListeners(); showAuth('login'); toast('You are logged out');
+  } catch (err) { toast('Could not log out. Please try again.'); }
 }
 
 async function reauth(pw) {
@@ -954,6 +1258,7 @@ async function reauth(pw) {
 
 async function changePassword(e) {
   e.preventDefault();
+  if (DEMO) return toast('Create your own account to set a password.');
   hideError('pwError');
   const oldPw = $('pwOld').value, newPw = $('pwNew').value;
   if (!oldPw) return showError('pwError', 'Type your current password.');
@@ -970,6 +1275,13 @@ async function changePassword(e) {
 }
 
 async function deleteBusiness() {
+  if (DEMO) {
+    if (!confirm('Clear this sample business from this browser?')) return;
+    Store.remove('cp_demo_v2'); DEMO = false; closeAllSheets(); leaveListeners(); showAuth('register');
+    return toast('Sample business cleared.');
+  }
+  flushTemplates();
+  if (SYNC.pending || SYNC.error) return toast('Wait for saves to finish, or resolve the save error first.');
   if (!navigator.onLine) return toast('You need internet to delete your business.');
   if (!confirm('Delete "' + ACCOUNT.businessName + '" and ALL its customers and sales? This cannot be undone.')) return;
   if (!confirm('Are you very sure? Everything for this business will be gone.')) return;
@@ -979,7 +1291,7 @@ async function deleteBusiness() {
     await reauth(pw);
     const uid = USER.uid, user = USER;
     leaveListeners(false);
-    const snap = await FB.F.getDocs(customersCol(uid));
+    const snap = await FB.F.getDocsFromServer(customersCol(uid));
     const ids = snap.docs.map(d => d.id);
     for (let i = 0; i < ids.length; i += 400) {
       const b = FB.F.writeBatch(FB.db);
@@ -987,6 +1299,7 @@ async function deleteBusiness() {
       await b.commit();
     }
     await FB.F.deleteDoc(profileRef(uid));
+    Store.remove('cp_recovery_' + uid); Store.remove('cp_round_' + uid);
     closeAllSheets();
     await FB.A.deleteUser(user);
     toast('Business deleted');
@@ -998,9 +1311,10 @@ async function deleteBusiness() {
 
 /* ---------- Records saved on this phone by the old version ---------- */
 function legacyPick(phone) {
-  const list = Store.get('keep_accounts', []).map(a => ({ a, d: Store.get('keep_data_' + a.id, null) })).filter(x => x.d && Array.isArray(x.d.customers) && x.d.customers.length);
+  const accounts = Store.get('keep_accounts', []);
+  const list = (Array.isArray(accounts) ? accounts : []).filter(a => a && safeKey(a.id)).map(a => ({ a, d: Store.get('keep_data_' + a.id, null) })).filter(x => x.d && Array.isArray(x.d.customers) && x.d.customers.length);
   if (!list.length) return null;
-  return list.find(x => x.a.phone === phone) || list.sort((x, y) => y.d.customers.length - x.d.customers.length)[0];
+  return list.find(x => normalizePhone(x.a.phone) === normalizePhone(phone)) || null;
 }
 function offerLegacyImport(silent) {
   if (!USER || !DATA) return;
@@ -1011,7 +1325,7 @@ function offerLegacyImport(silent) {
   if (!fresh.length) { if (!silent) toast('Those customers are already in your account.'); return; }
   if (!confirm('We found ' + fresh.length + ' customers saved on this phone by the old version of CustoPadi ("' + pick.a.businessName + '"). Add them to your account?')) return;
   writeCustomers(USER.uid, fresh.map(c => normalizeCustomer(c.id || uid(), c)));
-  DATA.progress.customer = true; saveProfile();
+  DATA.progress.customer = true; saveProfile({ 'progress.customer': true });
   closeSheet('business');
   toast(fresh.length + ' customers added');
 }
@@ -1038,9 +1352,11 @@ function openBusinessSheet() {
   $('bizType').value = ACCOUNT.businessType;
   $('bizPhone').value = ACCOUNT.phone;
   $('bizEmail').textContent = ACCOUNT.email;
+  $('followUpGap').value = String(DATA.settings.followUpGap);
   $('pwOld').value = ''; $('pwNew').value = '';
   hideError('bizError'); hideError('pwError');
   $('legacyBtn').classList.toggle('hidden', !legacyPick(ACCOUNT.phone));
+  renderSyncStatus();
   openSheet('business');
 }
 
@@ -1052,51 +1368,285 @@ function saveBusiness(e) {
   if (owner.length < 2) return showError('bizError', 'Please type your name.');
   if (!validPhone(phone)) return showError('bizError', 'Please type a correct number, like 08031234567.');
   Object.assign(ACCOUNT, { businessName: name, ownerName: owner, businessType: $('bizType').value, phone });
-  saveProfile();
+  saveProfile({ businessName: name, ownerName: owner, businessType: ACCOUNT.businessType, phone });
   renderHeader();
   closeSheet('business');
   rerender();
-  toast('Business details saved');
+  toast('Business details updated. Check the save status.');
+}
+
+function saveFollowUpSettings(e) {
+  e.preventDefault();
+  DATA.settings.followUpGap = Number($('followUpGap').value);
+  saveProfile({ 'settings.followUpGap': DATA.settings.followUpGap });
+  toast('Reminder setting updated.');
 }
 
 /* =========================================================
    BACKUP FILE
    ========================================================= */
-function exportBackup() {
-  if (!ACCOUNT || !DATA) return;
-  const payload = { app: 'CustoPadi', keepBackup: 1, exportedAt: todayStr(), business: { businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone, businessType: ACCOUNT.businessType, email: ACCOUNT.email }, data: DATA };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+function downloadFile(contents, name, type = 'text/plain;charset=utf-8') {
+  const blob = new Blob([contents], { type });
   const a = document.createElement('a');
-  const safeName = ACCOUNT.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'business';
-  a.href = URL.createObjectURL(blob);
-  a.download = 'custopadi-' + safeName + '-backup-' + todayStr() + '.json';
+  const url = URL.createObjectURL(blob);
+  a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
-  toast('Backup saved to your phone');
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
-function importBackup(e) {
+function exportBackup() {
+  if (!ACCOUNT || !DATA) return;
+  flushTemplates();
+  const payload = { app: 'CustoPadi', version: 2, keepBackup: 1, exportedAt: new Date().toISOString(), business: clean(ACCOUNT), data: clean(DATA) };
+  const safeName = ACCOUNT.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'business';
+  downloadFile(JSON.stringify(payload, null, 2), 'custopadi-' + safeName + '-backup-' + todayStr() + '.json', 'application/json');
+  toast('Backup download started. Keep this file private.');
+}
+
+function exportRecovery() {
+  if (!USER || DEMO) return;
+  const copy = RECOVERY_COPY || Store.get('cp_recovery_' + USER.uid, null);
+  if (!copy?.data) return toast('No recovery copy is available. Download a full backup instead.');
+  downloadFile(JSON.stringify({ ...copy, keepBackup: 1, version: 2, recovery: true }, null, 2), 'custopadi-recovery-' + todayStr() + '.json', 'application/json');
+  toast('Recovery download started. Use Restore backup to bring it back.');
+}
+
+function clearRecoveryCopy() {
+  if (!USER || SYNC.pending || failedWrites.length) return toast('Resolve pending saves first.');
+  if (!confirm('Discard the earlier recovery copy on this browser? Download it first if it contains changes you still need. This does not delete the current online records.')) return;
+  RECOVERY_COPY = null; Store.remove('cp_recovery_' + USER.uid); checkpointLocal(); renderSyncStatus();
+  toast('Earlier recovery copy cleared.');
+}
+
+function validateImportedCustomer(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('A customer record is not valid.');
+  if (typeof raw.name !== 'string' || raw.name.trim().length < 2 || raw.name.trim().length > 50) throw new Error('Names need 2 to 50 characters.');
+  if (!validPhone(normalizePhone(raw.phone))) throw new Error('A phone number is not a valid Nigerian number.');
+  if (raw.birthday && (!validDate(raw.birthday) || raw.birthday > todayStr())) throw new Error('A birthday needs a valid YYYY-MM-DD date, not in the future.');
+  if (raw.nextFollowUp && !validDate(raw.nextFollowUp)) throw new Error('A follow-up needs a valid YYYY-MM-DD date.');
+  if (raw.tag && !['New', 'Regular', 'VIP'].includes(raw.tag)) throw new Error('Tags must be New, Regular or VIP.');
+  if (raw.notes != null && (typeof raw.notes !== 'string' || raw.notes.length > 300)) throw new Error('Notes must be text with no more than 300 characters.');
+  if (raw.followUpNote != null && (typeof raw.followUpNote !== 'string' || raw.followUpNote.length > 200)) throw new Error('Follow-up notes must have no more than 200 characters.');
+  if (raw.contactAllowed != null && typeof raw.contactAllowed !== 'boolean') throw new Error('Contact permission must be true or false.');
+  if (raw.purchases != null && !Array.isArray(raw.purchases)) throw new Error('Purchase history must be a list.');
+  if ((raw.purchases || []).length > 5000) throw new Error('A customer has too many purchases for this restore.');
+  const saleIds = new Set();
+  for (const p of raw.purchases || []) {
+    if (!p || typeof p.item !== 'string' || !p.item.trim() || p.item.length > 60 || !validDate(p.date) || p.date > todayStr() || !Number.isFinite(Number(p.amount)) || Number(p.amount) <= 0 || Number(p.amount) > 1e12) throw new Error('A sale has an invalid item, amount or date.');
+    if (p.id && saleIds.has(p.id)) throw new Error('A customer has repeated sale IDs.');
+    if (p.id) saleIds.add(p.id);
+  }
+  return normalizeCustomer(raw.id || uid(), raw);
+}
+
+async function importBackup(e) {
   const file = e.target.files && e.target.files[0];
   e.target.value = '';
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
+  if (!file || !USER) return;
+  if (file.size > 10 * 1024 * 1024) return toast('This backup is over 10 MB. Please choose a smaller file.');
+  if (!DEMO && (SYNC.pending || SYNC.error)) return toast('Resolve current saves before replacing your records.');
+  const owner = USER.uid, version = sessionVersion;
+  try {
+    const parsed = JSON.parse(await file.text());
+    if (USER?.uid !== owner || sessionVersion !== version) return;
+    const incoming = parsed?.data && Array.isArray(parsed.data.customers) ? parsed.data : (Array.isArray(parsed?.customers) ? parsed : null);
+    if (!incoming || incoming.customers.length > 5000) throw new Error('Choose a CustoPadi backup with no more than 5,000 customers.');
+    const list = incoming.customers.map(validateImportedCustomer);
+    if (new Set(list.map(c => c.phone)).size !== list.length || new Set(list.map(c => c.id)).size !== list.length) throw new Error('This file has repeated customer numbers or IDs. Please fix them first.');
+    const keep = new Set(list.map(c => c.id));
+    const remove = DATA.customers.map(c => c.id).filter(id => !keep.has(id));
+    const backupBusiness = plainText(parsed.business?.businessName || 'this backup', 60);
+    if (list.length + remove.length + 1 > 450) {
+      if (!confirm('This backup is too large for a single safe replacement. Merge ' + list.length + ' customers from "' + backupBusiness + '" instead? Missing customers and purchases will be added. Current details stay unchanged, permissions stay restrictive, and nothing is deleted.')) return;
+      const current = clean(DATA.customers);
+      const merged = mergeBackupCustomers(current, list);
+      DATA.customers = merged;
+      if (DEMO) persistDemo(); else mergeBackupOnline(owner, current, list, merged);
+      closeSheet('business'); rerender();
+      toast('Large backup merge queued. Keep this page open and check saves.');
+      return;
+    }
+    if (!confirm('Replace all current customers and sales with ' + list.length + ' customers from "' + backupBusiness + '"? Current customers: ' + DATA.customers.length + '. Download a full backup first if you want to keep them.')) return;
+    const templates = normalizeTemplates(incoming.templates), settings = normalizeSettings(incoming.settings);
+    DATA.customers = list; DATA.templates = templates; DATA.settings = settings;
+    if (DEMO) persistDemo();
+    else {
+      const rows = clean(list);
+      trackWrite(() => {
+        const batch = FB.F.writeBatch(FB.db);
+        remove.forEach(id => batch.delete(customerRef(id, owner)));
+        rows.forEach(c => batch.set(customerRef(c.id, owner), c));
+        batch.update(profileRef(owner), { templates, settings });
+        return batch.commit();
+      });
+    }
+    if (ROUND) { Store.remove('cp_round_' + owner); ROUND = null; }
+    closeSheet('business'); rerender();
+    toast('Restore queued. Check the save status before leaving.');
+  } catch (err) { toast(err instanceof SyntaxError ? 'This file is not readable JSON.' : plainText(err.message || 'Could not read that backup.', 240)); }
+}
+
+function mergeBackupCustomers(current, incoming) {
+  const result = current.map(c => clean(c));
+  const byPhone = new Map();
+  result.forEach(c => { if (!byPhone.has(c.phone)) byPhone.set(c.phone, c); });
+  const usedIds = new Set(current.map(c => c.id));
+  incoming.forEach(row => {
+    const existing = byPhone.get(row.phone);
+    if (existing) {
+      const saleIds = new Set(existing.purchases.map(p => p.id));
+      existing.purchases.push(...row.purchases.filter(p => !saleIds.has(p.id)));
+      if (existing.purchases.length > 5000) throw new Error('A merged customer would have over 5,000 purchases. Current records were not changed.');
+      existing.contactAllowed = existing.contactAllowed !== false && row.contactAllowed !== false;
+    } else {
+      const c = clean(row);
+      if (usedIds.has(c.id)) c.id = uid();
+      usedIds.add(c.id); byPhone.set(c.phone, c); result.push(c);
+    }
+  });
+  return result;
+}
+
+function mergeBackupOnline(owner, current, incoming, merged) {
+  const currentByPhone = new Map();
+  current.forEach(c => { if (!currentByPhone.has(c.phone)) currentByPhone.set(c.phone, c); });
+  const mergedByPhone = new Map(merged.map(c => [c.phone, c]));
+  const operations = incoming.map(c => {
+    const existing = currentByPhone.get(c.phone);
+    if (!existing) return { create: clean(mergedByPhone.get(c.phone)) };
+    const saleIds = new Set(existing.purchases.map(p => p.id));
+    const extra = c.purchases.filter(p => !saleIds.has(p.id));
+    const patch = {};
+    if (extra.length) patch.purchases = FB.F.arrayUnion(...clean(extra));
+    if (c.contactAllowed === false) patch.contactAllowed = false;
+    return Object.keys(patch).length ? { id: existing.id, patch } : null;
+  }).filter(Boolean);
+  const tasks = [];
+  for (let i = 0; i < operations.length; i += 100) {
+    const chunk = operations.slice(i, i + 100);
+    tasks.push(trackWrite(() => {
+      const batch = FB.F.writeBatch(FB.db);
+      chunk.forEach(op => { if (op.create) batch.set(customerRef(op.create.id, owner), op.create); else batch.update(customerRef(op.id, owner), op.patch); });
+      return batch.commit();
+    }));
+  }
+  return Promise.all(tasks).then(results => results.every(Boolean));
+}
+
+/* CSV parsing handles quoted commas, escaped quotes, CRLF and multi-line notes. */
+function parseCSV(source) {
+  const text = String(source).replace(/^\uFEFF/, '');
+  const rows = [];
+  let row = [], field = '', quoted = false, afterQuote = false;
+  for (let i = 0; i <= text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === undefined) throw new Error('A quoted CSV field was not closed.');
+      if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else { quoted = false; afterQuote = true; } }
+      else field += ch;
+      continue;
+    }
+    if (ch === '"') {
+      if (field || afterQuote) throw new Error('A CSV quote is in the wrong place. Save the spreadsheet as a comma-separated CSV.');
+      quoted = true;
+    } else if (ch === ',') { row.push(field); field = ''; afterQuote = false; }
+    else if (ch === '\n' || ch === '\r' || ch === undefined) {
+      row.push(field);
+      if (row.some(cell => cell.trim())) rows.push(row);
+      row = []; field = ''; afterQuote = false;
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+    } else if (afterQuote) {
+      if (ch !== ' ' && ch !== '\t') throw new Error('Unexpected text after a CSV quote.');
+    } else field += ch;
+  }
+  return rows;
+}
+
+function csvCell(value) {
+  let text = String(value ?? '');
+  if (/^\s*[=+@-]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+function csvText(headers, rows) { return '\uFEFF' + [headers, ...rows].map(row => row.map(csvCell).join(',')).join('\r\n') + '\r\n'; }
+
+function openCustomerTools() {
+  if (!USER || !DATA) return;
+  CSV_TICKET++;
+  CSV_DRAFT = null;
+  $('csvFile').value = '';
+  $('csvPreview').innerHTML = '<p class="text-stone text-[16px]">Choose a file to check the names and numbers before adding anyone.</p>';
+  openSheet('tools');
+}
+function exportCustomersCSV() {
+  if (!DATA.customers.length) return toast('Add a customer first, then download your list.');
+  const headers = ['Name', 'Phone', 'Birthday', 'Tag', 'Notes', 'Contact allowed', 'Next follow up', 'Follow up note', 'Total spent NGN', 'Last purchase'];
+  const rows = [...DATA.customers].sort((a, b) => a.name.localeCompare(b.name)).map(c => [c.name, c.phone, c.birthday, c.tag, c.notes, c.contactAllowed !== false ? 'yes' : 'no', c.nextFollowUp, c.followUpNote, totalSpent(c), lastPurchase(c)?.date || '']);
+  downloadFile(csvText(headers, rows), 'custopadi-customers-' + todayStr() + '.csv', 'text/csv;charset=utf-8');
+  toast('Customer list download started. This is not a full backup.');
+}
+function downloadCSVExample() {
+  const headers = ['Name', 'Phone', 'Birthday', 'Tag', 'Notes', 'Contact allowed', 'Next follow up', 'Follow up note'];
+  const rows = [['Adaeze Obi', '08031234567', '1992-06-15', 'Regular', 'Example only: replace with your own customer', 'yes', '', '']];
+  downloadFile(csvText(headers, rows), 'custopadi-example.csv', 'text/csv;charset=utf-8');
+  toast('Example download started. Replace the example before importing.');
+}
+
+function prepareCSV(source, existingPhones) {
+  const table = parseCSV(source);
+  if (table.length < 2) throw new Error('This CSV needs a header row and at least one customer.');
+  if (table.length > 401) throw new Error('Please import no more than 400 customer rows at once.');
+  const aliases = { name: 'name', fullname: 'name', customername: 'name', phone: 'phone', phonenumber: 'phone', whatsapp: 'phone', whatsappnumber: 'phone', birthday: 'birthday', tag: 'tag', notes: 'notes', contactallowed: 'contactAllowed', nextfollowup: 'nextFollowUp', followupnote: 'followUpNote' };
+  const headers = table[0].map(h => { const key = h.toLowerCase().replace(/[^a-z0-9]/g, ''); return Object.prototype.hasOwnProperty.call(aliases, key) ? aliases[key] : ''; });
+  if (!headers.includes('name') || !headers.includes('phone')) throw new Error('The first row must include Name and Phone columns. Download the example if you need help.');
+  const known = headers.filter(Boolean);
+  if (new Set(known).size !== known.length) throw new Error('Two columns have the same name. Keep just one of each.');
+  const seen = new Set(existingPhones), customers = [], issues = [];
+  let duplicates = 0, invalid = 0;
+  table.slice(1).forEach((row, index) => {
     try {
-      const parsed = JSON.parse(reader.result);
-      const incoming = parsed && parsed.data && Array.isArray(parsed.data.customers) ? parsed.data : (Array.isArray(parsed.customers) ? parsed : null);
-      if (!incoming) return toast('This file is not a CustoPadi backup.');
-      if (!confirm('Replace your current customers and sales with the backup file (' + incoming.customers.length + ' customers)?')) return;
-      const list = incoming.customers.map(c => normalizeCustomer(c.id || uid(), c));
-      const keep = new Set(list.map(c => c.id));
-      writeCustomers(USER.uid, list, DATA.customers.map(c => c.id).filter(id => !keep.has(id)));
-      if (Array.isArray(incoming.templates) && incoming.templates.length) DATA.templates = incoming.templates;
-      if (incoming.settings) DATA.settings = Object.assign({}, DATA.settings, incoming.settings);
-      saveProfile();
-      closeSheet('business');
-      toast('Backup restored (' + list.length + ' customers)');
-    } catch (err) { toast('Could not read that backup file.'); }
-  };
-  reader.readAsText(file);
+      if (row.length !== headers.length) throw new Error('The number of columns does not match the header.');
+      const raw = {};
+      headers.forEach((key, col) => { if (key) raw[key] = row[col].trim(); });
+      raw.phone = normalizePhone(raw.phone);
+      raw.tag = { new: 'New', regular: 'Regular', vip: 'VIP', '': 'New' }[String(raw.tag || '').toLowerCase()] || raw.tag;
+      const consent = String(raw.contactAllowed || '').toLowerCase();
+      if (!['', 'yes', 'true', '1', 'no', 'false', '0'].includes(consent)) throw new Error('Contact allowed must be yes or no.');
+      raw.contactAllowed = !['no', 'false', '0'].includes(consent);
+      raw.purchases = []; raw.id = uid(); raw.createdAt = todayStr();
+      const c = validateImportedCustomer(raw);
+      if (seen.has(c.phone)) { duplicates++; return; }
+      seen.add(c.phone); customers.push(c);
+    } catch (err) { invalid++; issues.push('Row ' + (index + 2) + ': ' + err.message); }
+  });
+  return { customers, duplicates, invalid, issues, total: table.length - 1 };
+}
+
+let CSV_TICKET = 0;
+async function previewCSV(e) {
+  const file = e.target.files?.[0]; e.target.value = '';
+  CSV_DRAFT = null;
+  if (!file || !USER) return;
+  const owner = USER.uid, version = sessionVersion, ticket = ++CSV_TICKET;
+  if (file.size > 2 * 1024 * 1024) { $('csvPreview').textContent = 'This file is over 2 MB. Please split it into smaller files.'; return; }
+  $('csvPreview').textContent = 'Checking the file...';
+  try {
+    const text = await file.text();
+    if (USER?.uid !== owner || sessionVersion !== version || ticket !== CSV_TICKET) return;
+    const result = prepareCSV(text, DATA.customers.map(c => c.phone));
+    CSV_DRAFT = { ...result, owner };
+    $('csvPreview').innerHTML = `<h4 class="font-bold text-[18px] mb-2">Check before adding</h4><p class="text-[16px] text-stone mb-3">${result.customers.length} ready to add. ${result.duplicates} repeated numbers skipped. ${result.invalid} invalid rows skipped. No existing records will be changed.</p>${result.customers.length ? `<div class="overflow-x-auto mb-3"><table class="tool-table"><thead><tr><th>Name</th><th>Phone</th></tr></thead><tbody>${result.customers.slice(0, 5).map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.phone)}</td></tr>`).join('')}</tbody></table></div>${result.customers.length > 5 ? '<p class="text-[16px] text-stone mb-3">Showing the first five customers.</p>' : ''}` : '<p class="text-[16px] mb-3">There is nobody new to add. Fix invalid rows or choose a different list.</p>'}${result.issues.length ? `<details class="text-[16px] mb-4"><summary class="min-h-[48px] flex items-center cursor-pointer font-bold text-rose">See invalid rows (${result.issues.length})</summary><ul class="list-disc pl-5 space-y-2">${result.issues.slice(0, 20).map(issue => `<li>${esc(issue)}</li>`).join('')}</ul>${result.issues.length > 20 ? '<p>Only the first 20 errors are shown.</p>' : ''}</details>` : ''}${result.customers.length ? `<label class="contact-choice !border-0 mb-3"><input id="csvPermission" type="checkbox" onchange="document.getElementById('csvImportButton').disabled = !this.checked"><span class="text-[16px]">I have permission to keep these details and contact the customers whose follow-ups are enabled.</span></label><button id="csvImportButton" onclick="commitCSV()" class="btn btn-primary w-full" disabled>Add ${result.customers.length} customers</button>` : ''}`;
+  } catch (err) { $('csvPreview').textContent = 'Could not import: ' + (err.message || 'Please check the CSV format.'); }
+}
+function commitCSV() {
+  if (!CSV_DRAFT || CSV_DRAFT.owner !== USER?.uid || !$('csvPermission')?.checked) return;
+  const seen = new Set(DATA.customers.map(c => c.phone));
+  const list = CSV_DRAFT.customers.filter(c => !seen.has(c.phone));
+  CSV_DRAFT = null;
+  if (!list.length) { $('csvPreview').textContent = 'Those numbers are already saved. Nothing was changed.'; return; }
+  DATA.customers.push(...list); DATA.progress.customer = true;
+  writeCustomers(USER.uid, list); saveProfile({ 'progress.customer': true });
+  closeSheet('tools'); $('customerSearch').value = ''; FILTER = 'all'; switchTab('customers');
+  toast(list.length + ' customers added to this list. Check the save status.');
 }
 
 /* =========================================================
@@ -1173,23 +1723,55 @@ function copyAppLink() {
 /* =========================================================
    SHEETS & NAV
    ========================================================= */
+const SHEET_STACK = [];
+function updateDialogFocus() {
+  const active = SHEET_STACK.at(-1)?.name;
+  document.querySelectorAll('[id^="sheet-"] .sheet-panel').forEach(panel => {
+    const top = panel.parentElement.id === 'sheet-' + active;
+    panel.inert = !!active && !top;
+    if (panel.getAttribute('role') === 'dialog') panel.setAttribute('aria-modal', top ? 'true' : 'false');
+  });
+  $('appView').inert = $('authView').inert = !!active;
+}
 function openSheet(name) {
-  $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  const sheet = $('sheet-' + name);
+  const newlyOpened = sheet.classList.contains('hidden');
+  if (newlyOpened) SHEET_STACK.push({ name, previous: document.activeElement });
+  sheet.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  sheet.style.zIndex = String(50 + SHEET_STACK.findIndex(s => s.name === name) * 2);
+  const panel = sheet.querySelector('.sheet-panel');
+  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-label', { customer: 'Customer details', picker: 'Choose a message', business: 'My business', launch: 'Install and share', round: 'One-by-one follow-ups', tools: 'Customer CSV tools' }[name] || name);
+  updateDialogFocus();
+  if (newlyOpened) requestAnimationFrame(() => { if (SHEET_STACK.at(-1)?.name === name) panel.querySelector('button[aria-label]')?.focus({ preventScroll: true }); });
   if (name === 'launch') renderInstallCheck();
 }
 function closeSheet(name) {
+  const index = SHEET_STACK.findIndex(s => s.name === name);
+  const wasTop = index >= 0 && index === SHEET_STACK.length - 1;
+  const previous = index >= 0 ? SHEET_STACK.splice(index, 1)[0].previous : null;
   $('sheet-' + name).classList.add('hidden');
-  if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
+  if (name === 'tools') { CSV_TICKET++; CSV_DRAFT = null; }
+  updateDialogFocus();
+  if (!SHEET_STACK.length) document.body.style.overflow = '';
+  if (wasTop) {
+    if (previous?.isConnected && !previous.closest('.hidden')) previous.focus({ preventScroll: true });
+    else if (SHEET_STACK.length) $('sheet-' + SHEET_STACK.at(-1).name).querySelector('button[aria-label]')?.focus({ preventScroll: true });
+    else document.querySelector('.nav-btn.active')?.focus({ preventScroll: true });
+  }
 }
-function closeAllSheets() { ['customer', 'picker', 'business', 'launch'].forEach(closeSheet); }
+function closeAllSheets() { ['customer', 'picker', 'business', 'launch', 'round', 'tools'].forEach(closeSheet); }
 
 let CURRENT_TAB = 'today';
 function switchTab(name) {
+  if (!DATA || !ACCOUNT) return;
+  flushTemplates();
   CURRENT_TAB = name;
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   const el = $('screen-' + name);
   el.classList.remove('hidden', 'fade-up'); void el.offsetWidth; el.classList.add('fade-up');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.nav-btn').forEach(b => { if (b.dataset.tab === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   window.scrollTo(0, 0);
   if (name === 'add') hideForms();
   rerender();
@@ -1219,7 +1801,7 @@ function statusOf(days) {
   if (days <= 60) return { key: 'slipping', label: 'Slipping', dot: 'bg-amber', text: 'text-amber' };
   return { key: 'lost', label: 'Lost', dot: 'bg-rose', text: 'text-rose' };
 }
-function getCustomer(id) { return DATA.customers.find(c => c.id === id); }
+function getCustomer(id) { return DATA?.customers.find(c => c.id === id); }
 function daysText(d, c) {
   if (!c.purchases.length) return 'No purchase yet';
   if (d === 0) return 'Bought today';
@@ -1227,10 +1809,79 @@ function daysText(d, c) {
   return d + ' days since last buy';
 }
 
+function needsFollowUp(c, settings = DATA.settings) {
+  settings = settings && typeof settings === 'object' ? settings : DATA.settings;
+  if (c.contactAllowed === false || !validPhone(c.phone)) return false;
+  const today = todayStr();
+  if (c.snoozedUntil && c.snoozedUntil > today) return false;
+  if (c.nextFollowUp) return c.nextFollowUp <= today;
+  if (c.lastCompleted && daysSince(c.lastCompleted) < settings.followUpGap) return false;
+  return daysSince(lastDate(c)) >= settings.followUpDays;
+}
+
+function dueCustomers() {
+  return DATA.customers.filter(c => needsFollowUp(c)).sort((a, b) => {
+    if (!!a.nextFollowUp !== !!b.nextFollowUp) return a.nextFollowUp ? -1 : 1;
+    if (a.nextFollowUp && b.nextFollowUp) return a.nextFollowUp.localeCompare(b.nextFollowUp);
+    return daysSince(lastDate(b)) - daysSince(lastDate(a));
+  });
+}
+
+function patchCustomer(c, patch, entry) {
+  Object.assign(c, patch);
+  const value = { ...patch };
+  if (entry) {
+    c.activity = [...(c.activity || []), { id: entry.id || uid(), type: entry.type, at: Date.now(), note: plainText(entry.note, 200) }].slice(-50);
+    value.activity = c.activity;
+  }
+  saveCustomer(c, clean(value));
+}
+
+function refreshCustomerIfOpen() {
+  if (DETAIL_ID && !$('sheet-customer').classList.contains('hidden') && getCustomer(DETAIL_ID)) openCustomer(DETAIL_ID);
+}
+
+function saveFollowUp(e, id) {
+  e.preventDefault();
+  const c = getCustomer(id), date = $('planDate').value, note = $('planNote').value.trim();
+  if (!c) return;
+  if (!validDate(date) || date < todayStr()) return showError('planError', 'Choose today or a future date.');
+  patchCustomer(c, { nextFollowUp: date, followUpNote: note.slice(0, 200), snoozedUntil: '' }, { type: 'planned', note: fmtDate(date) + (note ? ': ' + note : '') });
+  openCustomer(id); rerender();
+  toast('Follow-up planned. It will appear when you open the app.');
+}
+
+function clearFollowUp(id) {
+  const c = getCustomer(id);
+  if (!c) return;
+  patchCustomer(c, { nextFollowUp: '', followUpNote: '', snoozedUntil: '' });
+  refreshCustomerIfOpen(); rerender();
+  toast('Plan cleared. Usual follow-up reminders still apply.');
+}
+
+function snoozeFollowUp(id) {
+  const c = getCustomer(id);
+  if (!c) return;
+  const tomorrow = dateAfter(1);
+  patchCustomer(c, { nextFollowUp: tomorrow, snoozedUntil: tomorrow }, { type: 'snoozed', note: 'Moved to ' + fmtDate(tomorrow) });
+  refreshCustomerIfOpen(); rerender();
+  toast('Moved to tomorrow.');
+}
+
+function completeFollowUp(id) {
+  const c = getCustomer(id);
+  if (!c) return;
+  const patch = { lastCompleted: todayStr(), snoozedUntil: '' };
+  if (!c.nextFollowUp || c.nextFollowUp <= todayStr()) Object.assign(patch, { nextFollowUp: '', followUpNote: '' });
+  patchCustomer(c, patch, { type: 'done', note: 'Follow-up marked done by you' });
+  refreshCustomerIfOpen(); rerender();
+  toast('Done for now. New reminders wait ' + DATA.settings.followUpGap + ' days.');
+}
+
 /* =========================================================
    TODAY
    ========================================================= */
-function setDays(v) { DATA.settings.followUpDays = parseInt(v, 10) || 30; saveProfile(); renderToday(); }
+function setDays(v) { DATA.settings.followUpDays = parseInt(v, 10) || 30; saveProfile({ 'settings.followUpDays': DATA.settings.followUpDays }); renderToday(); }
 
 function renderOnboarding() {
   const el = $('onboarding');
@@ -1239,7 +1890,7 @@ function renderOnboarding() {
   const steps = [
     { done: p.customer, title: 'Add your customers', desc: 'Put in the people who buy from you.', btn: 'Add a customer', action: "goAdd('customer')" },
     { done: p.sale, title: 'Log a sale', desc: 'Write down what they bought and how much.', btn: 'Log a sale', action: "goAdd('sale')" },
-    { done: p.sent, title: 'Send your first follow-up', desc: 'Tap WhatsApp on a customer. You press Send.', btn: 'Message someone', action: 'firstFollowUp()' }
+    { done: p.sent, title: 'Send your first follow-up', desc: 'Press Send in WhatsApp, then confirm it here.', btn: 'Message someone', action: 'firstFollowUp()' }
   ];
   const doneCount = steps.filter(s => s.done).length;
   el.classList.remove('hidden');
@@ -1248,13 +1899,13 @@ function renderOnboarding() {
       <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-amber/35"></div>
       <div class="relative">
         <div class="flex items-start justify-between gap-3 mb-1">
-          <h2 class="font-extrabold text-[19px] leading-tight">${doneCount === 3 ? "You're all set! 🎉" : 'Get started in 3 steps'}</h2>
+          <h2 class="font-extrabold text-[19px] leading-tight">${doneCount === 3 ? "You're all set!" : 'Get started in 3 steps'}</h2>
           <span class="text-[14px] font-bold bg-white/20 rounded-full px-3 py-1 shrink-0">${doneCount} of 3</span>
         </div>
         <p class="text-white/90 text-[15px] mb-4">${doneCount === 3 ? 'You now know how CustoPadi works. Check this page every day.' : 'CustoPadi helps you remember customers and bring them back.'}</p>
         <div class="space-y-2">
           ${steps.map((s, i) => `
-            <div class="bg-white rounded-2xl p-3 flex items-center gap-3 text-ink">
+            <div class="onboard-step bg-white rounded-2xl p-3 flex items-center gap-3 text-ink">
               <span class="w-9 h-9 rounded-full flex items-center justify-center font-bold shrink-0 ${s.done ? 'bg-leaf text-white' : 'bg-leaf-light text-leaf'}">${s.done ? '<i class="fa-solid fa-check"></i>' : i + 1}</span>
               <div class="flex-1 min-w-0">
                 <p class="font-bold text-[16px] ${s.done ? 'line-through text-stone' : ''}">${s.title}</p>
@@ -1267,39 +1918,41 @@ function renderOnboarding() {
       </div>
     </div>`;
 }
-function hideOnboarding() { DATA.onboardingDone = true; saveProfile(); renderOnboarding(); }
+function hideOnboarding() { DATA.onboardingDone = true; saveProfile({ onboardingDone: true }); renderOnboarding(); }
 function goAdd(kind, preId) {
   switchTab('add');
   if (kind === 'customer') showNewForm(); else showSaleForm(preId);
 }
 function firstFollowUp() {
   if (!DATA.customers.length) return goAdd('customer');
-  const days = DATA.settings.followUpDays;
-  const due = DATA.customers.find(c => daysSince(lastDate(c)) >= days);
-  openPicker((due || DATA.customers[0]).id);
+  const due = dueCustomers()[0] || DATA.customers.find(c => c.contactAllowed !== false);
+  if (!due) return toast('Everyone has follow-ups turned off. Ask permission before changing that.');
+  openPicker(due.id);
 }
 
 function renderToday() {
   renderOnboarding();
   $('daysSelect').value = String(DATA.settings.followUpDays);
   const days = DATA.settings.followUpDays;
-  const due = DATA.customers.map(c => ({ c, d: daysSince(lastDate(c)) })).filter(x => x.d >= days).sort((a, b) => b.d - a.d);
+  const due = dueCustomers().map(c => ({ c, d: daysSince(lastDate(c)) }));
 
   $('todayCount').textContent = due.length;
   $('todayCountLabel').textContent = due.length === 1 ? 'person to follow up today' : 'people to follow up today';
+  $('todayActions').classList.toggle('hidden', due.length === 0);
 
   const list = $('todayList');
   if (!DATA.customers.length) {
     list.innerHTML = emptyState('fa-user-plus', 'No customers yet', 'Add the people who buy from you. CustoPadi will tell you when to check on them.', 'Add your first customer', "goAdd('customer')");
   } else if (!due.length) {
-    list.innerHTML = emptyState('fa-face-smile', 'All caught up!', `Everyone has bought from you in the last ${days} days. Well done!`, 'See all customers', "switchTab('customers')");
+    list.innerHTML = emptyState('fa-face-smile', 'All caught up!', 'No follow-ups are due right now. Future plans and customers who asked not to be contacted stay out of this list.', 'See all customers', "switchTab('customers')");
   } else {
     list.innerHTML = due.map(({ c, d }) => {
       const lp = lastPurchase(c);
       const messaged = c.lastContacted === todayStr();
       const s = statusOf(d);
       return `
-        <div class="card p-4 flex items-center gap-3">
+        <div class="card p-4">
+          <div class="followup-main flex items-center gap-3">
           <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
             <span class="relative shrink-0">
               <span class="w-12 h-12 rounded-full bg-leaf-light text-leaf font-extrabold flex items-center justify-center">${esc(initials(c.name))}</span>
@@ -1308,18 +1961,23 @@ function renderToday() {
             <span class="min-w-0">
               <span class="block font-bold text-[17px] truncate">${esc(c.name)}</span>
               <span class="block text-[15px] ${s.text} font-semibold">${esc(daysText(d, c))}</span>
+              ${c.nextFollowUp ? `<span class="block text-[16px] text-leaf-deep">${c.nextFollowUp < todayStr() ? 'Plan overdue: ' : 'Planned for today'}${c.nextFollowUp < todayStr() ? esc(fmtDate(c.nextFollowUp)) : ''}</span>` : ''}
+              ${messaged ? '<span class="block text-[16px] text-stone">Opened WhatsApp today</span>' : ''}
               ${lp ? `<span class="block text-[14px] text-stone truncate">Last: ${esc(lp.item)}</span>` : ''}
             </span>
           </button>
-          <button onclick="openPicker('${c.id}','miss')" class="wa-btn ${messaged ? 'done' : ''}">
-            ${messaged ? '<i class="fa-solid fa-check"></i> Sent' : '<i class="fa-brands fa-whatsapp text-[18px]"></i> WhatsApp'}
+          <button onclick="openPicker('${c.id}','miss')" class="wa-btn">
+            <i class="fa-brands fa-whatsapp text-[18px]"></i> WhatsApp
           </button>
+          </div>
+          ${c.followUpNote ? `<p class="customer-note text-[16px] text-stone mt-3">${esc(c.followUpNote)}</p>` : ''}
+          <div class="flex gap-2 mt-3 border-t border-black/5 pt-2"><button onclick="snoozeFollowUp('${c.id}')" class="btn btn-ghost flex-1 !px-2">Tomorrow</button><button onclick="completeFollowUp('${c.id}')" class="btn btn-ghost flex-1 !px-2"><i class="fa-solid fa-check"></i> Done for now</button></div>
         </div>`;
     }).join('');
   }
 
   const t = startOfToday();
-  const bdays = DATA.customers.filter(c => c.birthday).map(c => {
+  const bdays = DATA.customers.filter(c => c.birthday && c.contactAllowed !== false).map(c => {
     const b = parseDate(c.birthday);
     let next = new Date(t.getFullYear(), b.getMonth(), b.getDate());
     if (next < t) next = new Date(t.getFullYear() + 1, b.getMonth(), b.getDate());
@@ -1327,19 +1985,20 @@ function renderToday() {
   }).filter(x => x.inDays <= 6).sort((a, b) => a.inDays - b.inDays);
 
   $('birthdayList').innerHTML = bdays.length ? bdays.map(({ c, inDays, next }) => {
-    const when = inDays === 0 ? 'Today! 🎉' : inDays === 1 ? 'Tomorrow' : next.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+    const when = inDays === 0 ? 'Today!' : inDays === 1 ? 'Tomorrow' : next.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
     const messaged = c.lastContacted === todayStr();
     return `
-      <div class="card p-4 flex items-center gap-3">
+      <div class="card p-4 followup-main flex items-center gap-3">
         <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
           <span class="w-12 h-12 rounded-full bg-amber/20 ico-sun flex items-center justify-center shrink-0"><i class="fa-solid fa-cake-candles text-lg"></i></span>
           <span class="min-w-0">
             <span class="block font-bold text-[17px] truncate">${esc(c.name)}</span>
             <span class="block text-[15px] ${inDays === 0 ? 'text-amber font-bold' : 'text-stone'}">${esc(when)}</span>
+            ${messaged ? '<span class="block text-[16px] text-stone">Opened WhatsApp today</span>' : ''}
           </span>
         </button>
-        <button onclick="openPicker('${c.id}','birthday')" class="wa-btn ${messaged ? 'done' : ''}">
-          ${messaged ? '<i class="fa-solid fa-check"></i> Sent' : '<i class="fa-brands fa-whatsapp text-[18px]"></i> WhatsApp'}
+        <button onclick="openPicker('${c.id}','birthday')" class="wa-btn">
+          <i class="fa-brands fa-whatsapp text-[18px]"></i> WhatsApp
         </button>
       </div>`;
   }).join('') : `
@@ -1347,6 +2006,9 @@ function renderToday() {
       <p class="text-[16px] font-semibold mb-1">No birthdays this week</p>
       <p class="text-[15px] text-stone">Add birthdays to your customers and we'll remind you here.</p>
     </div>`;
+
+  const plans = DATA.customers.filter(c => c.contactAllowed !== false && c.nextFollowUp > todayStr() && c.nextFollowUp <= dateAfter(7)).sort((a, b) => a.nextFollowUp.localeCompare(b.nextFollowUp));
+  $('upcomingPlans').innerHTML = plans.length ? plans.map(c => `<button onclick="openCustomer('${c.id}')" class="w-full text-left border-b border-black/10 py-4 min-h-[64px]"><span class="flex justify-between gap-3"><b class="text-[16px]">${esc(c.name)}</b><span class="text-[16px] text-leaf-deep shrink-0">${esc(fmtDayMonth(c.nextFollowUp))}</span></span><span class="block text-stone text-[16px] mt-1">${esc(c.followUpNote || 'A friendly check-in')}</span></button>`).join('') : '<p class="text-stone text-[16px] py-4">Nothing planned for the next seven days. Open a customer and choose a follow-up date.</p>';
 }
 
 function emptyState(icon, title, text, btn, action) {
@@ -1378,7 +2040,8 @@ function renderCustomers() {
   if (q) list = list.filter(({ c }) =>
     c.name.toLowerCase().includes(q) || (c.tag || '').toLowerCase().includes(q) ||
     (qDigits.length >= 3 && (c.phone.includes(qDigits) || c.phone.includes(normalizePhone(qDigits)))));
-  list.sort((a, b) => a.c.name.localeCompare(b.c.name));
+  const sort = $('customerSort').value;
+  list.sort((a, b) => sort === 'spent' ? totalSpent(b.c) - totalSpent(a.c) : sort === 'oldest' ? b.d - a.d : sort === 'newest' ? b.c.createdAt.localeCompare(a.c.createdAt) : a.c.name.localeCompare(b.c.name));
 
   const el = $('customerList');
   if (!DATA.customers.length) {
@@ -1389,7 +2052,7 @@ function renderCustomers() {
     el.innerHTML = emptyState('fa-magnifying-glass', 'No one found', q ? 'No customer matches "' + esc(q) + '". Check the spelling or try another filter.' : 'No customers in this group right now. That can be good news!', 'Show everyone', "clearCustomerSearch()");
     return;
   }
-  const tagStyle = { VIP: 'bg-amber/20 text-amber', Regular: 'bg-leaf-light text-leaf-deep', New: 'bg-sky-100 text-sky-700' };
+  const tagStyle = { VIP: 'bg-amber/20 text-amber', Regular: 'bg-leaf-light text-leaf-deep', New: 'bg-leaf-light text-leaf-deep' };
   el.innerHTML = list.map(({ c, d, s }) => `
     <button onclick="openCustomer('${c.id}')" class="card w-full p-4 flex items-center gap-3 text-left active:scale-[.99] transition">
       <span class="relative shrink-0">
@@ -1402,15 +2065,18 @@ function renderCustomers() {
           <span class="text-[12px] font-bold px-2 py-0.5 rounded-full shrink-0 ${tagStyle[c.tag] || tagStyle.New}">${esc(c.tag || 'New')}</span>
         </span>
         <span class="block text-[15px] text-stone">${esc(daysText(d, c))} · ${fmtMoney(totalSpent(c))}</span>
+        ${c.contactAllowed === false ? '<span class="block text-[16px] text-stone">WhatsApp follow-ups off</span>' : c.nextFollowUp ? `<span class="block text-[16px] text-leaf-deep">Next: ${esc(fmtDate(c.nextFollowUp))}</span>` : ''}
       </span>
       <i class="fa-solid fa-chevron-right text-stone/40"></i>
     </button>`).join('');
 }
 function clearCustomerSearch() { $('customerSearch').value = ''; FILTER = 'all'; renderCustomers(); }
+function showSlippingCustomers() { FILTER = 'slipping'; $('customerSearch').value = ''; switchTab('customers'); }
 
 function openCustomer(id) {
   const c = getCustomer(id);
   if (!c) return;
+  DETAIL_ID = id;
   const d = daysSince(lastDate(c));
   const s = statusOf(d);
   const purchases = [...c.purchases].sort((a, b) => b.date.localeCompare(a.date));
@@ -1422,20 +2088,36 @@ function openCustomer(id) {
         <p class="flex items-center gap-2 text-[15px] mt-1"><span class="w-2.5 h-2.5 rounded-full ${s.dot}"></span><span class="${s.text} font-semibold">${s.label}</span><span class="text-stone">· ${esc(daysText(d, c))}</span></p>
       </div>
     </div>
+    ${messageConfirmationHTML(c)}
     <div class="grid grid-cols-2 gap-2 mb-4">
       <a href="tel:+${esc(c.phone)}" class="bg-cream rounded-2xl p-3 block"><p class="text-[13px] text-stone font-semibold">Phone</p><p class="font-bold text-[15px]">${esc(prettyPhone(c.phone))}</p></a>
       <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Total spent</p><p class="font-bold text-[16px] text-leaf">${fmtMoney(totalSpent(c))}</p></div>
       <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Birthday</p><p class="font-bold text-[15px]">${c.birthday ? esc(fmtDayMonth(c.birthday)) : '<span class="text-stone font-normal">Not added</span>'}</p></div>
       <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Tag</p><p class="font-bold text-[15px]">${esc(c.tag || 'New')}</p></div>
     </div>
+    <button onclick="closeSheet('customer'); switchTab('add'); showNewForm('${c.id}')" class="btn btn-ghost w-full mb-4"><i class="fa-solid fa-pen"></i> Edit customer details</button>
     <div class="bg-amber/15 rounded-2xl p-4 mb-5">
       <p class="text-[13px] font-bold text-amber mb-1">NOTES</p>
       <p class="text-[16px] leading-relaxed">${c.notes ? esc(c.notes) : '<span class="text-stone">No notes yet.</span>'}</p>
     </div>
     <div class="grid grid-cols-2 gap-3 mb-6">
       <button onclick="closeSheet('customer'); goAdd('sale','${c.id}')" class="btn btn-outline"><i class="fa-solid fa-plus"></i> Add purchase</button>
-      <button onclick="openPicker('${c.id}')" class="btn btn-primary"><i class="fa-brands fa-whatsapp text-[18px]"></i> Message</button>
+      <button onclick="openPicker('${c.id}')" class="btn btn-primary" ${c.contactAllowed === false ? 'disabled' : ''}><i class="fa-brands fa-whatsapp text-[18px]"></i> Message</button>
     </div>
+    ${c.contactAllowed === false ? '<p class="text-[16px] text-stone mb-5">WhatsApp follow-ups are turned off for this customer. Only turn them on again with their permission.</p>' : `
+      <section class="border-t border-black/10 pt-5 mb-6">
+        <h4 class="font-bold text-[18px] mb-2">Next follow-up</h4>
+        <p class="text-stone text-[16px] mb-4">${c.nextFollowUp ? 'Planned for ' + esc(fmtDate(c.nextFollowUp)) + '.' : 'Pick a date for a check-in, collection or new arrival.'} Plans show in Today when you open the app.</p>
+        <form onsubmit="saveFollowUp(event,'${c.id}')" class="space-y-3">
+          <label class="label" for="planDate">Date</label><input id="planDate" type="date" class="field" min="${todayStr()}" value="${c.nextFollowUp || ''}" required>
+          <label class="label" for="planNote">What should you remember? (optional)</label><input id="planNote" class="field" maxlength="200" value="${esc(c.followUpNote || '')}" placeholder="e.g. Share the new Ankara colours">
+          <p id="planError" class="hidden text-rose text-[16px]" role="alert"></p>
+          <button type="submit" class="btn btn-primary w-full">Save follow-up plan</button>
+        </form>
+        <div class="grid grid-cols-2 gap-2 mt-3"><button onclick="snoozeFollowUp('${c.id}')" class="btn btn-ghost !px-2">Move to tomorrow</button><button onclick="completeFollowUp('${c.id}')" class="btn btn-ghost !px-2">Done for now</button></div>
+        ${c.nextFollowUp ? `<button onclick="clearFollowUp('${c.id}')" class="btn btn-ghost w-full mt-2">Clear this plan</button>` : ''}
+      </section>`}
+    <section class="border-t border-black/10 pt-5 mb-6"><h4 class="font-bold text-[18px] mb-2">Follow-up history</h4><p class="text-stone text-[16px] mb-3">Opening WhatsApp does not mean a message was sent. Confirm it yourself after pressing Send.</p>${activityHTML(c)}</section>
     <h4 class="font-bold text-[17px] mb-3">Purchase history <span class="text-stone font-normal text-[15px]">(${purchases.length})</span></h4>
     <div class="space-y-2 mb-6">
       ${purchases.length ? purchases.map(p => `
@@ -1447,13 +2129,16 @@ function openCustomer(id) {
     </div>
     <button onclick="deleteCustomer('${c.id}')" class="w-full min-h-[48px] text-rose font-semibold text-[15px]"><i class="fa-regular fa-trash-can mr-1"></i> Delete this customer</button>`;
   openSheet('customer');
+  $('sheet-customer').querySelector('.sheet-panel').scrollTop = 0;
 }
 
 function deletePurchase(cid, pid) {
   const c = getCustomer(cid);
   if (!c || !confirm('Remove this sale?')) return;
+  const purchase = c.purchases.find(p => p.id === pid);
+  if (!purchase) return;
   c.purchases = c.purchases.filter(p => p.id !== pid);
-  saveCustomer(c); openCustomer(cid); rerender();
+  saveCustomer(c, DEMO ? { purchases: c.purchases } : { purchases: FB.F.arrayRemove(clean(purchase)) }); openCustomer(cid); rerender();
   toast('Sale removed');
 }
 function deleteCustomer(cid) {
@@ -1468,19 +2153,28 @@ function deleteCustomer(cid) {
    ADD
    ========================================================= */
 function hideForms() {
+  EDIT_ID = null;
   $('newForm').classList.add('hidden');
   $('saleForm').classList.add('hidden');
   $('addChoices').classList.remove('hidden');
 }
-function showNewForm() {
+function showNewForm(id) {
   $('newForm').reset(); hideError('ncError');
+  const c = id ? getCustomer(id) : null;
+  EDIT_ID = c ? c.id : null;
+  $('customerFormTitle').textContent = c ? 'Edit customer' : 'New customer';
+  $('customerSubmit').textContent = c ? 'Save changes' : 'Save customer';
+  $('ncContactAllowed').checked = c ? c.contactAllowed !== false : true;
+  if (c) { $('ncName').value = c.name; $('ncPhone').value = c.phone; $('ncBirthday').value = c.birthday; $('ncTag').value = c.tag; $('ncNotes').value = c.notes; }
   $('ncBirthday').max = todayStr();
   $('saleForm').classList.add('hidden');
   $('newForm').classList.remove('hidden');
   $('addChoices').classList.add('hidden');
   setTimeout(() => $('ncName').focus(), 50);
 }
+function cancelCustomerForm() { const id = EDIT_ID; hideForms(); if (id && getCustomer(id)) { switchTab('customers'); openCustomer(id); } }
 function showSaleForm(preId) {
+  EDIT_ID = null;
   hideError('saleError');
   $('newForm').classList.add('hidden');
   $('saleForm').classList.remove('hidden');
@@ -1504,12 +2198,23 @@ function addCustomer(e) {
   const phone = normalizePhone($('ncPhone').value);
   if (name.length < 2) return showError('ncError', "Please type the customer's name.");
   if (!validPhone(phone)) return showError('ncError', 'Please type a correct number, like 08031234567.');
-  const dup = DATA.customers.find(c => c.phone === phone);
+  const birthday = $('ncBirthday').value;
+  if (birthday && (!validDate(birthday) || birthday > todayStr())) return showError('ncError', 'Choose a valid birthday that is not in the future.');
+  const dup = DATA.customers.find(c => c.phone === phone && c.id !== EDIT_ID);
   if (dup) return showError('ncError', 'This number is already saved for ' + dup.name + '.');
-  const c = { id: uid(), name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, purchases: [] };
+  const details = { name: name.slice(0, 50), phone, birthday: birthday || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim().slice(0, 300), contactAllowed: $('ncContactAllowed').checked };
+  if (EDIT_ID) {
+    const c = getCustomer(EDIT_ID);
+    if (!c) return showError('ncError', 'This customer was removed on another device.');
+    Object.assign(c, details);
+    saveCustomer(c, clean(details));
+    hideForms(); switchTab('customers'); openCustomer(c.id);
+    return toast('Customer updated. Check the save status.');
+  }
+  const c = normalizeCustomer(uid(), { ...details, createdAt: todayStr(), purchases: [] });
   DATA.customers.push(c);
   DATA.progress.customer = true;
-  saveCustomer(c); saveProfile();
+  saveCustomer(c); saveProfile({ 'progress.customer': true });
   hideForms();
   toast(firstName(name) + ' added. Log what they bought?');
   showSaleForm(c.id);
@@ -1524,12 +2229,13 @@ function addSale(e) {
   const date = $('saleDate').value || todayStr();
   if (!c) return showError('saleError', 'Please choose the customer.');
   if (!item) return showError('saleError', 'Please type what they bought.');
-  if (!amount || amount <= 0) return showError('saleError', 'Please type the amount in naira.');
-  if (date > todayStr()) return showError('saleError', 'The date cannot be in the future.');
-  c.purchases.push({ id: uid(), date, item, amount });
+  if (!Number.isFinite(amount) || amount <= 0 || amount > 1e12) return showError('saleError', 'Please type a valid amount in naira.');
+  if (!validDate(date) || date > todayStr()) return showError('saleError', 'Choose a valid date that is not in the future.');
+  const purchase = { id: uid(), date, item: item.slice(0, 60), amount };
+  c.purchases.push(purchase);
   if (c.purchases.length > 3 && c.tag === 'New') c.tag = 'Regular';
   DATA.progress.sale = true;
-  saveCustomer(c); saveProfile();
+  saveCustomer(c, DEMO ? { purchases: c.purchases, tag: c.tag } : { purchases: FB.F.arrayUnion(clean(purchase)), tag: c.tag }); saveProfile({ 'progress.sale': true });
   hideForms();
   toast(fmtMoney(amount) + ' sale saved for ' + firstName(c.name));
 }
@@ -1540,6 +2246,7 @@ function addSale(e) {
 let saveTimers = {};
 function renderTemplates() {
   $('msgBizName').textContent = ACCOUNT.businessName;
+  $('roundLaunch').textContent = ROUND ? 'Continue one-by-one follow-ups' : 'Message a few customers';
   const ae = document.activeElement;
   if (ae && ae.id && ae.id.startsWith('tpl-')) return; // don't interrupt typing
   $('templateList').innerHTML = DATA.templates.map(t => `
@@ -1549,7 +2256,7 @@ function renderTemplates() {
         <h3 class="font-bold text-[17px] flex-1">${esc(t.title)}</h3>
         <span id="saved-${t.id}" class="text-[14px] text-leaf font-semibold opacity-0 transition-opacity"><i class="fa-solid fa-check"></i> Saved</span>
       </div>
-      <textarea id="tpl-${t.id}" class="field resize-none leading-relaxed" rows="4" oninput="updateTemplate('${t.id}', this.value)">${esc(t.body)}</textarea>
+      <textarea id="tpl-${t.id}" aria-label="${esc(t.title)} message" maxlength="4000" class="field resize-none leading-relaxed" rows="4" oninput="updateTemplate('${t.id}', this.value)">${esc(t.body)}</textarea>
       ${t.body.includes('{name}') ? '' : '<p class="text-[14px] text-amber mt-2"><i class="fa-solid fa-circle-info"></i> Tip: add {name} so it feels personal.</p>'}
       <div class="flex gap-2 mt-3">
         <button onclick="copyTemplate('${t.id}')" class="btn btn-ghost flex-1 !text-[15px]"><i class="fa-regular fa-copy"></i> Copy</button>
@@ -1560,25 +2267,39 @@ function renderTemplates() {
 function updateTemplate(id, val) {
   const t = DATA.templates.find(x => x.id === id);
   if (!t) return;
-  t.body = val;
+  t.body = val.slice(0, 4000);
+  const owner = USER.uid, version = sessionVersion;
   clearTimeout(saveTimers[id]);
   saveTimers[id] = setTimeout(() => {
-    saveProfile();
+    delete saveTimers[id];
+    if (USER?.uid !== owner || sessionVersion !== version) return;
     const s = $('saved-' + id);
-    if (s) { s.style.opacity = 1; setTimeout(() => s.style.opacity = 0, 1200); }
+    if (s) { s.textContent = 'Saving...'; s.style.opacity = 1; }
+    saveProfile({ templates: clean(DATA.templates) }).then(ok => {
+      if (USER?.uid !== owner || sessionVersion !== version) return;
+      const label = $('saved-' + id);
+      if (label) { label.textContent = ok ? (DEMO ? 'Saved here' : 'Saved') : 'Not saved'; label.style.opacity = 1; }
+    });
   }, 600);
+}
+function flushTemplates() {
+  if (!DATA || !USER || !Object.keys(saveTimers).length) return;
+  Object.values(saveTimers).forEach(clearTimeout); saveTimers = {};
+  saveProfile({ templates: clean(DATA.templates) });
 }
 function resetTemplate(id) {
   const def = DEFAULT_TEMPLATES.find(x => x.id === id);
   const t = DATA.templates.find(x => x.id === id);
   if (!def || !t) return;
   if (t.body !== def.body && !confirm('Go back to the original message?')) return;
-  t.body = def.body; saveProfile(); renderTemplates();
+  clearTimeout(saveTimers[id]); delete saveTimers[id];
+  t.body = def.body; saveProfile({ templates: clean(DATA.templates) }); renderTemplates();
   toast('Message reset');
 }
 function copyTemplate(id) {
   const t = DATA.templates.find(x => x.id === id);
-  const text = t.body.replace(/\{business\}/gi, ACCOUNT.businessName);
+  if (!t || !t.body.trim()) return toast('Write a message first.');
+  const text = t.body.replace(/\{business\}/gi, () => ACCOUNT.businessName);
   const done = () => toast('Message copied');
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
   else fallbackCopy(text, done);
@@ -1587,7 +2308,7 @@ function fallbackCopy(text, done) {
   const ta = document.createElement('textarea');
   ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
   document.body.appendChild(ta); ta.select();
-  try { document.execCommand('copy'); done(); } catch (e) { toast('Could not copy. Please copy by hand.'); }
+  try { if (document.execCommand('copy')) done(); else toast('Could not copy. Please select and copy the text.'); } catch (e) { toast('Could not copy. Please copy by hand.'); }
   ta.remove();
 }
 
@@ -1596,17 +2317,20 @@ function fallbackCopy(text, done) {
    ========================================================= */
 let PICK_ID = null;
 function fillTemplate(body, c) {
-  return body.replace(/\{name\}/gi, firstName(c.name)).replace(/\{business\}/gi, ACCOUNT.businessName);
+  return String(body).replace(/\{name\}/gi, () => firstName(c.name)).replace(/\{business\}/gi, () => ACCOUNT.businessName);
 }
 function openPicker(customerId, suggested) {
   const c = getCustomer(customerId);
   if (!c) return;
+  if (c.contactAllowed === false) return toast('This customer has WhatsApp follow-ups turned off.');
+  if (!validPhone(c.phone)) return toast('Edit this customer and add a valid WhatsApp number first.');
+  flushTemplates();
   PICK_ID = customerId;
   $('pickerTitle').textContent = 'Message ' + firstName(c.name);
   let tpls = [...DATA.templates];
   if (suggested) tpls.sort((a, b) => (b.id === suggested) - (a.id === suggested));
-  $('pickerList').innerHTML = tpls.map(t => `
-    <button onclick="sendTemplate('${t.id}')" class="w-full text-left rounded-2xl p-4 border-2 ${t.id === suggested ? 'border-leaf bg-leaf-light/50' : 'border-black/5 bg-white'} active:scale-[.99] transition">
+  $('pickerList').innerHTML = tpls.filter(t => t.body.trim()).map(t => `
+    <a href="${esc('https://wa.me/' + c.phone + '?text=' + encodeURIComponent(fillTemplate(t.body, c)))}" target="_blank" rel="noopener noreferrer" onclick="return sendTemplate('${t.id}')" class="block w-full text-left rounded-2xl p-4 border-2 ${t.id === suggested ? 'border-leaf bg-leaf-light/50' : 'border-black/5 bg-white'} active:scale-[.99] transition">
       <span class="flex items-center gap-2 mb-2">
         <i class="fa-solid ${t.icon || 'fa-comment'} text-leaf"></i>
         <span class="font-bold text-[17px]">${esc(t.title)}</span>
@@ -1614,57 +2338,186 @@ function openPicker(customerId, suggested) {
       </span>
       <span class="block text-[15px] text-stone leading-relaxed mb-3">${esc(fillTemplate(t.body, c))}</span>
       <span class="inline-flex items-center gap-2 text-leaf font-bold text-[15px]"><i class="fa-brands fa-whatsapp text-[18px]"></i> Open in WhatsApp</span>
-    </button>`).join('');
+    </a>`).join('') || emptyState('fa-comment', 'No messages written yet', 'Write at least one message in Messages, then come back here.', 'Write a message', "closeSheet('picker'); closeSheet('customer'); switchTab('messages')");
   openSheet('picker');
 }
 function sendTemplate(tid) {
   const c = getCustomer(PICK_ID);
   const t = DATA.templates.find(x => x.id === tid);
-  if (!c || !t) return;
-  const url = 'https://wa.me/' + c.phone + '?text=' + encodeURIComponent(fillTemplate(t.body, c));
-  c.lastContacted = todayStr();
+  if (!c || !t || c.contactAllowed === false || !validPhone(c.phone) || !t.body.trim()) return false;
+  recordWhatsAppOpen(c, t.title);
+  closeSheet('picker');
+  openCustomer(c.id);
+  toast('Press Send in WhatsApp, then confirm it here.');
+  rerender();
+  return true;
+}
+
+function recordWhatsAppOpen(c, title) {
+  const id = uid();
+  patchCustomer(c, { lastContacted: todayStr() }, { id, type: 'opened', note: title });
+  return id;
+}
+
+function pendingMessage(c) {
+  return [...(c.activity || [])].reverse().find(a => a.type === 'opened' && !c.activity.some(other => other.id === 'sent_' + a.id));
+}
+
+function messageConfirmationHTML(c) {
+  const entry = pendingMessage(c);
+  if (!entry) return '';
+  return `<div class="bg-leaf-light rounded-2xl p-4 mb-4"><p class="text-[16px] mb-3">You opened <b>${esc(entry.note || 'a message')}</b> in WhatsApp. Did you press Send?</p><button onclick="confirmWhatsAppSent('${c.id}','${entry.id}'); refreshCustomerIfOpen(); rerender()" class="btn btn-primary w-full">Yes, I sent it</button></div>`;
+}
+
+function confirmWhatsAppSent(id, openId) {
+  const c = getCustomer(id);
+  if (!c) return false;
+  if (c.activity.some(a => a.id === 'sent_' + openId)) return true;
+  const opened = c.activity.find(a => a.id === openId && a.type === 'opened');
+  if (!opened) { toast('Open the message in WhatsApp first.'); return false; }
+  const patch = { lastConfirmed: todayStr(), lastCompleted: todayStr(), snoozedUntil: '' };
+  if (!c.nextFollowUp || c.nextFollowUp <= todayStr()) Object.assign(patch, { nextFollowUp: '', followUpNote: '' });
+  patchCustomer(c, patch, { id: 'sent_' + openId, type: 'sent', note: opened.note });
   DATA.progress.sent = true;
   DATA.sentCount++;
-  saveCustomer(c); saveProfile();
-  closeSheet('picker');
-  const w = window.open(url, '_blank');
-  if (!w) window.location.href = url;
-  toast('WhatsApp opened. Press Send when ready.');
-  if (!$('sheet-customer').classList.contains('hidden')) openCustomer(c.id);
-  rerender();
+  saveProfile(DEMO ? { 'progress.sent': true } : { 'progress.sent': true, sentCount: FB.F.increment(1) });
+  toast('Marked as sent by you. Delivery is not tracked.');
+  return true;
 }
+
+function activityHTML(c) {
+  const items = [...(c.activity || [])].sort((a, b) => b.at - a.at).slice(0, 10);
+  const labels = { opened: 'Opened WhatsApp', sent: 'You confirmed sending', done: 'Follow-up done', planned: 'Follow-up planned', snoozed: 'Moved to tomorrow' };
+  return items.length ? items.map(a => `<div class="border-b border-black/5 py-3"><p class="font-semibold text-[16px]">${labels[a.type]}</p><p class="text-stone text-[16px]">${esc(a.note)}</p><time class="block text-[14px] text-stone mt-1" datetime="${new Date(a.at).toISOString()}">${esc(new Date(a.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))}</time></div>`).join('') : '<p class="text-stone text-[16px] py-3">No follow-ups recorded yet. Your next check-in will show here.</p>';
+}
+
+/* A message list never auto-sends or auto-opens the next chat. */
+let ROUND_SELECTION = new Set();
+function persistRound() { if (USER && ROUND) Store.set('cp_round_' + USER.uid, clean(ROUND)); }
+function restoreRound() {
+  const r = Store.get('cp_round_' + USER.uid, null);
+  const count = n => Number.isFinite(Number(n)) ? Math.max(0, Math.min(400, Math.floor(Number(n)))) : 0;
+  ROUND = r && r.owner === USER.uid && Array.isArray(r.ids) && r.ids.length <= 400 && new Set(r.ids).size === r.ids.length && r.ids.every(safeKey) && Number.isInteger(r.index) && r.index >= 0 && r.index <= r.ids.length && typeof r.body === 'string' && r.body.trim() && r.body.length <= 4000 ? { ...r, title: plainText(r.title, 60), sent: count(r.sent), skipped: count(r.skipped), openId: safeKey(r.openId) ? r.openId : '' } : null;
+}
+
+function openRoundSetup(group = 'all') {
+  if (ROUND) { renderRound(); openSheet('round'); return; }
+  flushTemplates();
+  if (!DATA.customers.length) { toast('Add a customer first, then make a message list.'); return goAdd('customer'); }
+  if (!DATA.templates.some(t => t.body.trim())) { toast('Write a message in Messages first.'); return switchTab('messages'); }
+  $('roundBody').innerHTML = `
+    <h3 class="font-extrabold text-[22px] mb-2">A few friendly check-ins</h3>
+    <p class="text-stone text-[16px] mb-5">Choose who to contact. Each message opens separately and you press Send in WhatsApp. This is not a bulk-send tool.</p>
+    <label for="roundGroup" class="label">Which customers?</label>
+    <select id="roundGroup" class="field mb-4" onchange="chooseRoundGroup()"><option value="all">All customers</option><option value="today">Due today</option><option value="slipping">Slipping</option><option value="lost">Lost</option><option value="VIP">VIP</option><option value="Regular">Regular</option><option value="New">New</option></select>
+    <label for="roundTemplate" class="label">Start with a message</label>
+    <select id="roundTemplate" class="field mb-3" onchange="chooseRoundTemplate()">${DATA.templates.filter(t => t.body.trim()).map(t => `<option value="${t.id}">${esc(t.title)}</option>`).join('')}</select>
+    <label for="roundMessage" class="label">Make it sound like you</label><textarea id="roundMessage" class="field mb-3" rows="4" maxlength="4000" oninput="renderRoundSelection()"></textarea>
+    <p class="text-[16px] text-stone">{name} becomes each person's first name; {business} becomes your business name.</p>
+    <div class="flex items-center justify-between mt-4 gap-2"><p id="roundCount" class="text-[16px] font-bold" aria-live="polite"></p><button onclick="toggleAllRound()" class="btn btn-ghost !px-3">Select / clear all</button></div>
+    <div id="roundContacts" class="max-h-[280px] overflow-y-auto mb-4"></div>
+    <p class="text-[16px] text-stone mb-4">Customers with follow-ups switched off are excluded. Only message people who have agreed.</p>
+    <div id="roundPreview" class="bg-leaf-light rounded-2xl p-4 text-[16px] mb-4" aria-live="polite"></div>
+    <button id="startRoundButton" onclick="startRound()" class="btn btn-primary w-full">Start my follow-ups</button>`;
+  $('roundGroup').value = ['today', 'all', 'slipping', 'lost', 'VIP', 'Regular', 'New'].includes(group) ? group : 'all';
+  if (group === 'today' && DATA.templates.some(t => t.id === 'miss' && t.body.trim())) $('roundTemplate').value = 'miss';
+  chooseRoundTemplate(); chooseRoundGroup(); openSheet('round');
+}
+
+function roundCandidates() {
+  const group = $('roundGroup')?.value || 'all';
+  return DATA.customers.filter(c => c.contactAllowed !== false && validPhone(c.phone) && (group === 'all' || (group === 'today' ? needsFollowUp(c) : ['slipping', 'lost'].includes(group) ? statusOf(daysSince(lastDate(c))).key === group : c.tag === group))).sort((a, b) => a.name.localeCompare(b.name));
+}
+function chooseRoundTemplate() { const t = DATA.templates.find(t => t.id === $('roundTemplate').value); $('roundMessage').value = t?.body || ''; renderRoundSelection(); }
+function chooseRoundGroup() {
+  ROUND_SELECTION = new Set(roundCandidates().slice(0, 400).map(c => c.id));
+  renderRoundContacts();
+}
+function renderRoundContacts() {
+  const list = roundCandidates();
+  $('roundContacts').innerHTML = list.length ? list.slice(0, 400).map(c => `<label class="contact-choice"><input type="checkbox" value="${c.id}" onchange="selectRoundCustomer(this.value, this.checked)" ${ROUND_SELECTION.has(c.id) ? 'checked' : ''}><span class="min-w-0"><b class="block text-[16px]">${esc(c.name)}</b><span class="text-stone text-[16px]">${esc(prettyPhone(c.phone))}</span></span></label>`).join('') : '<p class="text-stone text-[16px] py-5">No customers in this group can receive follow-ups. Try another group.</p>';
+  if (list.length > 400) $('roundContacts').insertAdjacentHTML('beforeend', '<p class="text-stone text-[16px] py-3">Showing the first 400 people. Use a smaller group for the rest.</p>');
+  renderRoundSelection();
+}
+function selectRoundCustomer(id, checked) { if (checked) ROUND_SELECTION.add(id); else ROUND_SELECTION.delete(id); renderRoundSelection(); }
+function toggleAllRound() { const ids = roundCandidates().slice(0, 400).map(c => c.id); ROUND_SELECTION = ids.every(id => ROUND_SELECTION.has(id)) ? new Set() : new Set(ids); renderRoundContacts(); }
+function renderRoundSelection() {
+  if (!$('roundCount')) return;
+  const selected = roundCandidates().slice(0, 400).filter(c => ROUND_SELECTION.has(c.id));
+  $('roundCount').textContent = selected.length + ' selected';
+  const body = $('roundMessage').value;
+  $('startRoundButton').disabled = !selected.length || !body.trim();
+  $('roundPreview').textContent = selected.length && body.trim() ? 'Preview for ' + firstName(selected[0].name) + ': ' + fillTemplate(body, selected[0]) : 'Select someone and write a message to see a personal preview.';
+}
+function startRound() {
+  const ids = roundCandidates().slice(0, 400).filter(c => ROUND_SELECTION.has(c.id)).map(c => c.id);
+  const body = $('roundMessage').value.trim().slice(0, 4000);
+  if (!ids.length || !body) return toast('Choose at least one person and write a message.');
+  ROUND = { owner: USER.uid, ids, index: 0, body, title: DATA.templates.find(t => t.id === $('roundTemplate').value)?.title || 'Personal check-in', sent: 0, skipped: 0, openId: '' };
+  persistRound(); renderRound();
+}
+function renderRound() {
+  if (!ROUND || ROUND.owner !== USER?.uid) return;
+  while (ROUND.index < ROUND.ids.length) {
+    const c = getCustomer(ROUND.ids[ROUND.index]);
+    if (c && c.contactAllowed !== false && validPhone(c.phone)) break;
+    ROUND.index++; ROUND.skipped++; ROUND.openId = '';
+  }
+  persistRound();
+  if (ROUND.index >= ROUND.ids.length) {
+    $('roundBody').innerHTML = `<h3 class="font-extrabold text-[22px] mb-3">You've finished this list</h3><p class="text-[16px] text-stone mb-5">You confirmed ${ROUND.sent} ${plural(ROUND.sent, 'message', 'messages')} sent and skipped ${ROUND.skipped} ${plural(ROUND.skipped, 'customer', 'customers')}. WhatsApp delivery is not tracked.</p><button onclick="finishRound()" class="btn btn-primary w-full">Back to my business</button>`;
+    return;
+  }
+  const c = getCustomer(ROUND.ids[ROUND.index]);
+  const url = 'https://wa.me/' + c.phone + '?text=' + encodeURIComponent(fillTemplate(ROUND.body, c));
+  $('roundBody').innerHTML = `<h3 class="font-extrabold text-[22px] mb-1">One friendly message at a time</h3><p class="text-[16px] text-stone mb-3">${ROUND.index + 1} of ${ROUND.ids.length} customers</p><div class="round-progress mb-6"><span style="width:${Math.round(ROUND.index / ROUND.ids.length * 100)}%"></span></div><h4 class="font-bold text-[22px]">${esc(c.name)}</h4><p class="text-stone text-[16px] mb-4">${esc(prettyPhone(c.phone))}</p><p class="bg-leaf-light rounded-2xl p-4 text-[16px] leading-relaxed whitespace-pre-wrap mb-4">${esc(fillTemplate(ROUND.body, c))}</p><a href="${esc(url)}" target="_blank" rel="noopener noreferrer" onclick="return openRoundLink()" class="btn btn-primary w-full"><i class="fa-brands fa-whatsapp"></i> ${ROUND.openId ? 'Open WhatsApp again' : 'Open in WhatsApp'}</a><p class="text-stone text-[16px] my-4">${ROUND.openId ? 'Come back after pressing Send. Only confirm below if you sent this message.' : 'You press Send in WhatsApp. CustoPadi never sends for you.'}</p><button onclick="nextRound(true)" class="btn btn-outline w-full mb-2" ${ROUND.openId ? '' : 'disabled'}>I sent it; next customer</button><button onclick="nextRound(false)" class="btn btn-ghost w-full mb-4">Skip this customer</button><button onclick="endRound()" class="btn btn-ghost w-full">End this list</button><p class="text-[16px] text-stone mt-4">You can close this screen and continue later in Messages. Your place stays in this browser when storage is available.</p>`;
+}
+function openRoundLink() {
+  const c = ROUND && getCustomer(ROUND.ids[ROUND.index]);
+  if (!c || c.contactAllowed === false || !validPhone(c.phone)) { renderRound(); return false; }
+  ROUND.openId = recordWhatsAppOpen(c, ROUND.title); persistRound();
+  setTimeout(() => { if (ROUND) renderRound(); }, 0);
+  return true;
+}
+function nextRound(sent) {
+  if (!ROUND) return;
+  const c = getCustomer(ROUND.ids[ROUND.index]);
+  if (sent) {
+    if (!ROUND.openId || !c || !confirmWhatsAppSent(c.id, ROUND.openId)) return;
+    ROUND.sent++;
+  } else ROUND.skipped++;
+  ROUND.index++; ROUND.openId = ''; persistRound(); renderRound(); rerender();
+}
+function endRound() { if (confirm('End this list? Your follow-up history will stay, but unfinished people will not be marked sent.')) finishRound(); }
+function finishRound() { Store.remove('cp_round_' + USER.uid); ROUND = null; closeSheet('round'); rerender(); }
 
 /* =========================================================
    STATS
    ========================================================= */
 function renderStats() {
-  const t = startOfToday();
-  const monthStart = toDateStr(new Date(t.getFullYear(), t.getMonth(), 1));
-  $('statsMonth').textContent = t.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  const { start, end } = salesPeriod();
+  const sales = selectedSales();
+  const total = sales.reduce((sum, row) => sum + row.amount, 0);
+  const buyers = new Set(sales.map(row => row.customer.id));
+  const repeat = DATA.customers.filter(c => [...c.purchases].sort((a, b) => a.date.localeCompare(b.date)).some((p, index) => index > 0 && p.date >= start && p.date <= end)).length;
+  $('statsMonth').textContent = fmtDate(start) + ' to ' + fmtDate(end);
+  $('periodRevenue').textContent = fmtMoney(total);
+  $('periodSalesNote').textContent = sales.length ? sales.length + ' ' + plural(sales.length, 'sale', 'sales') + '. Average sale: ' + fmtMoney(total / sales.length) + '.' : 'No sales in this period. Log a sale to start seeing your progress.';
+  $('statMonth').textContent = buyers.size;
+  $('statBack').textContent = repeat;
+  $('statSlip').textContent = DATA.customers.filter(c => c.purchases.length && statusOf(daysSince(lastDate(c))).key === 'slipping').length;
 
-  let thisMonth = 0, cameBack = 0, slipping = 0;
-  DATA.customers.forEach(c => {
-    const boughtThisMonth = c.purchases.some(p => p.date >= monthStart);
-    const boughtBefore = c.purchases.some(p => p.date < monthStart);
-    if (boughtThisMonth) thisMonth++;
-    if (boughtThisMonth && boughtBefore) cameBack++;
-    if (statusOf(daysSince(lastDate(c))).key === 'slipping') slipping++;
+  const items = new Map();
+  sales.forEach(row => {
+    const key = row.item.trim().toLowerCase();
+    const item = items.get(key) || { name: row.item, count: 0, total: 0 };
+    item.count++; item.total += row.amount; items.set(key, item);
   });
-  $('statMonth').textContent = thisMonth;
-  $('statBack').textContent = cameBack;
-  $('statSlip').textContent = slipping;
+  const top = [...items.values()].sort((a, b) => b.total - a.total).slice(0, 5);
+  $('topItems').innerHTML = top.length ? top.map((item, index) => `<div class="flex items-center gap-3 py-4 border-b border-black/10"><span class="text-stone text-[16px]">${index + 1}.</span><div class="flex-1 min-w-0"><p class="font-semibold text-[16px] break-words">${esc(item.name)}</p><p class="text-stone text-[16px]">${item.count} ${plural(item.count, 'sale', 'sales')}</p></div><p class="font-bold text-[16px]">${fmtMoney(item.total)}</p></div>`).join('') : '<p class="text-stone text-[16px] py-4">No items sold in this period yet.</p>';
 
-  const weeks = [];
-  for (let i = 5; i >= 0; i--) {
-    const end = new Date(t); end.setDate(end.getDate() - i * 7);
-    const start = new Date(end); start.setDate(start.getDate() - 6);
-    weeks.push({ start: toDateStr(start), end: toDateStr(end), label: i === 0 ? 'This week' : start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), total: 0 });
-  }
-  DATA.customers.forEach(c => c.purchases.forEach(p => {
-    const w = weeks.find(w => p.date >= w.start && p.date <= w.end);
-    if (w) w.total += Number(p.amount) || 0;
-  }));
-  const grand = weeks.reduce((s, w) => s + w.total, 0);
+  const weeks = weeklySales(DATA.customers);
+  const grand = weeks.reduce((sum, week) => sum + week.total, 0);
   $('chartTotal').textContent = 'Total: ' + fmtMoney(grand);
 
   if (!grand) {
@@ -1677,23 +2530,52 @@ function renderStats() {
       </div>`;
     return;
   }
-  const max = Math.max(...weeks.map(w => w.total));
+  const max = Math.max(...weeks.map(w => w.total), 1);
   const H = 170;
   $('chartArea').innerHTML = `
-    <div class="flex items-end gap-2 border-b-2 border-black/5" style="height:${H + 26}px">
+    <div role="img" aria-label="Sales in the last six weeks: ${esc(weeks.map(w => fmtDayMonth(w.start) + ', ' + fmtMoney(w.total)).join('; '))}" class="flex items-end gap-2 border-b-2 border-black/5" style="height:${H + 26}px">
       ${weeks.map((w, i) => {
-        const h = w.total ? Math.max(8, Math.round(w.total / max * H)) : 3;
+        const h = w.total ? Math.max(8, Math.round(w.total / max * H)) : 0;
         const last = i === weeks.length - 1;
         return `<div class="flex-1 flex flex-col items-center justify-end h-full">
           <span class="text-[12px] font-bold mb-1 ${w.total ? 'text-ink' : 'text-stone/50'}">${w.total ? fmtShortMoney(w.total) : '₦0'}</span>
-          <div class="w-full max-w-[44px] rounded-t-lg ${last ? 'bg-amber' : 'bg-leaf'}" style="height:${h}px" title="${fmtMoney(w.total)}"></div>
+          <div class="chart-bar w-full max-w-[44px] rounded-t-lg ${last ? 'bg-amber' : 'bg-leaf'}" style="height:${h}px;animation-delay:${i * 45}ms" title="${fmtMoney(w.total)}"></div>
         </div>`;
       }).join('')}
     </div>
     <div class="flex gap-2 mt-2">
       ${weeks.map((w, i) => `<span class="flex-1 text-center text-[12px] leading-tight ${i === weeks.length - 1 ? 'text-amber font-bold' : 'text-stone'}">${esc(w.label)}</span>`).join('')}
     </div>
-    <p class="text-[14px] text-stone mt-3">Each bar is 7 days. The orange bar is the last 7 days.</p>`;
+    <p class="text-[16px] text-stone mt-3">This chart always shows the last six weeks. The orange bar is the last seven days.</p>
+    <details class="mt-3"><summary class="min-h-[48px] flex items-center cursor-pointer font-bold text-leaf text-[16px]">See exact weekly amounts</summary><table class="tool-table"><thead><tr><th>Week starting</th><th>Sales</th></tr></thead><tbody>${weeks.map(w => `<tr><td>${esc(fmtDayMonth(w.start))}</td><td>${fmtMoney(w.total)}</td></tr>`).join('')}</tbody></table></details>
+    <p class="text-[16px] text-stone mt-4">Came back means the customer had an earlier sale on record. It does not prove a WhatsApp message caused a purchase.</p>`;
+}
+
+function salesPeriod() {
+  const value = $('statsPeriod').value;
+  const now = startOfToday();
+  return { start: value === 'month' ? toDateStr(new Date(now.getFullYear(), now.getMonth(), 1)) : daysAgoStr((Number(value) || 30) - 1), end: todayStr() };
+}
+function selectedSales() {
+  const { start, end } = salesPeriod();
+  return DATA.customers.flatMap(customer => customer.purchases.filter(p => p.date >= start && p.date <= end).map(p => ({ ...p, customer }))).sort((a, b) => b.date.localeCompare(a.date));
+}
+function weeklySales(customers) {
+  const weeks = [];
+  for (let i = 5; i >= 0; i--) {
+    const end = daysAgoStr(i * 7), start = daysAgoStr(i * 7 + 6);
+    weeks.push({ start, end, label: i === 0 ? 'This week' : fmtDayMonth(start), total: 0 });
+  }
+  customers.forEach(c => c.purchases.forEach(p => { const w = weeks.find(w => p.date >= w.start && p.date <= w.end); if (w) w.total += p.amount; }));
+  return weeks;
+}
+function exportSalesCSV() {
+  const sales = selectedSales();
+  if (!sales.length) return toast('No sales in this period to download.');
+  const { start, end } = salesPeriod();
+  const rows = sales.map(p => [p.date, p.customer.name, p.customer.phone, p.item, p.amount]);
+  downloadFile(csvText(['Date', 'Customer', 'Phone', 'Item', 'Amount NGN'], rows), 'custopadi-sales-' + start + '-to-' + end + '.csv', 'text/csv;charset=utf-8');
+  toast('Sales download started. Keep this file private.');
 }
 
 /* =========================================================
@@ -1748,11 +2630,64 @@ function renderStats() {
   })(0);
 })();
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllSheets(); });
+function runAppChecks() {
+  const settings = { followUpDays: 30, followUpGap: 7 };
+  const contact = normalizeCustomer('check_customer', { name: 'Ada Obi', phone: '08031234567', createdAt: daysAgoStr(50), purchases: [{ id: 'check_sale', date: daysAgoStr(40), item: 'Fabric', amount: 12500 }] });
+  const tests = [
+    ['Local phone numbers', () => normalizePhone('0803 123 4567') === '2348031234567'],
+    ['International phone numbers', () => normalizePhone('+234 803 123 4567') === '2348031234567' && normalizePhone('002348031234567') === '2348031234567'],
+    ['Invalid dates rejected', () => !validDate('2025-02-29') && !validDate('2026-04-31') && validDate('2024-02-29') && !validDate(null)],
+    ['Money formatting', () => fmtMoney(12500) === '\u20a6' + '12,500'],
+    ['CSV quoted notes', () => { const rows = parseCSV('Name,Notes\r\n"Ada, Obi","Likes ""red""\nand green"\r\n'); return rows[1][0] === 'Ada, Obi' && rows[1][1] === 'Likes "red"\nand green'; }],
+    ['Incomplete CSV rejected', () => { try { parseCSV('Name,Notes\nAda,"unfinished'); return false; } catch (e) { return true; } }],
+    ['Spreadsheet formula protection', () => parseCSV(csvText(['Notes'], [['=1+1']]))[1][0] === "'=1+1"],
+    ['CSV duplicates and permission', () => { const result = prepareCSV('Name,Phone,Contact allowed\r\nAda Obi,08031234567,yes\r\nChi Eze,08051112222,no\r\nBad Number,123,yes\r\nAda Again,2348031234567,yes', ['2348031234567']); return result.duplicates === 2 && result.invalid === 1 && result.customers.length === 1 && result.customers[0].contactAllowed === false; }],
+    ['Large backups preserve existing records', () => { const incoming = { ...clean(contact), name: 'Other name', contactAllowed: false, purchases: [...contact.purchases, { id: 'extra_sale', date: todayStr(), item: 'Shirt', amount: 500 }] }; const merged = mergeBackupCustomers([contact], [incoming]); return merged.length === 1 && merged[0].name === contact.name && merged[0].purchases.length === 2 && merged[0].contactAllowed === false && contact.purchases.length === 1; }],
+    ['Inactive customers are due', () => needsFollowUp(contact, settings)],
+    ['Reminder checks are safe in lists', () => [contact, contact].filter(c => needsFollowUp(c, settings)).length === 2],
+    ['Permission is respected', () => !needsFollowUp({ ...contact, contactAllowed: false }, settings)],
+    ['Future plans are not due', () => !needsFollowUp({ ...contact, nextFollowUp: dateAfter(2) }, settings)],
+    ['Today plans include recent buyers', () => needsFollowUp({ ...contact, purchases: [{ date: todayStr(), amount: 100 }], nextFollowUp: todayStr() }, settings)],
+    ['Completed follow-ups wait', () => !needsFollowUp({ ...contact, lastCompleted: todayStr() }, settings)],
+    ['Snoozed follow-ups wait', () => !needsFollowUp({ ...contact, snoozedUntil: dateAfter(1) }, settings)],
+    ['Weekly sales boundaries', () => { const weeks = weeklySales([{ purchases: [{ date: daysAgoStr(0), amount: 10 }, { date: daysAgoStr(6), amount: 20 }, { date: daysAgoStr(7), amount: 30 }, { date: daysAgoStr(41), amount: 40 }, { date: daysAgoStr(42), amount: 50 }] }]); return weeks[5].total === 30 && weeks[4].total === 30 && weeks[0].total === 40 && weeks.reduce((sum, w) => sum + w.total, 0) === 100; }],
+    ['Personal names are inserted literally', () => fillTemplate('Hi {name}, hello {name}', { name: 'Ada$& Obi' }) === 'Hi Ada$&, hello Ada$&'],
+    ['Five safe message templates', () => normalizeTemplates([{ id: 'thanks', icon: 'unsafe', title: 'Other', body: 'Hello {name}' }]).length === 5 && normalizeTemplates([])[0].icon === 'fa-heart'],
+    ['Required screens are present', () => ['syncStatus', 'csvPreview', 'roundBody', 'upcomingPlans', 'periodRevenue', 'screen-customers'].every(id => $(id))]
+  ];
+  const results = tests.map(([name, test]) => { try { return { check: name, passed: !!test() }; } catch (err) { return { check: name, passed: false }; } });
+  const failed = results.filter(result => !result.passed);
+  $('localChecksResult').textContent = failed.length ? 'Some local checks need attention: ' + failed.map(result => result.check).join(', ') + '. Firebase and installation are not tested here.' : 'All ' + results.length + ' local checks passed on this device. Firebase saves, WhatsApp and phone installation still need a live test.';
+  console.table(results);
+  return results;
+}
+
+document.addEventListener('keydown', e => {
+  const top = SHEET_STACK.at(-1);
+  if (!top) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeSheet(top.name); return; }
+  if (e.key !== 'Tab') return;
+  const panel = $('sheet-' + top.name).querySelector('.sheet-panel');
+  const controls = [...panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex="0"]')].filter(el => el.getClientRects().length && !el.closest('.hidden'));
+  const first = controls[0], last = controls.at(-1);
+  if (!first) { e.preventDefault(); return; }
+  if (e.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { flushTemplates(); checkpointLocal(); }
+  else if (USER && appShown) { renderHeader(); if (CURRENT_TAB === 'today') renderToday(); renderSyncStatus(); }
+});
+window.addEventListener('beforeunload', e => {
+  flushTemplates(); checkpointLocal();
+  if (!DEMO && (SYNC.pending || failedWrites.length)) { e.preventDefault(); e.returnValue = ''; }
+});
+let lastOpenDay = todayStr();
+setInterval(() => { const day = todayStr(); if (day !== lastOpenDay && appShown) { lastOpenDay = day; renderHeader(); rerender(); } }, 60000);
 updateBars();
 </script>
 
-<!-- Firebase: accounts, online storage and analytics -->
+<!-- Firebase: accounts and online storage -->
 <script type="module">
   const firebaseConfig = {
     apiKey: "AIzaSyDaDEC-5VrCaTA4J81EOwtKN0TeBsNLFIc",
@@ -1776,7 +2711,7 @@ updateBars();
       let db;
       try { db = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); }
       catch (e) { db = F.getFirestore(app); }
-      import(base + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if (ok) G.getAnalytics(app); })).catch(() => {});
+      // Do not auto-start Analytics: outgoing WhatsApp URLs contain personal customer details.
       window.boot({ app, auth, db, A, F });
     } catch (err) { window.bootFailed(err); }
   })();

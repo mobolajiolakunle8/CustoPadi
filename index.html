@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <link rel="icon" id="favicon" href="data:," />
-  <link rel="apple-touch-icon" id="appleIcon" href="data:," />
-  <link rel="manifest" id="manifestLink" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <title>CustoPadi — Stay close to your customers</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -473,8 +473,9 @@
     <h3 class="font-extrabold text-[21px] mb-1 pr-10">Install &amp; share</h3>
     <p class="text-stone text-[15px] mb-5">Put CustoPadi on your phone screen, or send it to other business owners.</p>
 
-    <div id="pwaInstallBox" class="hidden bg-leaf-light rounded-2xl p-4 mb-4">
-      <p class="font-bold text-[16px] text-ink mb-2">Add CustoPadi to your home screen</p>
+    <div id="installCheck" class="mb-4"></div>
+
+    <div id="pwaInstallBox" class="hidden mb-4">
       <button type="button" onclick="triggerInstall()" class="btn btn-primary w-full"><i class="fa-solid fa-download"></i> Install CustoPadi now</button>
     </div>
 
@@ -497,12 +498,24 @@
 
     <div class="bg-leaf-light/70 rounded-2xl p-4 space-y-2.5 text-[15px] leading-relaxed">
       <h4 class="font-bold text-[16px] text-leaf-deep flex items-center gap-2"><i class="fa-solid fa-globe"></i> How to put CustoPadi online for free</h4>
-      <p>CustoPadi is one file (<code class="bg-white px-1.5 py-0.5 rounded font-bold">index.html</code>). Put it in a folder together with your logo file <code class="bg-white px-1.5 py-0.5 rounded font-bold">logo.png</code>, then:</p>
+      <p>To install on phones, put these files <b>together in one folder</b>:</p>
+      <ul class="bg-white rounded-xl p-3 text-[14px] font-mono space-y-0.5">
+        <li>index.html</li>
+        <li>manifest.webmanifest</li>
+        <li>sw.js</li>
+        <li>icon.svg</li>
+        <li>icon-192.png <span class="font-sans text-stone">(download below)</span></li>
+        <li>icon-512.png <span class="font-sans text-stone">(download below)</span></li>
+        <li>logo.png <span class="font-sans text-stone">(optional, your real logo)</span></li>
+      </ul>
+      <button type="button" onclick="downloadIcons()" class="btn btn-outline w-full !text-[15px]"><i class="fa-solid fa-image"></i> Download icon-192.png &amp; icon-512.png</button>
+      <p class="font-semibold">Then put the folder online:</p>
       <ol class="list-decimal pl-5 space-y-1.5">
         <li><b>Netlify Drop (easiest):</b> go to <b>app.netlify.com/drop</b> and drag the folder onto the page. You get a live <code class="bg-white px-1 rounded">https://...netlify.app</code> link straight away.</li>
         <li><b>Vercel or Cloudflare Pages:</b> upload the folder at <b>vercel.com</b> or <b>pages.cloudflare.com</b>.</li>
         <li><b>GitHub Pages:</b> upload the files to a GitHub repository and turn on <b>Settings → Pages</b>.</li>
       </ol>
+      <p>Open the new <b>https://</b> link on your phone in <b>Chrome</b> (Android) or <b>Safari</b> (iPhone), then come back to this screen.</p>
     </div>
   </div>
 </div>
@@ -904,8 +917,7 @@ let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  const box = $('pwaInstallBox');
-  if (box) box.classList.remove('hidden');
+  renderInstallCheck();
 });
 
 async function triggerInstall() {
@@ -917,6 +929,74 @@ async function triggerInstall() {
     toast('CustoPadi is installing on your phone!');
   }
   deferredInstallPrompt = null;
+}
+window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; toast('CustoPadi is now on your home screen 🎉'); renderInstallCheck(); });
+
+// Offline helper (needed for install). Only works on a live https website.
+let swOk = false;
+if ('serviceWorker' in navigator && window.isSecureContext && /^https?:/.test(location.protocol)) {
+  navigator.serviceWorker.register('sw.js').then(() => { swOk = true; renderInstallCheck(); }).catch(() => renderInstallCheck());
+}
+
+function installEnv() {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let framed = false; try { framed = window.self !== window.top; } catch (e) { framed = true; }
+  return {
+    installed: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
+    file: location.protocol === 'file:',
+    https: window.isSecureContext && /^https?:/.test(location.protocol),
+    framed, ios,
+    iosSafari: ios && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|Instagram|FBAN|FBAV|WhatsApp/i.test(ua),
+    inApp: /Instagram|FBAN|FBAV|WhatsApp|Line\//i.test(ua)
+  };
+}
+
+function renderInstallCheck() {
+  const box = $('installCheck');
+  if (!box) return;
+  const e = installEnv();
+  let tone = 'amber', icon = 'fa-triangle-exclamation', title, body;
+  if (e.installed) {
+    tone = 'leaf'; icon = 'fa-circle-check';
+    title = 'CustoPadi is installed';
+    body = 'You opened it from your home screen. Nothing more to do.';
+  } else if (e.file) {
+    title = 'You opened the file directly';
+    body = 'Phones can only install apps from a website link that starts with <b>https://</b>. Put CustoPadi online first (see the steps below), then open that link on your phone.';
+  } else if (e.framed) {
+    title = 'You are viewing a preview';
+    body = 'This page is inside another app or preview window, so it cannot be installed. Open the real <b>https://</b> link straight in Chrome (Android) or Safari (iPhone).';
+  } else if (!e.https) {
+    title = 'This link is not secure';
+    body = 'The address must start with <b>https://</b>. Free hosts like Netlify give you https automatically.';
+  } else if (e.inApp) {
+    title = 'Open in your browser';
+    body = 'You opened this link inside WhatsApp or Instagram. Tap the menu <b>⋮</b> and choose <b>Open in Chrome</b> (or <b>Open in Safari</b> on iPhone).';
+  } else if (e.ios && !e.iosSafari) {
+    title = 'Use Safari on iPhone';
+    body = 'iPhones can only add apps to the home screen from <b>Safari</b>. Copy this link and open it in Safari.';
+  } else if (e.ios) {
+    tone = 'leaf'; icon = 'fa-circle-check';
+    title = 'Ready to add to your iPhone';
+    body = 'Tap <b>Share</b> <i class="fa-solid fa-arrow-up-from-bracket text-xs"></i> at the bottom of Safari, scroll down, then tap <b>Add to Home Screen</b>.';
+  } else if (deferredInstallPrompt) {
+    tone = 'leaf'; icon = 'fa-circle-check';
+    title = 'Ready to install';
+    body = 'Tap the green button below.';
+  } else {
+    tone = 'leaf'; icon = 'fa-circle-info';
+    title = 'Almost ready';
+    body = 'In Chrome, tap the 3 dots <b>⋮</b> at the top right, then <b>Install app</b> or <b>Add to Home screen</b>. If you only see "Add to Home screen", that works too. If the icon looks blank, make sure <b>icon-192.png</b> and <b>icon-512.png</b> were uploaded with the app.' + (swOk ? '' : ' <br><span class="text-stone">Still loading the offline helper. Wait a few seconds and reopen this screen.</span>');
+  }
+  const bg = tone === 'leaf' ? 'bg-leaf-light' : 'bg-amber/20';
+  const ic = tone === 'leaf' ? 'text-leaf' : 'text-amber';
+  box.innerHTML = `
+    <div class="${bg} rounded-2xl p-4 flex gap-3">
+      <i class="fa-solid ${icon} ${ic} text-xl mt-0.5 shrink-0"></i>
+      <div class="text-[15px] leading-relaxed"><p class="font-bold text-[16px] mb-1">${title}</p><p>${body}</p></div>
+    </div>`;
+  $('pwaInstallBox').classList.toggle('hidden', !(deferredInstallPrompt && !e.installed));
 }
 
 function shareAppWhatsApp() {
@@ -938,7 +1018,10 @@ function copyAppLink() {
 /* =========================================================
    SHEETS & NAV
    ========================================================= */
-function openSheet(name) { $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function openSheet(name) {
+  $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  if (name === 'launch') renderInstallCheck();
+}
 function closeSheet(name) {
   $('sheet-' + name).classList.add('hidden');
   if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
@@ -1474,7 +1557,6 @@ function renderStats() {
     '<g fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="round">' + G + '</g>' +
     '<g fill="#178A45">' + G + '</g></svg>';
   const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg);
-  $('favicon').href = svgUrl;
 
   function png(size) {
     return new Promise(resolve => {
@@ -1490,26 +1572,19 @@ function renderStats() {
       img.src = svgUrl;
     });
   }
-  Promise.all([png(192), png(512)]).then(([p192, p512]) => {
-    if (!p192 || !p512) return;
-    $('appleIcon').href = p192;
-    $('favicon').href = p192;
-    $('favicon').type = 'image/png';
-    const manifest = {
-      name: 'CustoPadi — Customer Follow-up',
-      short_name: 'CustoPadi',
-      description: 'Know who to message today and follow up with customers on WhatsApp.',
-      start_url: window.location.href.split('#')[0],
-      display: 'standalone',
-      background_color: '#ffffff',
-      theme_color: '#178A45',
-      icons: [
-        { src: p192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-        { src: p512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-      ]
-    };
-    $('manifestLink').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
-  });
+  // Download the PNG icon files needed when publishing the app online.
+  window.downloadIcons = async function () {
+    const files = [[192, 'icon-192.png'], [512, 'icon-512.png']];
+    for (const [size, name] of files) {
+      const data = await png(size);
+      if (!data) return toast('Could not make icons on this browser.');
+      const a = document.createElement('a');
+      a.href = data; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      await new Promise(r => setTimeout(r, 400));
+    }
+    toast('2 icon files downloaded');
+  };
 
   // If the real logo file sits next to index.html, use it everywhere instead of the redrawn version.
   const names = ['logo.png', 'logo.svg', 'logo.webp', 'logo.jpg', 'logo.jpeg'];

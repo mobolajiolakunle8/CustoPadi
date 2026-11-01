@@ -74,8 +74,6 @@
     .ico-sun { color: #F5A623; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { width: 36px; height: 36px; border-radius: 50%; border: 4px solid #E5F3EA; border-top-color: #178A45; animation: spin .8s linear infinite; }
-    .spinner-sm { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.35); border-top-color: #fff; vertical-align: -4px; margin-right: 6px; animation: spin .8s linear infinite; }
-    .spinner-sm.dark { border-color: rgba(23,138,69,0.25); border-top-color: #178A45; }
   </style>
 </head>
 
@@ -138,10 +136,6 @@
 
   <div class="px-4 -mt-8 pb-10 relative">
     <div class="card p-5">
-      <div id="previewNotice" class="hidden bg-amber/20 rounded-2xl p-4 mb-4 text-[15px] leading-snug">
-        <p class="font-bold mb-1"><i class="fa-solid fa-triangle-exclamation text-amber mr-1"></i> You're viewing a preview</p>
-        <p>Creating an account and logging in are usually blocked inside a preview window. If it doesn't work here, open your live <b>https://</b> address directly in Chrome or Safari.</p>
-      </div>
       <div class="seg flex bg-cream rounded-2xl p-1 mb-5">
         <button id="segRegister" onclick="setAuthMode('register')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Create account</button>
         <button id="segLogin" onclick="setAuthMode('login')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Log in</button>
@@ -189,8 +183,10 @@
             </div>
           </div>
         </div>
-        <div id="regError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></div>
+        <p id="regError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
+        <button type="button" onclick="runFirebaseCheck()" class="btn btn-ghost w-full mt-2 !text-[15px]"><i class="fa-solid fa-stethoscope text-leaf"></i> Check Firebase connection</button>
+        <div id="regCheck" class="hidden mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed"></div>
         <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Only you can see your customers. Keep your password safe.</p>
       </form>
 
@@ -212,11 +208,13 @@
           </div>
         </div>
         <div class="text-right mt-1">
-          <button type="button" onclick="forgotPassword(this)" class="text-leaf font-bold text-[15px] min-h-[48px] px-1">Forgot password?</button>
+          <button type="button" onclick="forgotPassword()" class="text-leaf font-bold text-[15px] min-h-[48px] px-1">Forgot password?</button>
         </div>
-        <div id="logError" class="hidden mt-2 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></div>
+        <p id="logError" class="hidden mt-2 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <p id="logInfo" class="hidden mt-2 text-leaf-deep text-[15px] font-medium bg-leaf-light rounded-xl px-4 py-3"></p>
         <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-4">Log in <i class="fa-solid fa-arrow-right"></i></button>
+        <button type="button" onclick="runFirebaseCheck()" class="btn btn-ghost w-full mt-2 !text-[15px]"><i class="fa-solid fa-stethoscope text-leaf"></i> Check Firebase connection</button>
+        <div id="logCheck" class="hidden mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed"></div>
         <p class="text-[14px] text-stone text-center mt-4">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
       </form>
     </div>
@@ -226,6 +224,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cloud text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Saved online, any phone</p></div>
     </div>
+
   </div>
 </div>
 
@@ -283,7 +282,7 @@
 
     <!-- CUSTOMERS -->
     <section id="screen-customers" class="screen hidden">
-      <h2 class="font-extrabold text-[22px] mb-1">Your customers</h2>
+      <h2 class="font-extrabold text-[22px] mb-3">Your customers</h2>
       <p class="text-[15px] text-stone mb-3">Keep their details and your next check-in in one place.</p>
       <div class="relative mb-3">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone/60"></i>
@@ -498,7 +497,7 @@
     </form>
 
     <div class="border-t border-black/5 pt-5 mb-6 space-y-3">
-      <h4 class="font-bold text-[17px]">Backup &amp; sharing</h4>
+      <h4 class="font-bold text-[17px]">Backup &amp; export</h4>
       <p class="text-[14px] text-stone leading-snug">Your records are already saved online. You can also keep a copy file on your phone.</p>
       <div class="grid grid-cols-2 gap-3">
         <button type="button" onclick="exportBackup()" class="btn btn-ghost !text-[15px]"><i class="fa-solid fa-download text-leaf"></i> Save backup</button>
@@ -509,8 +508,6 @@
       </div>
       <button type="button" onclick="exportCustomersCsv()" class="btn btn-outline w-full !text-[15px]"><i class="fa-solid fa-file-csv"></i> Download customers as CSV</button>
       <button id="legacyBtn" type="button" onclick="offerLegacyImport()" class="hidden btn btn-outline w-full !text-[15px]"><i class="fa-solid fa-people-arrows"></i> Bring customers from the old version on this phone</button>
-      <button id="sampleBtn" type="button" onclick="removeSampleCustomers()" class="hidden btn btn-danger w-full !text-[15px]"><i class="fa-solid fa-broom"></i> Remove sample customers</button>
-      <button type="button" onclick="shareAppWhatsApp()" class="btn btn-ghost w-full !text-[15px]"><i class="fa-brands fa-whatsapp text-leaf"></i> Share CustoPadi on WhatsApp</button>
     </div>
 
     <div class="border-t border-black/5 pt-5 space-y-3">
@@ -525,21 +522,21 @@
   </div>
 </div>
 
-<!-- Add-to-phone popup -->
-<div id="installPopup" class="fixed inset-0 z-[80] hidden">
-  <div class="absolute inset-0 bg-ink/40" onclick="snoozeInstall()"></div>
-  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] p-6 pb-8 text-center">
-    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-5"></div>
-    <svg viewBox="0 0 130 130" class="w-16 h-16 mx-auto mb-3" aria-hidden="true"><use href="#cp-mark"/></svg>
-    <h3 class="font-extrabold text-[21px] mb-1">Add CustoPadi to your home screen</h3>
-    <p class="text-stone text-[15px] mb-5">Open your customers in one tap, straight from your home screen.</p>
-    <button type="button" onclick="triggerInstall()" class="btn btn-primary w-full mb-2"><i class="fa-solid fa-download"></i> Add to home screen</button>
-    <button type="button" onclick="snoozeInstall()" class="btn btn-ghost w-full">Not now</button>
+<!-- Install popup: after login and again during long visits -->
+<div id="installPrompt" class="fixed inset-x-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[45] hidden px-4">
+  <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-black/10 p-3 flex items-center gap-3">
+    <div class="w-11 h-11 rounded-xl bg-leaf text-white font-extrabold flex items-center justify-center shrink-0">C</div>
+    <div class="flex-1 min-w-0">
+      <p class="font-bold text-[16px] leading-tight">Keep CustoPadi handy</p>
+      <p id="installPromptText" class="text-[14px] text-stone leading-snug">Add it to your home screen and open it like an app.</p>
+    </div>
+    <button id="installPromptBtn" type="button" onclick="triggerInstall()" class="btn btn-primary !min-h-[48px] !px-3 !text-[14px] shrink-0">Install</button>
+    <button type="button" onclick="dismissInstallPrompt()" aria-label="Not now" class="w-10 h-10 flex items-center justify-center text-stone shrink-0"><i class="fa-solid fa-xmark"></i></button>
   </div>
 </div>
 
 <!-- Toast -->
-<div id="toast" class="fixed left-4 right-4 bottom-28 z-[90] max-w-md mx-auto hidden">
+<div id="toast" class="fixed left-4 right-4 bottom-28 z-[60] max-w-md mx-auto hidden">
   <div class="bg-ink text-white px-5 py-4 rounded-2xl shadow-xl text-[16px] font-medium flex items-center gap-3">
     <i class="fa-solid fa-circle-check text-[#F5A623]"></i><span id="toastText">Done</span>
   </div>
@@ -610,6 +607,12 @@ function togglePw(id, btn) {
   btn.innerHTML = show ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
 }
+function showCheck(id, ok, msg) {
+  const el = $(id);
+  el.className = (ok ? 'mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed bg-leaf-light text-leaf-deep' : 'mt-3 rounded-xl px-4 py-3 text-[14px] leading-relaxed bg-rose/10 text-rose');
+  el.innerHTML = msg;
+  el.classList.remove('hidden');
+}
 
 let toastTimer;
 function toast(msg) {
@@ -628,7 +631,15 @@ function updateBars() {
 window.addEventListener('online', () => { updateBars(); toast('Back online. Syncing your changes…'); });
 window.addEventListener('offline', updateBars);
 function setupProblem(msg) {
-  if (!appShown) { showBootError('Setup not finished', msg, true); return; }
+  // The account already exists at this point, so let the business into the app
+  // with a clear banner instead of trapping them on a loading screen.
+  if (!appShown && USER) {
+    if (!DATA) DATA = freshData();
+    if (!ACCOUNT) applyProfile(pendingProfile || defaultProfile(USER));
+    showApp();
+  } else if (!appShown) {
+    showBootError('Setup not finished', msg, true); return;
+  }
   $('setupBannerText').textContent = msg;
   $('setupBanner').classList.remove('hidden');
   updateBars();
@@ -659,30 +670,6 @@ const DEFAULT_TEMPLATES = [
   { id: 'new', title: 'New arrival', icon: 'fa-box-open', body: "Hi {name}! New goods just arrived at {business} and I thought of you. Can I send you some pictures before they finish?" },
   { id: 'review', title: 'Ask for a review', icon: 'fa-star', body: "Hi {name}, thank you for buying from {business}. Please, how did you find it? A few words from you will really help my small business grow. Thank you!" }
 ];
-
-/* Sample customers that earlier versions added automatically.
-   Only these exact name + phone pairs are treated as samples, so a business's own customers are never removed. */
-const SAMPLE_SIGNATURES = [
-  ['Chiamaka Okafor', '2348031234567'], ['Emeka Nwosu', '2348059876543'],
-  ['Aisha Bello', '2347062345678'], ['Tunde Bakare', '2348123456789'],
-  ['Ngozi Eze', '2349034567812'], ['Ibrahim Musa', '2348167890123'],
-  ['Funmilayo Adeyemi', '2347038765432'], ['Blessing Udoh', '2349051239876']
-];
-function findSampleCustomers() {
-  if (!DATA) return [];
-  return DATA.customers.filter(c => SAMPLE_SIGNATURES.some(([n, p]) => c.name === n && c.phone === p));
-}
-function removeSampleCustomers() {
-  const list = findSampleCustomers();
-  if (!list.length) return toast('No sample customers found.');
-  if (!confirm('Remove ' + list.length + ' sample customer' + (list.length === 1 ? '' : 's') + ' and their sales? Your own customers are not affected.')) return;
-  const ids = list.map(c => c.id);
-  DATA.customers = DATA.customers.filter(c => !ids.includes(c.id));
-  writeCustomers(USER.uid, [], ids);
-  closeSheet('business');
-  rerender();
-  toast('Sample customers removed');
-}
 
 function freshData() {
   return {
@@ -716,7 +703,7 @@ function normalizeCustomer(id, d) {
    FIREBASE: ACCOUNTS AND ONLINE STORAGE
    Data lives at  businesses/{uid}  and  businesses/{uid}/customers/{id}
    ========================================================= */
-let FB = null, BOOTED = false, REGISTERING = false;
+let FB = null, BOOTED = false;
 let USER = null, ACCOUNT = null, DATA = null;
 let unsubProfile = null, unsubCustomers = null, appShown = false, creatingProfile = false, pendingProfile = null;
 
@@ -727,21 +714,24 @@ const customerRef = (id, uid) => FB.F.doc(FB.db, 'businesses', uid || USER.uid, 
 window.boot = function (fb) {
   FB = fb; BOOTED = true;
   FB.A.onAuthStateChanged(FB.auth, user => {
-    if (user) {
-      if (REGISTERING) return; // register() opens the app itself once the profile is saved
-      if (USER && USER.uid === user.uid && unsubProfile) return;
-      enterApp(user);
-    } else { leaveListeners(); showAuth(); }
+    if (user) { if (USER && USER.uid === user.uid && unsubProfile) return; enterApp(user); }
+    else { leaveListeners(); showAuth(); }
   }, err => { console.error(err); showAuth(); });
 };
 window.bootFailed = function (err) {
   console.error(err);
+  const msg = ((err && err.message) || '').toLowerCase();
+  if (/failed to fetch|cors|blocked|firebase-auth|auth\//i.test(msg)) {
+    showBootError('Firebase setup problem', 'This website could not load Firebase correctly. App owner: check that the live website domain is allowed in Firebase Authentication → Settings → Authorized domains, and that your API key allows this domain.', false);
+    return;
+  }
   showBootError('Could not load CustoPadi', 'Check your internet connection and try again.', false);
 };
 setTimeout(() => { if (!BOOTED) showBootError('This is taking too long', 'Your internet may be slow. Check your connection and try again.', false); }, 45000);
 
 function authMessage(err) {
   const code = (err && err.code) || '';
+  const msg = ((err && err.message) || '').toLowerCase();
   const map = {
     'auth/email-already-in-use': 'This email already has an account. Please log in instead.',
     'auth/invalid-email': 'Please type a correct email address.',
@@ -752,30 +742,42 @@ function authMessage(err) {
     'auth/invalid-credential': 'Wrong email or password. Please try again.',
     'auth/invalid-login-credentials': 'Wrong email or password. Please try again.',
     'auth/too-many-requests': 'Too many tries. Please wait a few minutes and try again.',
-    'auth/network-request-failed': 'Could not reach the server. Check your connection and try again.',
     'auth/user-disabled': 'This account has been turned off.',
     'auth/requires-recent-login': 'For safety, please log out, log in again, then try this.',
-    'auth/operation-not-allowed': 'Email sign-up is not turned on yet. App owner: in Firebase go to Authentication → Sign-in method and turn on Email/Password.',
+    'auth/operation-not-allowed': 'Email login is not turned on yet. App owner: in Firebase go to Authentication → Sign-in method and turn on Email/Password.',
     'auth/configuration-not-found': 'Firebase login is not set up yet. App owner: in Firebase open Authentication and press Get started.',
-    'auth/unauthorized-domain': 'Accounts cannot be created from this website address yet. App owner: in Firebase go to Authentication → Settings → Authorized domains and add this website address (for example your-site.netlify.app).',
-    'auth/app-not-authorized': 'This website is not allowed to use CustoPadi accounts yet. App owner: check the Firebase web app settings and Authorized domains.',
-    'auth/api-key-not-valid': 'The app key is not accepted by Firebase. App owner: check the apiKey in index.html and any key restrictions in Google Cloud.',
-    'auth/internal-error': 'Firebase had a problem. Please wait a minute and try again.',
-    'permission-denied': 'Your account cannot be saved yet. App owner: in Firebase go to Firestore Database → Rules, paste the CustoPadi rules and press Publish.',
-    'not-found': 'The database has not been created yet. App owner: in Firebase go to Firestore Database and press Create database.',
-    'unavailable': 'Could not reach the server. Check your internet and try again.',
-    'cp/timeout': 'Could not reach the server. Check your internet and try again.'
+    'auth/unauthorized-domain': 'This website address is not yet allowed to log in. App owner: in Firebase go to Authentication → Settings → Authorized domains, then add your live website domain exactly as it appears in the address bar (for example custopadi.netlify.app).',
+    'auth/app-not-authorized': 'This website address is not yet allowed to log in. App owner: add the live website domain under Firebase Authentication → Settings → Authorized domains.',
+    'auth/api-key-not-valid': 'The Firebase API key is being rejected. App owner: in Google Cloud → APIs & Services → Credentials, open this API key and allow your live website domain.',
+    'auth/invalid-api-key': 'The Firebase API key is not valid for this website. App owner: check the API key restrictions in Google Cloud → APIs & Services → Credentials.',
+    'auth/internal-error': 'Firebase could not finish the request. Please try again. If it keeps happening, check that this website domain is listed in Firebase Authentication → Settings → Authorized domains.'
   };
-  if (map[code]) return map[code];
-  return 'Something went wrong. Please try again.' + (code ? ' (' + code + ')' : '');
+  let message = map[code];
+
+  // Firebase often reports domain/CORS/setup issues as "network-request-failed" in the browser.
+  if (code === 'auth/network-request-failed') {
+    if (!navigator.onLine) return 'No internet. Check your connection and try again.';
+    if (/identitytoolkit|verifypassword|signupsignin|createauthuri|cors|blocked by cors|access-control-allow-origin|failed to fetch|load failed|fetch/i.test(msg)) {
+      return 'This website cannot talk to Firebase Authentication yet. App owner: in Firebase go to Authentication → Settings → Authorized domains and add this live website domain exactly as it appears in the address bar. If the domain is already there, check that your API key is not blocking this website in Google Cloud → APIs & Services → Credentials.';
+    }
+    return 'The sign-up request did not reach Firebase. If your internet is fine, the live website domain is probably not yet allowed in Firebase Authentication → Settings → Authorized domains.';
+  }
+
+  if (!message && (/requests-from-referer|referer.*blocked|api key.*referer|http referrer/i.test(code + ' ' + msg))) {
+    message = 'This website address is blocked for login. App owner: add the live website domain under Firebase Authentication → Settings → Authorized domains, and if you restricted the API key, allow this same domain in Google Cloud → APIs & Services → Credentials.';
+  }
+  if (!message && (/authdomain|custom domain|domain not authorized|unauthorized domain/i.test(msg))) {
+    message = 'This website address is not yet allowed to log in. App owner: add the live website domain under Firebase Authentication → Settings → Authorized domains.';
+  }
+  return message || ('Something went wrong. Please try again.' + (code ? ' (' + code + ')' : ''));
 }
 
 function dataError(err) {
   console.error(err);
   const code = (err && err.code) || '';
   const msg = (err && err.message) || '';
-  if (code === 'permission-denied') setupProblem(authMessage({ code }));
-  else if (code === 'not-found' || /does not exist/i.test(msg)) setupProblem(authMessage({ code: 'not-found' }));
+  if (code === 'permission-denied') setupProblem('Nothing can be saved yet because database access is blocked. App owner: in Firebase go to Firestore Database → Rules, paste the CustoPadi rules and press Publish.');
+  else if (code === 'not-found' || /does not exist/i.test(msg)) setupProblem('The database has not been created yet. App owner: in Firebase go to Firestore Database and press Create database.');
   else if (code === 'unavailable' || code === 'failed-precondition' || code === 'cancelled') { /* offline or tab issue, nothing to do */ }
   else toast('Problem saving' + (code ? ' (' + code + ')' : ''));
 }
@@ -802,10 +804,20 @@ function enterApp(user) {
   appShown = false; creatingProfile = false;
   DATA = freshData(); ACCOUNT = null;
   let gotP = false, gotC = false;
-  const ready = () => { if (gotP && gotC) { if (!appShown) showApp(); else rerender(); } };
+  const ready = () => {
+    if (gotP && gotC) {
+      clearTimeout(fallbackTimer);
+      if (!appShown) showApp(); else rerender();
+    }
+  };
+  // Never leave a signed-in business stuck if the database is misconfigured or very slow.
+  const fallbackTimer = setTimeout(() => {
+    if (!appShown && USER) {
+      setupProblem('We could not load your saved records yet. Check your internet. If this continues, the app owner should confirm Firestore Database is created and its rules are published in Firebase. Anything you add now will sync when the connection is fixed.');
+    }
+  }, 9000);
   unsubProfile = FB.F.onSnapshot(profileRef(), snap => {
     if (!snap.exists()) {
-      // Use the details typed at sign-up if they are still on their way; otherwise a basic profile.
       if (!creatingProfile) {
         creatingProfile = true;
         const p = pendingProfile || defaultProfile(user); pendingProfile = null;
@@ -859,10 +871,12 @@ function showAuth(mode) {
   $('splash').classList.add('hidden');
   $('appView').classList.add('hidden');
   $('authView').classList.remove('hidden');
+  hideInstallPrompt();
+  $('regCheck').classList.add('hidden');
+  $('logCheck').classList.add('hidden');
   const last = Store.get('cp_last_email', '');
   if (last && !$('logEmail').value) $('logEmail').value = last;
   setAuthMode(mode || (last ? 'login' : 'register'));
-  $('previewNotice').classList.toggle('hidden', !inFrame());
   window.scrollTo(0, 0);
   updateBars();
 }
@@ -875,6 +889,7 @@ function showApp() {
   renderHeader();
   switchTab('today');
   updateBars();
+  startInstallPrompts();
   try {
     const pending = JSON.parse(sessionStorage.getItem('cp_pending_message') || 'null');
     if (pending && getCustomer(pending.customerId)) {
@@ -903,52 +918,23 @@ async function register(e) {
 
   const base = freshData();
   const profile = { businessName, ownerName, phone, businessType, email, createdAt: todayStr(), templates: base.templates, settings: base.settings, progress: base.progress, onboardingDone: false, sentCount: 0 };
-  const btn = $('regSubmit');
-  REGISTERING = true;
-  let hadNetFail = false;
+  const btn = $('regSubmit'); btn.disabled = true;
+  pendingProfile = profile;
   try {
-    const result = await runWithRetry(btn, 'Creating your account…', async () => {
-      try {
-        const cred = await FB.A.createUserWithEmailAndPassword(FB.auth, email, pw);
-        return { user: cred.user, recovered: false };
-      } catch (err) {
-        if (err && err.code === 'auth/email-already-in-use' && hadNetFail) {
-          // The first try may have gone through without a reply. Log in with the same details.
-          try { const cred = await FB.A.signInWithEmailAndPassword(FB.auth, email, pw); return { user: cred.user, recovered: true }; }
-          catch (e2) { throw isNetErr(e2) ? e2 : err; }
-        }
-        if (isNetErr(err)) hadNetFail = true;
-        throw err;
-      }
-    });
-    const user = result.user;
+    const cred = await FB.A.createUserWithEmailAndPassword(FB.auth, email, pw);
+    const user = cred.user;
     Store.set('cp_last_email', email);
-    let hasProfile = false;
-    if (result.recovered) {
-      // This email already had an account. Keep its details if it has any.
-      setBusy(btn, 'Opening your account…');
-      try {
-        const snap = await Promise.race([FB.F.getDocFromServer(profileRef(user.uid)), sleep(10000).then(() => null)]);
-        hasProfile = !!(snap && snap.exists());
-      } catch (e2) { /* treat as no profile */ }
-    }
-    if (!hasProfile) {
-      pendingProfile = profile;
-      // Saved on the phone at once and sent to the server in the background, so a slow network never blocks sign-up.
-      FB.F.setDoc(profileRef(user.uid), clean(profile)).catch(dataError);
-    }
-    REGISTERING = false;
-    $('registerForm').reset();
+    FB.F.setDoc(profileRef(user.uid), clean(profile)).catch(dataError);
+    pendingProfile = null;
     showSplash();
-    enterApp(user);
+    $('registerForm').reset();
     toast('Welcome to CustoPadi, ' + firstName(ownerName) + '!');
     setTimeout(() => offerLegacyImport(true), 2500);
   } catch (err) {
-    console.error(err);
-    REGISTERING = false;
-    if (FB.auth.currentUser) { showSplash(); enterApp(FB.auth.currentUser); return; } // never leave someone half logged in
-    if (isNetErr(err)) showNetFailure('reg'); else showError('regError', authMessage(err));
-  } finally { setBusy(btn, null); }
+    console.error('Sign-up failed:', err);
+    pendingProfile = null;
+    showError('regError', authMessage(err));
+  } finally { btn.disabled = false; }
 }
 
 async function login(e) {
@@ -959,119 +945,81 @@ async function login(e) {
   if (!validEmail(email)) return showError('logError', 'Please type your email address.');
   if (!pw) return showError('logError', 'Please type your password.');
   if (!FB) return showError('logError', 'Still loading. Please wait a moment and try again.');
-  const btn = $('logSubmit');
+  const btn = $('logSubmit'); btn.disabled = true;
   try {
-    await runWithRetry(btn, 'Logging in…', () => FB.A.signInWithEmailAndPassword(FB.auth, email, pw));
+    await FB.A.signInWithEmailAndPassword(FB.auth, email, pw);
     Store.set('cp_last_email', email);
     $('logPw').value = '';
     showSplash();
     toast('Welcome back!');
   } catch (err) {
-    if (isNetErr(err)) showNetFailure('log');
-    else { $('logPw').value = ''; showError('logError', authMessage(err)); }
-  } finally { setBusy(btn, null); }
+    console.error('Login failed:', err);
+    $('logPw').value = '';
+    showError('logError', authMessage(err));
+  } finally { btn.disabled = false; }
 }
 
-async function forgotPassword(btn) {
+async function forgotPassword() {
   hideError('logError'); $('logInfo').classList.add('hidden');
   const email = $('logEmail').value.trim().toLowerCase();
   if (!validEmail(email)) return showError('logError', 'Type your email above first, then tap "Forgot password?".');
   if (!FB) return showError('logError', 'Still loading. Please wait a moment and try again.');
   try {
-    await runWithRetry(btn, 'Sending…', () => FB.A.sendPasswordResetEmail(FB.auth, email), 2);
+    await FB.A.sendPasswordResetEmail(FB.auth, email);
     const info = $('logInfo'); info.textContent = 'We sent a reset link to ' + email + '. Check your inbox (and spam folder), then come back and log in.'; info.classList.remove('hidden');
-  } catch (err) {
-    if (isNetErr(err)) showNetFailure('log'); else showError('logError', authMessage(err));
-  } finally { setBusy(btn, null); }
+  } catch (err) { showError('logError', authMessage(err)); }
 }
 
-/* ---------- Network-safe sign-up and login ----------
-   Slow or unstable networks, and phones that wrongly report "offline", make Firebase give up
-   with auth/network-request-failed. We retry, test the connection ourselves and explain the real cause. */
-const NET_CODES = new Set(['auth/network-request-failed', 'auth/timeout', 'auth/internal-error']);
-const isNetErr = err => NET_CODES.has(err && err.code);
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const inFrame = () => { try { return window.self !== window.top; } catch (e) { return true; } };
-
-function setBusy(btn, label) {
-  if (!btn) return;
-  if (label == null) {
-    if (btn.dataset.html != null) { btn.innerHTML = btn.dataset.html; delete btn.dataset.html; }
-    btn.disabled = false;
+async function runFirebaseCheck() {
+  const targets = ['regCheck', 'logCheck'];
+  targets.forEach(id => $(id).classList.add('hidden'));
+  if (!FB) {
+    targets.forEach(id => showCheck(id, false, 'Firebase has not finished loading yet. Reload the page and try again.'));
     return;
   }
-  if (btn.dataset.html == null) btn.dataset.html = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-sm' + (btn.classList.contains('btn-primary') ? '' : ' dark') + '"></span>' + esc(label);
-}
+  try {
+    // 1) Basic Firebase Auth endpoint reachability
+    const authPing = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=' + encodeURIComponent(FB.auth.app.options.apiKey), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier: 'check@example.com', continueUri: window.location.origin, providerId: 'password' })
+    });
 
-// Some phones tell the browser "offline" while data is working. Firebase then gives up after 5 seconds.
-function forceOnline() {
-  try { Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true }); } catch (e) {}
-  updateBars();
-}
-
-async function probe(url, init, ms) {
-  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), ms);
-  try { await fetch(url, Object.assign({ cache: 'no-store', referrerPolicy: 'no-referrer', signal: ctrl.signal }, init)); return true; }
-  catch (e) { return false; }
-  finally { clearTimeout(t); }
-}
-let lastDiag = null;
-async function diagnoseConnection(fresh) {
-  if (!fresh && lastDiag && Date.now() - lastDiag.at < 20000) return lastDiag;
-  const url = 'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + encodeURIComponent((FB && FB.apiKey) || '');
-  const d = { at: Date.now(), online: navigator.onLine, framed: inFrame(), reach: false, full: false };
-  // 1) Can this browser reach Google's sign-in service at all? (any reply counts, even an error)
-  d.reach = await probe(url, { method: 'POST', mode: 'no-cors', body: '{}' }, 8000);
-  // 2) Is the full request, with the headers Firebase sends, allowed through?
-  if (d.reach) d.full = await probe(url, { method: 'POST', body: '{}', headers: { 'Content-Type': 'application/json', 'X-Client-Version': 'CustoPadi/Web' } }, 8000);
-  lastDiag = d;
-  return d;
-}
-
-async function runWithRetry(btn, label, fn, tries = 3) {
-  let lastErr;
-  for (let i = 1; i <= tries; i++) {
-    setBusy(btn, i === 1 ? label : 'Slow network. Trying again (' + i + ' of ' + tries + ')…');
-    try { return await fn(); }
-    catch (err) {
-      lastErr = err;
-      if (!isNetErr(err)) throw err;
-      if (!navigator.onLine) {
-        // The browser says "offline". Check for ourselves before giving up.
-        setBusy(btn, 'Checking your connection…');
-        const d = await diagnoseConnection(true);
-        if (!d.reach) throw err;
-        forceOnline();
+    if (authPing.status === 403) {
+      const text = await authPing.text();
+      if (/requests from referer|referer|api key/i.test(text)) {
+        targets.forEach(id => showCheck(id, false, 'Firebase is reachable, but this website is blocked by your API key restrictions. In Google Cloud → APIs & Services → Credentials, open the API key and allow this domain: <b>' + window.location.origin + '</b>.'));
+        return;
       }
-      if (i < tries) await sleep(1500 * i);
     }
-  }
-  throw lastErr;
-}
 
-async function showNetFailure(key) {
-  const box = $(key + 'Error');
-  box.innerHTML = '<span class="spinner-sm" style="border-color:rgba(208,71,58,.25);border-top-color:#d0473a"></span>We could not reach the sign-in service. Checking why…';
-  box.classList.remove('hidden');
-  const d = await diagnoseConnection(true);
-  const line = (ok, text) => '<div class="flex gap-2"><span>' + (ok ? '✅' : '❌') + '</span><span>' + text + '</span></div>';
-  let advice;
-  if (!d.reach && d.framed) advice = 'You are viewing CustoPadi inside a preview or another app, which blocks sign-in. Open the real website address directly in Chrome (Android) or Safari (iPhone).';
-  else if (!d.reach) advice = 'Your phone may have internet, but this browser cannot reach Google\'s sign-in service. Something is blocking it. Try: switch between Wi‑Fi and mobile data · turn off any VPN, ad blocker or data saver · open CustoPadi in Chrome, not Opera Mini or inside another app.';
-  else if (!d.full) advice = 'A network filter (VPN, proxy or office network) is blocking part of the sign-in request. Try another network or turn the VPN off.';
-  else if (!d.online) { forceOnline(); advice = 'Your browser wrongly said this phone was offline, so it gave up too early. That is now fixed. Please tap the button again.'; }
-  else advice = 'The connection works but is slow or unstable right now. Please try again in a moment. If you already tapped the button, try logging in with the same email and password.';
-  box.innerHTML =
-    '<p class="font-bold mb-2">Could not reach the sign-in service</p>' +
-    '<div class="space-y-1 text-[14px] font-normal text-ink">' +
-      line(d.online, 'Browser reports internet: ' + (d.online ? 'yes' : 'no')) +
-      line(d.reach, 'Google sign-in service reachable') +
-      line(d.full, 'Full sign-in request allowed') +
-    '</div>' +
-    '<p class="mt-3 text-ink font-medium leading-snug">' + advice + '</p>' +
-    '<button type="button" onclick="showNetFailure(\'' + key + '\')" class="mt-2 text-leaf font-bold min-h-[44px]"><i class="fa-solid fa-rotate-right mr-1"></i> Check again</button>';
+    if (!authPing.ok) {
+      const text = await authPing.text();
+      targets.forEach(id => showCheck(id, false, 'Firebase Authentication answered with <b>' + authPing.status + '</b>. Details: ' + esc(text.slice(0, 220))));
+      return;
+    }
+
+    // 2) Firestore profile document read test (most useful after login)
+    if (USER) {
+      try {
+        await FB.F.getDoc(profileRef());
+      } catch (err) {
+        targets.forEach(id => showCheck(id, false, 'Authentication works, but the database is blocked. In Firebase → Firestore Database → Rules, publish the CustoPadi rules.'));
+        return;
+      }
+    }
+
+    const authDomain = window.location.hostname;
+    targets.forEach(id => showCheck(id, true, 'Good news: Firebase Authentication is reachable from <b>' + authDomain + '</b>. If sign-up still fails, check the exact red error message for a domain or password rule issue.'));
+  } catch (err) {
+    console.error('Firebase check failed:', err);
+    const text = String((err && err.message) || err || '');
+    if (/failed to fetch|networkerror|load failed/i.test(text)) {
+      targets.forEach(id => showCheck(id, false, 'This website could not reach Firebase from the browser. If your internet is fine, the likely cause is a blocked domain or API key restriction. Add <b>' + window.location.origin + '</b> to Firebase Authentication → Settings → Authorized domains, and allow it in Google Cloud → APIs & Services → Credentials if you restricted the API key.'));
+      return;
+    }
+    targets.forEach(id => showCheck(id, false, 'Firebase check failed: ' + esc(text)));
+  }
 }
 
 function logout() {
@@ -1138,8 +1086,8 @@ function legacyPick(phone) {
   return list.find(x => x.a.phone === phone) || list.sort((x, y) => y.d.customers.length - x.d.customers.length)[0];
 }
 function offerLegacyImport(silent) {
-  if (!USER || !DATA || !ACCOUNT) return;
-  const pick = legacyPick(ACCOUNT.phone);
+  if (!USER || !DATA) return;
+  const pick = legacyPick(ACCOUNT && ACCOUNT.phone);
   if (!pick) { if (!silent) toast('No old records found on this phone.'); return; }
   const have = new Set(DATA.customers.map(c => c.phone));
   const fresh = pick.d.customers.filter(c => c.phone && !have.has(c.phone));
@@ -1176,7 +1124,6 @@ function openBusinessSheet() {
   $('pwOld').value = ''; $('pwNew').value = '';
   hideError('bizError'); hideError('pwError');
   $('legacyBtn').classList.toggle('hidden', !legacyPick(ACCOUNT.phone));
-  $('sampleBtn').classList.toggle('hidden', findSampleCustomers().length === 0);
   openSheet('business');
 }
 
@@ -1196,7 +1143,7 @@ function saveBusiness(e) {
 }
 
 /* =========================================================
-   BACKUP FILE & CSV
+   BACKUP FILE
    ========================================================= */
 function exportBackup() {
   if (!ACCOUNT || !DATA) return;
@@ -1209,6 +1156,26 @@ function exportBackup() {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   toast('Backup saved to your phone');
+}
+
+function exportCustomersCsv() {
+  if (!DATA || !ACCOUNT) return;
+  // Quoting handles commas and quotes; prefix formula-like cells for spreadsheet safety.
+  const quote = value => {
+    let text = String(value ?? '').replace(/\r?\n/g, ' ');
+    if (/^[\s]*[=+@-]/.test(text) && !/^-?\d+(\.\d+)?$/.test(text)) text = "'" + text;
+    return '"' + text.replace(/"/g, '""') + '"';
+  };
+  const columns = ['Name', 'Phone', 'Birthday', 'Tag', 'Notes', 'Next follow-up', 'Last messaged', 'Last purchase', 'Total spent (NGN)', 'Number of sales'];
+  const rows = DATA.customers.map(c => [c.name, c.phone, c.birthday, c.tag, c.notes, c.nextFollowUp, c.lastContacted, c.purchases.length ? lastDate(c) : '', totalSpent(c), c.purchases.length]);
+  const csv = '\uFEFF' + [columns, ...rows].map(row => row.map(quote).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'custopadi-customers-' + todayStr() + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  toast(DATA.customers.length + ' customers downloaded');
 }
 
 function importBackup(e) {
@@ -1235,98 +1202,93 @@ function importBackup(e) {
   reader.readAsText(file);
 }
 
-function exportCustomersCsv() {
-  if (!DATA || !ACCOUNT) return;
-  // Quoting handles commas and quotes; formula-like cells are prefixed so spreadsheets do not run them.
-  const quote = value => {
-    let text = String(value ?? '').replace(/\r?\n/g, ' ');
-    if (/^[\s]*[=+@-]/.test(text) && !/^-?\d+(\.\d+)?$/.test(text)) text = "'" + text;
-    return '"' + text.replace(/"/g, '""') + '"';
-  };
-  const columns = ['Name', 'Phone', 'Birthday', 'Tag', 'Notes', 'Next follow-up', 'Last messaged', 'Last purchase', 'Total spent (NGN)', 'Number of sales'];
-  const rows = DATA.customers.map(c => [c.name, c.phone, c.birthday, c.tag, c.notes, c.nextFollowUp, c.lastContacted, c.purchases.length ? lastDate(c) : '', totalSpent(c), c.purchases.length]);
-  const csv = '\uFEFF' + [columns, ...rows].map(row => row.map(quote).join(',')).join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'custopadi-customers-' + todayStr() + '.csv';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
-  toast(DATA.customers.length + ' customers downloaded');
-}
-
 /* =========================================================
-   ADD TO HOME SCREEN POPUP
-   Shows a few seconds after opening, then again every 5 minutes while the page stays open.
-   Only shown when the browser allows installing (Chrome/Edge/Samsung on Android and computers).
-   iPhone Safari does not allow a popup like this, so it never appears there.
+   INSTALL & SHARE
    ========================================================= */
-const INSTALL_REPEAT_MS = 5 * 60 * 1000;
-let deferredInstallPrompt = null, installTimer = null;
-const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-const anySheetOpen = () => !!document.querySelector('[id^="sheet-"]:not(.hidden)');
-const typing = () => !!document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+let deferredInstallPrompt = null;
+let installPromptLastShown = 0;
+const INSTALL_REPROMPT_MS = 20 * 60 * 1000; // gently re-offer during long visits
 
-function scheduleInstallPopup(ms) { clearTimeout(installTimer); installTimer = setTimeout(tryShowInstallPopup, ms); }
-function tryShowInstallPopup() {
-  if (!deferredInstallPrompt || isStandalone()) return;
-  // Never interrupt a form being filled in or a screen that is open; try again shortly.
-  if (anySheetOpen() || typing()) return scheduleInstallPopup(15000);
-  $('installPopup').classList.remove('hidden');
+if ('serviceWorker' in navigator && window.isSecureContext && /^https?:/.test(location.protocol)) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
-function snoozeInstall() {
-  $('installPopup').classList.add('hidden');
-  if (deferredInstallPrompt) scheduleInstallPopup(INSTALL_REPEAT_MS);
+
+function isInstalled() {
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 }
-async function triggerInstall() {
-  const ev = deferredInstallPrompt;
-  if (!ev) return;
-  $('installPopup').classList.add('hidden');
-  clearTimeout(installTimer);
-  deferredInstallPrompt = null; // the browser only allows one install dialog per page load
-  ev.prompt();
-  try {
-    const res = await ev.userChoice;
-    if (res && res.outcome === 'accepted') toast('CustoPadi is being added to your home screen');
-  } catch (e) { /* ignore */ }
+function isIOS() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
+
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  if (!isStandalone()) scheduleInstallPopup(3000);
+  maybeShowInstallPrompt(false);
 });
 window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
-  clearTimeout(installTimer);
-  $('installPopup').classList.add('hidden');
-  toast('CustoPadi is on your home screen');
+  hideInstallPrompt();
+  toast('CustoPadi is now on your home screen 🎉');
 });
 
-// Offline helper: needed for installing and for working without internet.
-if ('serviceWorker' in navigator && window.isSecureContext && /^https?:/.test(location.protocol)) {
-  navigator.serviceWorker.register('sw.js').catch(err => console.error('Offline helper not started', err));
+function maybeShowInstallPrompt(force) {
+  if (!appShown || isInstalled()) return;
+  const now = Date.now();
+  if (!force && now - installPromptLastShown < INSTALL_REPROMPT_MS) return;
+  // Only offer a real install action, or the iPhone home-screen shortcut.
+  if (!deferredInstallPrompt && !isIOS()) return;
+  installPromptLastShown = now;
+  const text = $('installPromptText');
+  if (deferredInstallPrompt) {
+    text.textContent = 'Add it to your home screen and open it like an app.';
+    $('installPromptBtn').classList.remove('hidden');
+  } else {
+    text.textContent = 'On iPhone: tap Share, then Add to Home Screen.';
+    $('installPromptBtn').classList.add('hidden');
+  }
+  const box = $('installPrompt');
+  box.classList.remove('hidden', 'fade-up');
+  void box.offsetWidth;
+  box.classList.add('fade-up');
+}
+function hideInstallPrompt() { $('installPrompt').classList.add('hidden'); }
+function dismissInstallPrompt() {
+  hideInstallPrompt();
+  installPromptLastShown = Date.now();
+}
+async function triggerInstall() {
+  if (!deferredInstallPrompt) return hideInstallPrompt();
+  deferredInstallPrompt.prompt();
+  const res = await deferredInstallPrompt.userChoice;
+  hideInstallPrompt();
+  deferredInstallPrompt = null;
+  if (res && res.outcome === 'accepted') toast('CustoPadi is installing on your phone!');
 }
 
-function shareAppWhatsApp() {
-  const link = /^https?:/.test(window.location.href) ? window.location.href.split('#')[0] : '';
-  const msg = "Hi! I use *CustoPadi* to remember my customers and follow up with them on WhatsApp. You can register your business free here" + (link ? ': ' + link : '.');
-  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
-  const w = window.open(url, '_blank');
-  if (!w) window.location.href = url;
+let installPromptsStarted = false;
+function startInstallPrompts() {
+  if (installPromptsStarted) return;
+  installPromptsStarted = true;
+  setTimeout(() => maybeShowInstallPrompt(true), 1200); // right after login
+  setInterval(() => { if (document.visibilityState === 'visible') maybeShowInstallPrompt(false); }, INSTALL_REPROMPT_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') maybeShowInstallPrompt(false);
+  });
 }
 
 /* =========================================================
    SHEETS & NAV
    ========================================================= */
-function openSheet(name) { $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function openSheet(name) {
+  $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden';
+}
 function closeSheet(name) {
   $('sheet-' + name).classList.add('hidden');
   if (name === 'confirm') {
     PENDING_MESSAGE = null;
     try { sessionStorage.removeItem('cp_pending_message'); } catch (e) {}
   }
-  if (!anySheetOpen()) document.body.style.overflow = '';
-  if (!anySheetOpen() && deferredInstallPrompt) scheduleInstallPopup(3000);
+  if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
 }
 function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business'].forEach(closeSheet); }
 
@@ -1367,17 +1329,17 @@ function statusOf(days) {
   return { key: 'lost', label: 'Lost', dot: 'bg-rose', text: 'text-rose' };
 }
 function getCustomer(id) { return DATA.customers.find(c => c.id === id); }
-function daysText(d, c) {
-  if (!c.purchases.length) return 'No purchase yet';
-  if (d === 0) return 'Bought today';
-  if (d === 1) return 'Bought yesterday';
-  return d + ' days since last buy';
-}
 function followUpDue(c, days) {
   if (c.nextFollowUp) return c.nextFollowUp <= todayStr();
   // A completed check-in starts a new reminder cycle, even without a new sale.
   const lastActivity = c.lastContacted && c.lastContacted > lastDate(c) ? c.lastContacted : lastDate(c);
   return daysSince(lastActivity) >= days;
+}
+function daysText(d, c) {
+  if (!c.purchases.length) return 'No purchase yet';
+  if (d === 0) return 'Bought today';
+  if (d === 1) return 'Bought yesterday';
+  return d + ' days since last buy';
 }
 
 /* =========================================================
@@ -1481,7 +1443,7 @@ function renderToday() {
 
   $('birthdayList').innerHTML = bdays.length ? bdays.map(({ c, inDays, next }) => {
     const when = inDays === 0 ? 'Today! 🎉' : inDays === 1 ? 'Tomorrow' : next.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
-    const messaged = c.lastContacted === todayStr();
+      const messaged = c.lastContacted === todayStr();
     return `
       <div class="card p-4 flex items-center gap-3">
         <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
@@ -1589,7 +1551,7 @@ function openCustomer(id) {
       <p class="text-[13px] font-bold text-leaf mb-1">NEXT FOLLOW-UP</p>
       <p class="text-[16px]">${c.nextFollowUp ? esc(fmtDate(c.nextFollowUp)) : 'Uses your normal reminder'}</p>
     </div>
-    <button onclick="openEditCustomer('${c.id}')" class="btn btn-ghost w-full mb-3"><i class="fa-solid fa-pen"></i> Edit details &amp; follow-up date</button>
+    <button onclick="openEditCustomer('${c.id}')" class="btn btn-ghost w-full mb-3"><i class="fa-solid fa-pen"></i> Edit details & follow-up date</button>
     <div class="grid grid-cols-2 gap-3 mb-6">
       <button onclick="closeSheet('customer'); goAdd('sale','${c.id}')" class="btn btn-outline"><i class="fa-solid fa-plus"></i> Add purchase</button>
       <button onclick="openPicker('${c.id}')" class="btn btn-primary"><i class="fa-brands fa-whatsapp text-[18px]"></i> Message</button>
@@ -1703,7 +1665,7 @@ function addCustomer(e) {
   if (!validPhone(phone)) return showError('ncError', 'Please type a correct number, like 08031234567.');
   const dup = DATA.customers.find(c => c.phone === phone);
   if (dup) return showError('ncError', 'This number is already saved for ' + dup.name + '.');
-  const c = { id: uid(), name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, nextFollowUp: '', contactHistory: [], purchases: [] };
+  const c = { id: uid(), name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, purchases: [] };
   DATA.customers.push(c);
   DATA.progress.customer = true;
   saveCustomer(c); saveProfile();
@@ -1911,9 +1873,10 @@ function renderStats() {
 }
 
 /* =========================================================
-   LOGO: use the real logo.png if it sits next to index.html
+   BRAND: icon files, real logo file
    ========================================================= */
-(function useRealLogo() {
+(function setupBrand() {
+  // If the real logo file sits next to index.html, use it everywhere instead of the redrawn version.
   const names = ['logo.png', 'logo.svg', 'logo.webp', 'logo.jpg', 'logo.jpeg'];
   (function tryNext(i) {
     if (i >= names.length) return;
@@ -1959,7 +1922,7 @@ updateBars();
       try { db = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); }
       catch (e) { db = F.getFirestore(app); }
       import(base + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if (ok) G.getAnalytics(app); })).catch(() => {});
-      window.boot({ app, auth, db, A, F, apiKey: firebaseConfig.apiKey });
+      window.boot({ app, auth, db, A, F });
     } catch (err) { window.bootFailed(err); }
   })();
 </script>

@@ -3,98 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#178A4A" />
+  <meta name="theme-color" content="#178A45" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
-  <meta name="description" content="CustoPadi — Customer follow-up tool for Nigerian small businesses on WhatsApp." />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%23178A4A'/%3E%3Cg transform='translate(6 12)'%3E%3Cg transform='translate(32 30) scale(-1 1)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23ffffff'/%3E%3C/g%3E%3Cg transform='translate(50 30)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23F5A623' stroke='%23178A4A' stroke-width='5' paint-order='stroke fill'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%23178A4A'/%3E%3Cg transform='translate(6 12)'%3E%3Cg transform='translate(32 30) scale(-1 1)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23ffffff'/%3E%3C/g%3E%3Cg transform='translate(50 30)'%3E%3Cpath d='M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z' fill='%23F5A623' stroke='%23178A4A' stroke-width='5' paint-order='stroke fill'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E" />
-  <link rel="manifest" href='data:application/manifest+json,{"name":"CustoPadi — Customer Follow-up","short_name":"CustoPadi","start_url":".","display":"standalone","background_color":"#f6f8f4","theme_color":"#178A4A","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 96 96%27%3E%3Crect width=%2796%27 height=%2796%27 rx=%2724%27 fill=%27%23178A4A%27/%3E%3Cg transform=%27translate(6 12)%27%3E%3Cg transform=%27translate(32 30) scale(-1 1)%27%3E%3Cpath d=%27M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z%27 fill=%27%23ffffff%27/%3E%3C/g%3E%3Cg transform=%27translate(50 30)%27%3E%3Cpath d=%27M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z%27 fill=%27%23F5A623%27 stroke=%27%23178A4A%27 stroke-width=%275%27 paint-order=%27stroke fill%27/%3E%3C/g%3E%3C/g%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"}]}' />
+  <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
+  <link rel="icon" id="favicon" href="data:," />
+  <link rel="apple-touch-icon" id="appleIcon" href="data:," />
+  <link rel="manifest" id="manifestLink" />
   <title>CustoPadi — Stay close to your customers</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Oswald:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style type="text/tailwindcss">
     @theme {
       --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-      --color-ink: #1a2e1a;
-      --color-leaf: #178A4A;
-      --color-leaf-deep: #0F6B39;
-      --color-leaf-light: #E7F4EC;
-      --color-cream: #f6f8f4;
-      --color-stone: #5f665a;
-      --color-amber: #B8740A;
-      --color-gold: #F5A623;
+      --color-ink: #17301f;
+      --color-leaf: #178A45;
+      --color-leaf-deep: #0F6B34;
+      --color-leaf-light: #E5F3EA;
+      --color-cream: #F7F9F5;
+      --color-stone: #5d655a;
+      --color-amber: #F5A623;
       --color-rose: #d0473a;
     }
   </style>
 
   <style>
+    /* CustoPadi brand: green #178A45, orange #F5A623 (from the logo) */
     html { -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'DM Sans', system-ui, sans-serif; background: #f6f8f4; color: #1a2e1a; font-size: 16px; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: #F7F9F5; color: #17301f; font-size: 16px; }
     .card { background: #fff; border-radius: 20px; box-shadow: 0 1px 10px rgba(20,40,20,0.06); border: 1px solid rgba(0,0,0,0.04); }
-    .field { width: 100%; min-height: 50px; padding: 12px 14px; background: #f1f5ef; border-radius: 14px; font-size: 16px; color: #1a2e1a; border: 2px solid transparent; outline: none; transition: border-color .15s, background .15s; -webkit-appearance: none; appearance: none; }
-    .field:focus { border-color: #178A4A; background: #fff; }
+    .field { width: 100%; min-height: 50px; padding: 12px 14px; background: #f1f5ef; border-radius: 14px; font-size: 16px; color: #17301f; border: 2px solid transparent; outline: none; transition: border-color .15s, background .15s; -webkit-appearance: none; appearance: none; }
+    .field:focus { border-color: #178A45; background: #fff; }
     .field::placeholder { color: #9aa294; }
-    select.field { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235f665a' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    select.field { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235d655a' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
     .label { display: block; font-size: 15px; font-weight: 600; color: #3f463b; margin-bottom: 6px; }
     .btn { min-height: 48px; padding: 0 18px; border-radius: 14px; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .1s, background .15s, opacity .15s; cursor: pointer; }
     .btn:active { transform: scale(0.97); }
-    .btn-primary { background: #178A4A; color: #fff; box-shadow: 0 4px 12px rgba(23,138,74,0.24); }
-    .btn-primary:hover { background: #0F6B39; }
+    .btn-primary { background: #178A45; color: #fff; box-shadow: 0 4px 12px rgba(23,138,69,0.25); }
+    .btn-primary:hover { background: #0F6B34; }
     .btn-ghost { background: #eef2ec; color: #3f463b; }
-    .btn-outline { background: #fff; color: #178A4A; border: 2px solid #178A4A; }
-    .brand-word { font-weight: 800; letter-spacing: -0.035em; line-height: 1; }
+    .btn-outline { background: #fff; color: #178A45; border: 2px solid #178A45; }
     .btn-danger { background: #fdecea; color: #d0473a; }
     .btn:disabled { opacity: .6; pointer-events: none; }
-    .wa-btn { min-height: 48px; padding: 0 16px; border-radius: 14px; background: #178A4A; color: #fff; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0; }
+    .wa-btn { min-height: 48px; padding: 0 16px; border-radius: 14px; background: #178A45; color: #fff; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0; }
     .wa-btn:active { transform: scale(0.96); }
-    .wa-btn.done { background: #E7F4EC; color: #0F6B39; }
+    .wa-btn.done { background: #E5F3EA; color: #0F6B34; }
     .chip { min-height: 48px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 15px; white-space: nowrap; background: #fff; color: #3f463b; border: 1px solid rgba(0,0,0,0.08); }
-    .chip.active { background: #178A4A; color: #fff; border-color: #178A4A; }
+    .chip.active { background: #178A45; color: #fff; border-color: #178A45; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { scrollbar-width: none; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     .fade-up { animation: fadeUp .3s ease-out both; }
     @keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
     .sheet-panel { animation: sheetUp .28s cubic-bezier(.2,.8,.2,1) both; }
-    .tab-bar { background: rgba(255,255,255,0.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid rgba(0,0,0,0.06); padding-bottom: env(safe-area-inset-bottom); }
+    .tab-bar { background: rgba(255,255,255,0.95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid rgba(0,0,0,0.06); padding-bottom: env(safe-area-inset-bottom); }
     .nav-btn { min-height: 60px; }
-    .nav-btn.active { color: #178A4A; }
-    .nav-btn.active .nav-ico { background: #E7F4EC; }
+    .nav-btn.active { color: #178A45; }
+    .nav-btn.active .nav-ico { background: #E5F3EA; }
     .seg button { min-height: 48px; }
-    .seg button.active { background: #fff; color: #1a2e1a; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .seg button.active { background: #fff; color: #17301f; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    /* Brand orange is too light for small text, so text uses a deeper orange. Icons and fills keep the logo orange. */
+    .text-amber { color: #A9650A; }
+    .ico-sun { color: #F5A623; }
   </style>
 </head>
 
 <body class="min-h-screen">
 
+<!-- Logo artwork (used everywhere via <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="cp-gshape"><circle cx="48" cy="48" r="44"/><path d="M20 76L4 114L52 90Z"/></g>
+    <g id="cp-oshape"><circle cx="88" cy="76" r="38"/><path d="M62 92L60 126L88 112Z"/></g>
+  </defs>
+  <symbol id="cp-mark" viewBox="0 0 130 130">
+    <use href="#cp-oshape" fill="#F5A623"/>
+    <use href="#cp-gshape" fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>
+    <use href="#cp-gshape" fill="#178A45"/>
+  </symbol>
+  <symbol id="cp-logo" viewBox="0 0 640 130">
+    <use href="#cp-mark" x="0" y="0" width="130" height="130"/>
+    <text x="150" y="106" font-family="Oswald, 'Arial Narrow', Impact, sans-serif" font-weight="700" font-size="104" textLength="484" lengthAdjust="spacingAndGlyphs"><tspan fill="#178A45">Custo</tspan><tspan fill="#F5A623">Padi</tspan></text>
+  </symbol>
+</svg>
+
 <!-- ===================================================== -->
 <!-- AUTH: REGISTER / LOG IN                                -->
 <!-- ===================================================== -->
 <div id="authView" class="hidden min-h-screen max-w-md mx-auto">
-  <div class="bg-gradient-to-br from-leaf to-leaf-deep text-white px-6 pt-12 pb-20 rounded-b-[2.25rem] relative overflow-hidden">
-    <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10"></div>
-    <div class="absolute bottom-6 -left-8 w-24 h-24 rounded-full bg-white/10"></div>
+  <div class="bg-white px-6 pt-10 pb-16 rounded-b-[2.25rem] relative overflow-hidden shadow-[0_8px_30px_rgba(23,138,69,0.08)]">
+    <div class="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-amber/25"></div>
+    <div class="absolute top-24 -right-5 w-20 h-20 rounded-full bg-leaf/10"></div>
+    <div class="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-leaf/10"></div>
     <div class="relative">
-      <div class="inline-flex items-center gap-2.5 bg-white rounded-2xl pl-3 pr-4 py-2.5 shadow-lg mb-5">
-        <svg viewBox="0 0 88 72" class="w-10 h-9 shrink-0" aria-hidden="true">
-          <g transform="translate(30 30) scale(-1 1)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#178A4A"/></g>
-          <g transform="translate(58 30)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#F5A623" stroke="#fff" stroke-width="5" paint-order="stroke fill"/></g>
-        </svg>
-        <span class="text-[27px] brand-word"><span class="text-leaf">Custo</span><span class="text-gold">Padi</span></span>
-      </div>
-      <h1 class="text-[28px] font-extrabold leading-tight mb-2">Never forget a customer.<br>Bring them back.</h1>
-      <p class="text-white/90 text-[16px] leading-relaxed">Your customer padi. Know who to message today and send a warm WhatsApp in one tap.</p>
+      <svg viewBox="0 0 640 130" class="h-12 w-auto mb-7" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
+      <h1 class="text-[28px] font-extrabold leading-tight mb-2 text-ink">Remember every customer.<br><span class="text-leaf">Bring them back.</span></h1>
+      <p class="text-stone text-[16px] leading-relaxed">Know who to message today and send a warm WhatsApp in one tap.</p>
     </div>
   </div>
 
-  <div class="px-4 -mt-12 pb-10 relative">
+  <div class="px-4 -mt-8 pb-10 relative">
     <div class="card p-5">
       <div class="seg flex bg-cream rounded-2xl p-1 mb-5">
         <button id="segRegister" onclick="setAuthMode('register')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Create account</button>
@@ -141,14 +155,14 @@
               <input id="regPin2" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="new-password" />
             </div>
           </div>
-          <label class="flex items-start gap-3 bg-leaf-light/60 rounded-2xl p-4 cursor-pointer min-h-[48px]">
+          <label class="flex items-start gap-3 bg-leaf-light/70 rounded-2xl p-4 cursor-pointer min-h-[48px]">
             <input id="regSamples" type="checkbox" checked class="mt-1 w-5 h-5 accent-leaf shrink-0" />
             <span class="text-[15px] leading-snug"><b>Add 8 sample customers</b><br><span class="text-stone">So you can try CustoPadi before adding your own. You can delete them anytime.</span></span>
           </label>
         </div>
         <p id="regError" class="hidden mt-4 text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your records stay on this phone. Remember your PIN.</p>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your records stay on this phone. Keep your PIN safe.</p>
       </form>
 
       <!-- Login -->
@@ -177,13 +191,13 @@
 
     <div class="grid grid-cols-3 gap-2 mt-5 text-center">
       <div class="p-3"><i class="fa-solid fa-calendar-check text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Who to message today</p></div>
-      <div class="p-3"><i class="fa-brands fa-whatsapp text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
+      <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
 
-    <div class="mt-4 flex gap-2">
-      <button type="button" onclick="openSheet('launch')" class="btn btn-ghost flex-1 !text-[15px]">
-        <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Install on phone / Launch guide
+    <div class="mt-3">
+      <button type="button" onclick="openSheet('launch')" class="btn btn-ghost w-full !text-[15px]">
+        <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Put CustoPadi on your phone
       </button>
     </div>
   </div>
@@ -193,25 +207,13 @@
 <!-- MAIN APP                                               -->
 <!-- ===================================================== -->
 <div id="appView" class="hidden max-w-md mx-auto min-h-screen">
-  <header class="sticky top-0 z-30 bg-cream/95 backdrop-blur-xl px-4 pt-3 pb-2 border-b border-black/5">
-    <div class="flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 min-w-0 select-none" aria-label="CustoPadi">
-        <svg viewBox="0 0 88 72" class="w-9 h-8 shrink-0" aria-hidden="true">
-          <g transform="translate(30 30) scale(-1 1)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#178A4A"/></g>
-          <g transform="translate(58 30)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#F5A623" stroke="#f6f8f4" stroke-width="5" paint-order="stroke fill"/></g>
-        </svg>
-        <span class="text-[23px] brand-word truncate"><span class="text-leaf">Custo</span><span class="text-gold">Padi</span></span>
-      </div>
-      <button onclick="openBusinessSheet()" aria-label="My business and settings" class="w-12 h-12 rounded-full bg-white border border-black/5 flex items-center justify-center shadow-sm shrink-0">
-        <i class="fa-solid fa-gear text-stone"></i>
-      </button>
-    </div>
-    <button onclick="openBusinessSheet()" class="mt-1 w-full flex items-center gap-2 min-h-[44px] text-left rounded-xl px-1 -mx-1 active:bg-black/5">
-      <div id="hdrAvatar" class="w-8 h-8 rounded-lg bg-leaf text-white flex items-center justify-center font-extrabold text-[12px] shrink-0">CP</div>
-      <p id="hdrBiz" class="font-bold text-[15px] leading-tight truncate">Your business</p>
-      <span class="w-1 h-1 rounded-full bg-stone/40 shrink-0"></span>
-      <p id="hdrHello" class="text-[14px] text-stone truncate flex-1">Hello</p>
-      <i class="fa-solid fa-chevron-right text-[11px] text-stone/50 shrink-0"></i>
+  <header class="sticky top-0 z-30 bg-cream/90 backdrop-blur-xl px-4 pt-3 pb-2 flex items-center justify-between gap-3">
+    <button onclick="switchTab('today')" aria-label="CustoPadi home" class="min-h-[48px] flex items-center">
+      <svg viewBox="0 0 640 130" class="h-9 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
+    </button>
+    <button onclick="openBusinessSheet()" aria-label="My business and settings" class="relative w-12 h-12 rounded-full bg-leaf text-white flex items-center justify-center shrink-0 shadow-sm">
+      <span id="hdrAvatar" class="font-extrabold text-[16px]">K</span>
+      <span class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-white border border-black/10 flex items-center justify-center"><i class="fa-solid fa-gear text-[10px] text-stone"></i></span>
     </button>
   </header>
 
@@ -219,15 +221,20 @@
 
     <!-- TODAY -->
     <section id="screen-today" class="screen">
+      <div class="mb-4 px-1">
+        <p id="hdrHello" class="text-[15px] text-stone truncate">Hello</p>
+        <p id="hdrBiz" class="font-extrabold text-[22px] leading-tight truncate">Your business</p>
+      </div>
+
       <div id="onboarding" class="hidden mb-5"></div>
 
       <div class="card p-5 mb-5 relative overflow-hidden">
-        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-leaf via-leaf to-gold"></div>
+        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-leaf via-leaf to-amber"></div>
         <p class="text-[15px] font-semibold text-stone mb-1">Who to message today</p>
         <p class="leading-tight"><span id="todayCount" class="text-[44px] font-extrabold text-leaf tracking-tight">0</span> <span id="todayCountLabel" class="text-[18px] font-bold">people to follow up today</span></p>
         <div class="flex items-center gap-2 mt-3 text-[15px] text-stone flex-wrap">
           <span>Not bought in</span>
-          <select id="daysSelect" onchange="setDays(this.value)" class="field !w-auto !min-h-[44px] !py-2 font-bold !text-ink">
+          <select id="daysSelect" onchange="setDays(this.value)" class="field !w-auto !min-h-[48px] !py-2 font-bold !text-ink">
             <option value="7">7 days</option>
             <option value="14">14 days</option>
             <option value="21">21 days</option>
@@ -242,7 +249,7 @@
       <div id="todayList" class="space-y-3 mb-8"></div>
 
       <div class="flex items-center gap-2 mb-3">
-        <i class="fa-solid fa-cake-candles text-amber text-lg"></i>
+        <i class="fa-solid fa-cake-candles ico-sun text-lg"></i>
         <h2 class="font-bold text-[18px]">Birthdays this week</h2>
       </div>
       <div id="birthdayList" class="space-y-3"></div>
@@ -274,7 +281,7 @@
           <span><span class="block font-bold text-[18px]">New customer</span><span class="text-[14px] text-stone">Name and phone</span></span>
         </button>
         <button onclick="showSaleForm()" class="card p-5 text-left min-h-[140px] flex flex-col justify-between active:scale-[.98] transition">
-          <span class="w-12 h-12 rounded-2xl bg-amber/15 text-amber flex items-center justify-center text-xl"><i class="fa-solid fa-naira-sign"></i></span>
+          <span class="w-12 h-12 rounded-2xl bg-amber/20 ico-sun flex items-center justify-center text-xl"><i class="fa-solid fa-naira-sign"></i></span>
           <span><span class="block font-bold text-[18px]">Log a sale</span><span class="text-[14px] text-stone">Who bought what</span></span>
         </button>
       </div>
@@ -325,7 +332,7 @@
     <section id="screen-messages" class="screen hidden">
       <h2 class="font-extrabold text-[22px] mb-1">Your messages</h2>
       <p class="text-stone text-[16px] mb-3">Change any message to sound like you. It saves by itself.</p>
-      <div class="bg-leaf-light/70 rounded-2xl p-4 mb-5 text-[15px] leading-relaxed">
+      <div class="bg-leaf-light/80 rounded-2xl p-4 mb-5 text-[15px] leading-relaxed">
         <b class="text-leaf-deep">{name}</b> becomes the customer's first name.<br>
         <b class="text-leaf-deep">{business}</b> becomes <span id="msgBizName" class="font-semibold">your business name</span>.
       </div>
@@ -403,7 +410,7 @@
       </div>
     </div>
 
-    <div id="storageWarn" class="hidden bg-amber/15 text-[15px] rounded-2xl p-4 mb-4"><i class="fa-solid fa-triangle-exclamation text-amber mr-1"></i> This browser is not saving data. Your records will be lost when you close this page.</div>
+    <div id="storageWarn" class="hidden bg-amber/20 text-[15px] rounded-2xl p-4 mb-4"><i class="fa-solid fa-triangle-exclamation text-amber mr-1"></i> This browser is not saving data. Your records will be lost when you close this page.</div>
 
     <form onsubmit="saveBusiness(event)" class="space-y-4 mb-6" novalidate>
       <h4 class="font-bold text-[17px]">Business details</h4>
@@ -440,13 +447,18 @@
         </label>
       </div>
       <button type="button" onclick="closeSheet('business'); openSheet('launch')" class="btn btn-ghost w-full !text-[15px]">
-        <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Install on phone / Share CustoPadi
+        <i class="fa-solid fa-mobile-screen-button text-leaf"></i> Put on phone / Share CustoPadi
       </button>
     </div>
 
     <div class="border-t border-black/5 pt-5 space-y-3">
       <button onclick="logout()" class="btn btn-outline w-full"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
       <button onclick="deleteBusiness()" class="btn btn-danger w-full"><i class="fa-solid fa-trash"></i> Delete this business</button>
+    </div>
+
+    <div class="pt-6 flex flex-col items-center gap-1 opacity-90">
+      <svg viewBox="0 0 640 130" class="h-7 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
+      <p class="text-[13px] text-stone">Made for small businesses in Nigeria</p>
     </div>
   </div>
 </div>
@@ -457,19 +469,13 @@
     <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
     <button onclick="closeSheet('launch')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
 
-    <div class="inline-flex items-center gap-2 mb-3">
-      <svg viewBox="0 0 88 72" class="w-8 h-7 shrink-0" aria-hidden="true">
-        <g transform="translate(30 30) scale(-1 1)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#178A4A"/></g>
-        <g transform="translate(58 30)"><path d="M0 -24 A24 24 0 0 1 23 6 L26 36 L14 20 A24 24 0 1 1 0 -24 Z" fill="#F5A623" stroke="#fff" stroke-width="5" paint-order="stroke fill"/></g>
-      </svg>
-      <span class="text-[19px] brand-word"><span class="text-leaf">Custo</span><span class="text-gold">Padi</span></span>
-    </div>
-    <h3 class="font-extrabold text-[21px] mb-1 pr-10">Install &amp; Launch CustoPadi</h3>
-    <p class="text-stone text-[15px] mb-5">Put CustoPadi on your phone screen or publish it online for other businesses.</p>
+    <svg viewBox="0 0 640 130" class="h-9 w-auto mb-3" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
+    <h3 class="font-extrabold text-[21px] mb-1 pr-10">Install &amp; share</h3>
+    <p class="text-stone text-[15px] mb-5">Put CustoPadi on your phone screen, or send it to other business owners.</p>
 
     <div id="pwaInstallBox" class="hidden bg-leaf-light rounded-2xl p-4 mb-4">
       <p class="font-bold text-[16px] text-ink mb-2">Add CustoPadi to your home screen</p>
-      <button type="button" onclick="triggerInstall()" class="btn btn-primary w-full"><i class="fa-solid fa-download"></i> Install CustoPadi app now</button>
+      <button type="button" onclick="triggerInstall()" class="btn btn-primary w-full"><i class="fa-solid fa-download"></i> Install CustoPadi now</button>
     </div>
 
     <div class="bg-cream rounded-2xl p-4 mb-4 space-y-3">
@@ -484,18 +490,18 @@
       <h4 class="font-bold text-[16px] flex items-center gap-2"><i class="fa-brands fa-whatsapp text-leaf text-lg"></i> Share CustoPadi with other businesses</h4>
       <p class="text-[15px] text-stone leading-snug">Send the link on WhatsApp so other shop owners can register their business on their own phone.</p>
       <div class="grid grid-cols-2 gap-2">
-        <button type="button" onclick="shareCustoPadiWhatsApp()" class="btn btn-primary !text-[15px]"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
-        <button type="button" onclick="copyCustoPadiLink()" class="btn btn-ghost !text-[15px]"><i class="fa-regular fa-copy"></i> Copy link</button>
+        <button type="button" onclick="shareAppWhatsApp()" class="btn btn-primary !text-[15px]"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+        <button type="button" onclick="copyAppLink()" class="btn btn-ghost !text-[15px]"><i class="fa-regular fa-copy"></i> Copy link</button>
       </div>
     </div>
 
-    <div class="bg-leaf-light/60 rounded-2xl p-4 space-y-2.5 text-[15px] leading-relaxed">
-      <h4 class="font-bold text-[16px] text-leaf-deep flex items-center gap-2"><i class="fa-solid fa-globe"></i> How to publish CustoPadi online for free</h4>
-      <p>CustoPadi is a single file (<code class="bg-white px-1.5 py-0.5 rounded font-bold">index.html</code>). You can host it free in 2 minutes:</p>
+    <div class="bg-leaf-light/70 rounded-2xl p-4 space-y-2.5 text-[15px] leading-relaxed">
+      <h4 class="font-bold text-[16px] text-leaf-deep flex items-center gap-2"><i class="fa-solid fa-globe"></i> How to put CustoPadi online for free</h4>
+      <p>CustoPadi is one file (<code class="bg-white px-1.5 py-0.5 rounded font-bold">index.html</code>). Put it in a folder together with your logo file <code class="bg-white px-1.5 py-0.5 rounded font-bold">logo.png</code>, then:</p>
       <ol class="list-decimal pl-5 space-y-1.5">
-        <li><b>Netlify Drop (easiest):</b> Put <code class="bg-white px-1 rounded">index.html</code> inside a folder, go to <b>app.netlify.com/drop</b>, and drag the folder onto the page. You get a live <code class="bg-white px-1 rounded">https://...netlify.app</code> link immediately.</li>
-        <li><b>Vercel or Cloudflare Pages:</b> Upload the folder at <b>vercel.com</b> or <b>pages.cloudflare.com</b> for a free custom link.</li>
-        <li><b>GitHub Pages:</b> Upload <code class="bg-white px-1 rounded">index.html</code> to a GitHub repository and turn on <b>Settings → Pages</b>.</li>
+        <li><b>Netlify Drop (easiest):</b> go to <b>app.netlify.com/drop</b> and drag the folder onto the page. You get a live <code class="bg-white px-1 rounded">https://...netlify.app</code> link straight away.</li>
+        <li><b>Vercel or Cloudflare Pages:</b> upload the folder at <b>vercel.com</b> or <b>pages.cloudflare.com</b>.</li>
+        <li><b>GitHub Pages:</b> upload the files to a GitHub repository and turn on <b>Settings → Pages</b>.</li>
       </ol>
     </div>
   </div>
@@ -504,13 +510,15 @@
 <!-- Toast -->
 <div id="toast" class="fixed left-4 right-4 bottom-28 z-[60] max-w-md mx-auto hidden">
   <div class="bg-ink text-white px-5 py-4 rounded-2xl shadow-xl text-[16px] font-medium flex items-center gap-3">
-    <i class="fa-solid fa-circle-check text-[#4ade80]"></i><span id="toastText">Done</span>
+    <i class="fa-solid fa-circle-check text-[#F5A623]"></i><span id="toastText">Done</span>
   </div>
 </div>
 
 <script>
 /* =========================================================
    STORAGE (localStorage with in-memory fallback)
+   Storage keys still start with "keep_" so records saved
+   before the rename to CustoPadi are not lost.
    ========================================================= */
 const Store = (() => {
   const mem = {};
@@ -836,6 +844,9 @@ async function changePin(e) {
   toast('PIN updated');
 }
 
+/* =========================================================
+   BACKUP & RESTORE
+   ========================================================= */
 function exportBackup() {
   if (!ACCOUNT || !DATA) return;
   const payload = {
@@ -847,9 +858,9 @@ function exportBackup() {
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  const safeName = ACCOUNT.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'custopadi';
+  const safeName = ACCOUNT.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'business';
   a.href = URL.createObjectURL(blob);
-  a.download = safeName + '-custopadi-backup-' + todayStr() + '.json';
+  a.download = 'custopadi-' + safeName + '-backup-' + todayStr() + '.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   toast('Backup saved to your phone');
@@ -887,7 +898,7 @@ function importBackup(e) {
 }
 
 /* =========================================================
-   INSTALL & SHARE KEEP
+   INSTALL & SHARE
    ========================================================= */
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
@@ -908,16 +919,16 @@ async function triggerInstall() {
   deferredInstallPrompt = null;
 }
 
-function shareCustoPadiWhatsApp() {
-  const link = window.location.href.startsWith('http') ? window.location.href : '';
+function shareAppWhatsApp() {
+  const link = /^https?:/.test(window.location.href) ? window.location.href.split('#')[0] : '';
   const msg = "Hi! I use *CustoPadi* to remember my customers and follow up with them on WhatsApp. You can register your business free here" + (link ? ': ' + link : '.');
   const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
   const w = window.open(url, '_blank');
   if (!w) window.location.href = url;
 }
 
-function copyCustoPadiLink() {
-  const link = window.location.href;
+function copyAppLink() {
+  const link = window.location.href.split('#')[0];
   const done = () => toast('App link copied');
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
@@ -995,24 +1006,27 @@ function renderOnboarding() {
   const doneCount = steps.filter(s => s.done).length;
   el.classList.remove('hidden');
   el.innerHTML = `
-    <div class="bg-gradient-to-br from-leaf to-leaf-deep rounded-[22px] p-5 text-white shadow-lg shadow-leaf/20">
-      <div class="flex items-start justify-between gap-3 mb-1">
-        <h2 class="font-extrabold text-[19px] leading-tight">${doneCount === 3 ? "You're all set! 🎉" : 'Get started in 3 steps'}</h2>
-        <span class="text-[14px] font-bold bg-white/20 rounded-full px-3 py-1 shrink-0">${doneCount} of 3</span>
+    <div class="bg-gradient-to-br from-leaf to-leaf-deep rounded-[22px] p-5 text-white shadow-lg shadow-leaf/20 relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-amber/35"></div>
+      <div class="relative">
+        <div class="flex items-start justify-between gap-3 mb-1">
+          <h2 class="font-extrabold text-[19px] leading-tight">${doneCount === 3 ? "You're all set! 🎉" : 'Get started in 3 steps'}</h2>
+          <span class="text-[14px] font-bold bg-white/20 rounded-full px-3 py-1 shrink-0">${doneCount} of 3</span>
+        </div>
+        <p class="text-white/90 text-[15px] mb-4">${doneCount === 3 ? 'You now know how CustoPadi works. Check this page every day.' : 'CustoPadi helps you remember customers and bring them back.'}</p>
+        <div class="space-y-2">
+          ${steps.map((s, i) => `
+            <div class="bg-white rounded-2xl p-3 flex items-center gap-3 text-ink">
+              <span class="w-9 h-9 rounded-full flex items-center justify-center font-bold shrink-0 ${s.done ? 'bg-leaf text-white' : 'bg-leaf-light text-leaf'}">${s.done ? '<i class="fa-solid fa-check"></i>' : i + 1}</span>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-[16px] ${s.done ? 'line-through text-stone' : ''}">${s.title}</p>
+                ${s.done ? '' : `<p class="text-[14px] text-stone leading-snug">${s.desc}</p>`}
+              </div>
+              ${s.done ? '' : `<button onclick="${s.action}" class="btn btn-primary !min-h-[48px] !px-3 !text-[14px] shrink-0">${s.btn}</button>`}
+            </div>`).join('')}
+        </div>
+        <button onclick="hideOnboarding()" class="w-full min-h-[48px] mt-2 text-white/90 font-semibold text-[15px]">${doneCount === 3 ? 'Close' : 'Hide this'}</button>
       </div>
-      <p class="text-white/90 text-[15px] mb-4">${doneCount === 3 ? 'You now know how CustoPadi works. Check this page every day.' : 'CustoPadi helps you remember customers and bring them back.'}</p>
-      <div class="space-y-2">
-        ${steps.map((s, i) => `
-          <div class="bg-white rounded-2xl p-3 flex items-center gap-3 text-ink">
-            <span class="w-9 h-9 rounded-full flex items-center justify-center font-bold shrink-0 ${s.done ? 'bg-leaf text-white' : 'bg-leaf-light text-leaf'}">${s.done ? '<i class="fa-solid fa-check"></i>' : i + 1}</span>
-            <div class="flex-1 min-w-0">
-              <p class="font-bold text-[16px] ${s.done ? 'line-through text-stone' : ''}">${s.title}</p>
-              ${s.done ? '' : `<p class="text-[14px] text-stone leading-snug">${s.desc}</p>`}
-            </div>
-            ${s.done ? '' : `<button onclick="${s.action}" class="btn btn-primary !min-h-[44px] !px-3 !text-[14px] shrink-0">${s.btn}</button>`}
-          </div>`).join('')}
-      </div>
-      <button onclick="hideOnboarding()" class="w-full min-h-[48px] mt-2 text-white/90 font-semibold text-[15px]">${doneCount === 3 ? 'Close' : 'Hide this'}</button>
     </div>`;
 }
 function hideOnboarding() { DATA.onboardingDone = true; saveData(); renderOnboarding(); }
@@ -1041,7 +1055,7 @@ function renderToday() {
 
   const list = $('todayList');
   if (!DATA.customers.length) {
-    list.innerHTML = emptyState('fa-user-plus', 'No customers yet', 'Add the people who buy from you. CustoPadi will remind you when to check on them.', 'Add your first customer', "goAdd('customer')");
+    list.innerHTML = emptyState('fa-user-plus', 'No customers yet', 'Add the people who buy from you. CustoPadi will tell you when to check on them.', 'Add your first customer', "goAdd('customer')");
   } else if (!due.length) {
     list.innerHTML = emptyState('fa-face-smile', 'All caught up!', `Everyone has bought from you in the last ${days} days. Well done!`, 'See all customers', "switchTab('customers')");
   } else {
@@ -1084,7 +1098,7 @@ function renderToday() {
     return `
       <div class="card p-4 flex items-center gap-3">
         <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
-          <span class="w-12 h-12 rounded-full bg-amber/15 text-amber flex items-center justify-center shrink-0"><i class="fa-solid fa-cake-candles text-lg"></i></span>
+          <span class="w-12 h-12 rounded-full bg-amber/20 ico-sun flex items-center justify-center shrink-0"><i class="fa-solid fa-cake-candles text-lg"></i></span>
           <span class="min-w-0">
             <span class="block font-bold text-[17px] truncate">${esc(c.name)}</span>
             <span class="block text-[15px] ${inDays === 0 ? 'text-amber font-bold' : 'text-stone'}">${esc(when)}</span>
@@ -1141,7 +1155,7 @@ function renderCustomers() {
     el.innerHTML = emptyState('fa-magnifying-glass', 'No one found', q ? 'No customer matches "' + esc(q) + '". Check the spelling or try another filter.' : 'No customers in this group right now. That can be good news!', 'Show everyone', "clearCustomerSearch()");
     return;
   }
-  const tagStyle = { VIP: 'bg-amber/15 text-amber', Regular: 'bg-leaf-light text-leaf-deep', New: 'bg-sky-100 text-sky-700' };
+  const tagStyle = { VIP: 'bg-amber/20 text-amber', Regular: 'bg-leaf-light text-leaf-deep', New: 'bg-sky-100 text-sky-700' };
   el.innerHTML = list.map(({ c, d, s }) => `
     <button onclick="openCustomer('${c.id}')" class="card w-full p-4 flex items-center gap-3 text-left active:scale-[.99] transition">
       <span class="relative shrink-0">
@@ -1180,7 +1194,7 @@ function openCustomer(id) {
       <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Birthday</p><p class="font-bold text-[15px]">${c.birthday ? esc(fmtDayMonth(c.birthday)) : '<span class="text-stone font-normal">Not added</span>'}</p></div>
       <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Tag</p><p class="font-bold text-[15px]">${esc(c.tag || 'New')}</p></div>
     </div>
-    <div class="bg-amber/10 rounded-2xl p-4 mb-5">
+    <div class="bg-amber/15 rounded-2xl p-4 mb-5">
       <p class="text-[13px] font-bold text-amber mb-1">NOTES</p>
       <p class="text-[16px] leading-relaxed">${c.notes ? esc(c.notes) : '<span class="text-stone">No notes yet.</span>'}</p>
     </div>
@@ -1343,7 +1357,7 @@ function fallbackCopy(text, done) {
 }
 
 /* =========================================================
-   TEMPLATE PICKER → WHATSAPP
+   TEMPLATE PICKER → WHATSAPP (the owner always presses Send)
    ========================================================= */
 let PICK_ID = null;
 function fillTemplate(body, c) {
@@ -1357,7 +1371,7 @@ function openPicker(customerId, suggested) {
   let tpls = [...DATA.templates];
   if (suggested) tpls.sort((a, b) => (b.id === suggested) - (a.id === suggested));
   $('pickerList').innerHTML = tpls.map(t => `
-    <button onclick="sendTemplate('${t.id}')" class="w-full text-left rounded-2xl p-4 border-2 ${t.id === suggested ? 'border-leaf bg-leaf-light/40' : 'border-black/5 bg-white'} active:scale-[.99] transition">
+    <button onclick="sendTemplate('${t.id}')" class="w-full text-left rounded-2xl p-4 border-2 ${t.id === suggested ? 'border-leaf bg-leaf-light/50' : 'border-black/5 bg-white'} active:scale-[.99] transition">
       <span class="flex items-center gap-2 mb-2">
         <i class="fa-solid ${t.icon || 'fa-comment'} text-leaf"></i>
         <span class="font-bold text-[17px]">${esc(t.title)}</span>
@@ -1438,15 +1452,83 @@ function renderStats() {
         const last = i === weeks.length - 1;
         return `<div class="flex-1 flex flex-col items-center justify-end h-full">
           <span class="text-[12px] font-bold mb-1 ${w.total ? 'text-ink' : 'text-stone/50'}">${w.total ? fmtShortMoney(w.total) : '₦0'}</span>
-          <div class="w-full max-w-[44px] rounded-t-lg ${last ? 'bg-gradient-to-t from-gold to-amber' : 'bg-leaf/45'}" style="height:${h}px" title="${fmtMoney(w.total)}"></div>
+          <div class="w-full max-w-[44px] rounded-t-lg ${last ? 'bg-amber' : 'bg-leaf'}" style="height:${h}px" title="${fmtMoney(w.total)}"></div>
         </div>`;
       }).join('')}
     </div>
     <div class="flex gap-2 mt-2">
-      ${weeks.map((w, i) => `<span class="flex-1 text-center text-[12px] leading-tight ${i === weeks.length - 1 ? 'text-leaf font-bold' : 'text-stone'}">${esc(w.label)}</span>`).join('')}
+      ${weeks.map((w, i) => `<span class="flex-1 text-center text-[12px] leading-tight ${i === weeks.length - 1 ? 'text-amber font-bold' : 'text-stone'}">${esc(w.label)}</span>`).join('')}
     </div>
-    <p class="text-[14px] text-stone mt-3">Each bar is 7 days. The amber bar is the last 7 days.</p>`;
+    <p class="text-[14px] text-stone mt-3">Each bar is 7 days. The orange bar is the last 7 days.</p>`;
 }
+
+/* =========================================================
+   BRAND: app icons, home-screen manifest, real logo file
+   ========================================================= */
+(function setupBrand() {
+  const G = '<circle cx="48" cy="48" r="44"/><path d="M20 76L4 114L52 90Z"/>';
+  const O = '<circle cx="88" cy="76" r="38"/><path d="M62 92L60 126L88 112Z"/>';
+  const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="-30 -30 190 190">' +
+    '<rect x="-30" y="-30" width="190" height="190" fill="#fff"/>' +
+    '<g fill="#F5A623">' + O + '</g>' +
+    '<g fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="round">' + G + '</g>' +
+    '<g fill="#178A45">' + G + '</g></svg>';
+  const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg);
+  $('favicon').href = svgUrl;
+
+  function png(size) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const c = document.createElement('canvas'); c.width = c.height = size;
+          c.getContext('2d').drawImage(img, 0, 0, size, size);
+          resolve(c.toDataURL('image/png'));
+        } catch (e) { resolve(null); }
+      };
+      img.onerror = () => resolve(null);
+      img.src = svgUrl;
+    });
+  }
+  Promise.all([png(192), png(512)]).then(([p192, p512]) => {
+    if (!p192 || !p512) return;
+    $('appleIcon').href = p192;
+    $('favicon').href = p192;
+    $('favicon').type = 'image/png';
+    const manifest = {
+      name: 'CustoPadi — Customer Follow-up',
+      short_name: 'CustoPadi',
+      description: 'Know who to message today and follow up with customers on WhatsApp.',
+      start_url: window.location.href.split('#')[0],
+      display: 'standalone',
+      background_color: '#ffffff',
+      theme_color: '#178A45',
+      icons: [
+        { src: p192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: p512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+      ]
+    };
+    $('manifestLink').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+  });
+
+  // If the real logo file sits next to index.html, use it everywhere instead of the redrawn version.
+  const names = ['logo.png', 'logo.svg', 'logo.webp', 'logo.jpg', 'logo.jpeg'];
+  (function tryNext(i) {
+    if (i >= names.length) return;
+    const probe = new Image();
+    probe.onload = () => {
+      document.querySelectorAll('[data-logo]').forEach(el => {
+        const img = document.createElement('img');
+        img.src = names[i];
+        img.alt = 'CustoPadi';
+        img.className = el.getAttribute('class') || '';
+        el.replaceWith(img);
+      });
+    };
+    probe.onerror = () => tryNext(i + 1);
+    probe.src = names[i];
+  })(0);
+})();
 
 /* =========================================================
    INIT

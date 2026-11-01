@@ -141,6 +141,36 @@
         <button id="segLogin" onclick="setAuthMode('login')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Log in</button>
       </div>
 
+      <div id="domainFixCard" class="hidden mb-5 rounded-2xl border-2 border-leaf/30 bg-leaf-light/60 p-4">
+        <p class="font-bold text-[16px] mb-1 flex items-center gap-2"><i class="fa-solid fa-key text-leaf"></i> Domain needs whitelisting</p>
+        <p class="text-[14px] text-stone leading-relaxed mb-3">Firebase doesn't know this website yet. Copy these two exact values and paste them into the two places below.</p>
+        <div class="space-y-2 mb-3">
+          <div class="flex items-center gap-2 bg-white rounded-xl p-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[12px] font-semibold text-stone">1. Firebase → Authorized domains (paste this)</p>
+              <code id="fixDomain" class="block font-bold text-[16px] truncate">custopadi.vercel.app</code>
+            </div>
+            <button type="button" onclick="copyFixValue('fixDomain')" class="btn btn-ghost !min-h-[44px] !px-3 !text-[14px] shrink-0">Copy</button>
+          </div>
+          <div class="flex items-center gap-2 bg-white rounded-xl p-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-[12px] font-semibold text-stone">2. Google Cloud → API key → HTTP referrers (paste this)</p>
+              <code id="fixReferrer" class="block font-bold text-[15px] break-all">https://custopadi.vercel.app/*</code>
+            </div>
+            <button type="button" onclick="copyFixValue('fixReferrer')" class="btn btn-ghost !min-h-[44px] !px-3 !text-[14px] shrink-0">Copy</button>
+          </div>
+        </div>
+        <details class="text-[14px] text-stone leading-relaxed">
+          <summary class="font-bold text-ink cursor-pointer min-h-[48px] flex items-center">Exact steps</summary>
+          <ol class="list-decimal pl-5 space-y-1.5 mt-1">
+            <li><b>Firebase Console → Authentication → Settings → Authorized domains → Add domain</b>, paste value 1. (No https, no slash.)</li>
+            <li><b>Firebase Console → Authentication → Sign-in method → Email/Password → Enable → Save</b>.</li>
+            <li><b>Google Cloud → APIs &amp; Services → Credentials → Browser key (auto created by Firebase) → HTTP referrers → Add an item</b>, paste value 2. Also allow the <b>Identity Toolkit API</b> under API restrictions, then Save.</li>
+            <li>Wait 60 seconds, fully close and reopen this page, then create the account.</li>
+          </ol>
+        </details>
+      </div>
+
       <!-- Register -->
       <form id="registerForm" onsubmit="register(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Register your business</h2>
@@ -597,6 +627,18 @@ function prettyPhone(p) { return p && p.length === 13 ? '+234 ' + p.slice(3, 6) 
 
 function showError(id, msg) { const el = $(id); el.textContent = msg; el.classList.remove('hidden'); }
 function hideError(id) { $(id).classList.add('hidden'); }
+function showAuthFix(site) {
+  $('fixDomain').textContent = site;
+  $('fixReferrer').textContent = 'https://' + site + '/*';
+  $('domainFixCard').classList.remove('hidden');
+  $('domainFixCard').classList.add('fade-up');
+}
+function copyFixValue(id) {
+  const text = $(id).textContent.trim();
+  const done = () => toast('Copied: ' + text);
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  else fallbackCopy(text, done);
+}
 function togglePw(id, btn) {
   const f = $(id); const show = f.type === 'password';
   f.type = show ? 'text' : 'password';
@@ -755,9 +797,9 @@ function authMessage(err) {
     if (!navigator.onLine) return 'No internet. Check your connection and try again.';
     const site = window.location.hostname;
     const preview = /\.vercel\.app$/.test(site) && /-git-|-[a-z0-9]+-.*\.vercel\.app$/.test(site);
-    return 'Firebase could not be reached from ' + site + '. App owner: in Firebase Authentication → Settings → Authorized domains, add "' + site + '".' +
-      (preview ? ' This looks like a Vercel preview address, so it needs adding separately, or use your main production address.' : '') +
-      ' If "' + site + '" is already listed, the API key is blocking the site: in Google Cloud → APIs & Services → Credentials, add https://' + site + '/* under HTTP referrers and allow the Identity Toolkit API.';
+    showAuthFix(site);
+    return 'Firebase could not be reached from ' + site + '. Tap "Show the fix" below for the exact two items to add in Firebase and Google Cloud.' +
+      (preview ? ' Note: this preview address changes on every Vercel deploy, so sign-in must be tested on your main production address custopadi.vercel.app.' : '');
   }
 
   if (!message && (/requests-from-referer|referer.*blocked|api key.*referer|http referrer/i.test(code + ' ' + msg))) {

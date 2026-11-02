@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-FB-2" />
+  <meta name="application-version" content="CP-AUTH-2" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -139,7 +139,9 @@
       <!-- Register -->
       <form id="registerForm" onsubmit="register(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Register your business</h2>
-        <p class="text-stone text-[15px] mb-5">Free. Your records are saved safely online, so you can log in from any phone.</p>
+        <p class="text-stone text-[15px] mb-4">No email needed. Use your WhatsApp number and a PIN, or continue with Google.</p>
+        <button id="regGoogleBtn" type="button" onclick="googleSignIn('register')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
+        <p class="text-center text-[14px] text-stone mb-4">or create a phone + PIN account</p>
         <div class="space-y-4">
           <div>
             <label class="label" for="regBiz">Business name</label>
@@ -167,45 +169,35 @@
             </select>
           </div>
           <div>
-            <label class="label" for="regEmail">Email</label>
-            <input id="regEmail" class="field" type="email" inputmode="email" placeholder="you@gmail.com" autocomplete="email" autocapitalize="off" />
-          </div>
-          <div>
-            <label class="label" for="regPw">Password <span class="font-normal text-stone">(at least 6 characters)</span></label>
-            <div class="relative">
-              <input id="regPw" class="field !pr-14" type="password" placeholder="Choose a password" autocomplete="new-password" />
-              <button type="button" onclick="togglePw('regPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
-            </div>
+            <label class="label" for="regPin">Choose a 4-digit PIN</label>
+            <input id="regPin" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="new-password" />
+            <p class="text-[14px] text-stone mt-1">Use a PIN you can remember. Do not use your bank PIN.</p>
           </div>
         </div>
         <p id="regError" role="alert" class="hidden mt-4 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-        <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Only you can see your customers. Keep your password safe.</p>
+        <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create with phone + PIN <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Phone + PIN opens this account on this phone. Link Google later to use it on another phone.</p>
       </form>
 
       <!-- Login -->
       <form id="loginForm" class="hidden" onsubmit="login(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Welcome back</h2>
-        <p class="text-stone text-[15px] mb-5">Log in with your email and password.</p>
+        <p class="text-stone text-[15px] mb-4">Use Google on any phone, or phone + PIN on the phone where you registered.</p>
+        <button id="logGoogleBtn" type="button" onclick="googleSignIn('login')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
+        <p class="text-center text-[14px] text-stone mb-4">or unlock with phone + PIN</p>
         <div class="space-y-4">
           <div>
-            <label class="label" for="logEmail">Email</label>
-            <input id="logEmail" class="field" type="email" inputmode="email" placeholder="you@gmail.com" autocomplete="email" autocapitalize="off" />
+            <label class="label" for="logPhone">WhatsApp number</label>
+            <input id="logPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
           </div>
           <div>
-            <label class="label" for="logPw">Password</label>
-            <div class="relative">
-              <input id="logPw" class="field !pr-14" type="password" placeholder="Your password" autocomplete="current-password" />
-              <button type="button" onclick="togglePw('logPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
-            </div>
+            <label class="label" for="logPin">4-digit PIN</label>
+            <input id="logPin" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="current-password" />
           </div>
-        </div>
-        <div class="text-right mt-1">
-          <button id="resetPasswordBtn" type="button" onclick="forgotPassword()" class="text-leaf font-bold text-[16px] min-h-[48px] px-1">Forgot password?</button>
         </div>
         <p id="logError" role="alert" class="hidden mt-2 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <p id="logInfo" class="hidden mt-2 text-leaf-deep text-[15px] font-medium bg-leaf-light rounded-xl px-4 py-3"></p>
-        <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-4">Log in <i class="fa-solid fa-arrow-right"></i></button>
+        <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-4">Open my business <i class="fa-solid fa-arrow-right"></i></button>
         <p class="text-[14px] text-stone text-center mt-4">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
       </form>
     </div>
@@ -215,7 +207,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-FB-2</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-AUTH-2</span></p>
   </div>
 </div>
 
@@ -461,7 +453,7 @@
 
     <div class="bg-leaf-light/70 rounded-2xl p-4 mb-5 text-[15px] leading-snug flex gap-3">
       <i class="fa-solid fa-mobile-screen text-leaf text-lg mt-0.5"></i>
-      <div><b>Saved online.</b> Your customers are backed up to your account, so you can log in on any phone with your email and password.</div>
+      <div id="accountModeText"><b>Saved online.</b> Your customers are backed up to your account.</div>
     </div>
 
     <form onsubmit="saveBusiness(event)" class="space-y-4 mb-6" novalidate>
@@ -474,17 +466,23 @@
         </select>
       </div>
       <div><label class="label" for="bizPhone">WhatsApp number</label><input id="bizPhone" class="field" type="tel" inputmode="numeric" /></div>
-      <div><label class="label">Login email</label><div id="bizEmail" class="field !bg-cream text-stone flex items-center"></div></div>
+      <div><label class="label">Sign-in method</label><div id="bizEmail" class="field !bg-cream text-stone flex items-center"></div></div>
       <p id="bizError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
       <button type="submit" class="btn btn-primary w-full">Save changes</button>
     </form>
 
-    <form onsubmit="changePassword(event)" class="space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
-      <h4 class="font-bold text-[17px]">Change password</h4>
-      <div><label class="label" for="pwOld">Current password</label><input id="pwOld" class="field" type="password" autocomplete="current-password" /></div>
-      <div><label class="label" for="pwNew">New password <span class="font-normal text-stone">(at least 6 characters)</span></label><input id="pwNew" class="field" type="password" autocomplete="new-password" /></div>
+    <div id="linkGoogleBox" class="hidden border-t border-black/5 pt-5 mb-6">
+      <h4 class="font-bold text-[17px] mb-1">Use this account on another phone</h4>
+      <p class="text-[15px] text-stone mb-3">Link Google to keep the same customers and open them anywhere.</p>
+      <button type="button" onclick="linkGoogle()" class="btn btn-outline w-full"><i class="fa-brands fa-google"></i> Link Google account</button>
+    </div>
+
+    <form id="pinChangeForm" onsubmit="changePassword(event)" class="space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
+      <h4 class="font-bold text-[17px]">Change PIN</h4>
+      <div><label class="label" for="pwOld">Current PIN</label><input id="pwOld" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" /></div>
+      <div><label class="label" for="pwNew">New 4-digit PIN</label><input id="pwNew" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></div>
       <p id="pwError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-      <button type="submit" class="btn btn-ghost w-full">Update password</button>
+      <button type="submit" class="btn btn-ghost w-full">Update PIN</button>
     </form>
 
     <div class="border-t border-black/5 pt-5 mb-6 space-y-3">
@@ -502,7 +500,7 @@
     </div>
 
     <div class="border-t border-black/5 pt-5 space-y-3">
-      <button onclick="logout()" class="btn btn-outline w-full"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+      <button id="logoutBtn" onclick="logout()" class="btn btn-outline w-full"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
       <button onclick="deleteBusiness()" class="btn btn-danger w-full"><i class="fa-solid fa-trash"></i> Delete this business</button>
     </div>
 
@@ -563,7 +561,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-FB-2';
+const APP_BUILD = 'CP-AUTH-2';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -604,6 +602,38 @@ function togglePw(id, btn) {
   btn.innerHTML = show ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
 }
+
+/* Phone + PIN accounts use Firebase anonymous Auth. The PIN is a device lock,
+   not a password that can recreate an anonymous account on another phone.
+   Google linking is what makes the same account portable to other phones. */
+const canSha = !!(window.crypto && crypto.subtle && window.TextEncoder);
+function cyrb53(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+async function hashPin(pin, salt, algo) {
+  const text = salt + ':' + pin;
+  if (algo === 'sha256' && canSha) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return cyrb53(text);
+}
+const isGuest = () => !!(USER && USER.isAnonymous);
+const getGuests = () => Store.get('cp_guest_accounts', []);
+function saveGuestRecord(account) {
+  if (!account || !account.pinHash) return;
+  const guests = getGuests().filter(g => g.uid !== account.uid);
+  guests.push({ uid: account.uid, phone: account.phone, businessName: account.businessName, pinHash: account.pinHash, pinSalt: account.pinSalt, pinAlgo: account.pinAlgo });
+  Store.set('cp_guest_accounts', guests);
+}
+function removeGuestRecord(uid) { Store.set('cp_guest_accounts', getGuests().filter(g => g.uid !== uid)); }
+function unlockGuest(uid) { try { sessionStorage.setItem('cp_unlocked_guest', uid); } catch (e) {} }
+function guestIsUnlocked(uid) { try { return sessionStorage.getItem('cp_unlocked_guest') === uid; } catch (e) { return true; } }
+function lockGuestSession() { try { sessionStorage.removeItem('cp_unlocked_guest'); } catch (e) {} }
 
 let toastTimer;
 function toast(msg) {
@@ -671,24 +701,29 @@ function normalizeCustomer(id, d) {
 /* =========================================================
    FIREBASE: ACCOUNTS AND ONLINE STORAGE
    Auth: Firebase Authentication (email + password).
-   Data: Firestore at  businesses/{uid}  and  businesses/{uid}/customers/{id}
-   Firestore's own offline cache keeps the app usable without internet.
+   Data: Firebase Realtime Database at
+     businesses/{uid}                  (business profile, messages, settings)
+     businesses/{uid}/customers/{id}   (customers and their purchase history)
+   Realtime Database keeps a local cache and queues writes while offline.
    ========================================================= */
 let FB = null, BOOTED = false;
 let USER = null, ACCOUNT = null, DATA = null;
 let unsubProfile = null, unsubCustomers = null, appShown = false, authAction = '';
 
-const profileRef = uid => FB.F.doc(FB.db, 'businesses', uid || USER.uid);
-const customersCol = uid => FB.F.collection(FB.db, 'businesses', uid || USER.uid, 'customers');
-const customerRef = (id, uid) => FB.F.doc(FB.db, 'businesses', uid || USER.uid, 'customers', id);
+const businessRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid));
+const customersRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid) + '/customers');
+const customerRef = (id, uid) => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid) + '/customers/' + id);
 
 window.boot = function (fb) {
   FB = fb; BOOTED = true;
   FB.A.onAuthStateChanged(FB.auth, user => {
     // An explicit register/login call drives its own transition.
-    if (authAction === 'register' || authAction === 'login') return;
-    if (user) { if (USER && USER.uid === user.uid && unsubProfile) return; enterApp(user); }
-    else { leaveListeners(); showAuth('login'); }
+    if (authAction === 'register' || authAction === 'login' || authAction === 'google') return;
+    if (user) {
+      if (USER && USER.uid === user.uid && unsubProfile) return;
+      if (user.isAnonymous && !guestIsUnlocked(user.uid)) { USER = user; showAuth('login'); return; }
+      enterApp(user);
+    } else { leaveListeners(); showAuth('login'); }
   }, err => { console.error(err); showAuth('login'); });
 };
 window.bootFailed = function (err) {
@@ -699,6 +734,11 @@ window.bootFailed = function (err) {
 
 function authMessage(err) {
   const code = (err && err.code) || '';
+  if (code === 'auth/admin-restricted-operation' || code === 'auth/operation-not-allowed') {
+    if (authAction === 'register') return 'Phone + PIN sign-up is not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Anonymous, then try again.';
+    if (authAction === 'google') return 'Google sign-in is not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Google, then try again.';
+  }
+  if (code === 'auth/credential-already-in-use') return 'That Google account is already linked to another CustoPadi account. Sign in with Google instead.';
   const map = {
     'auth/email-already-in-use': 'This email already has an account. Please log in instead.',
     'auth/invalid-email': 'Please type a correct email address.',
@@ -712,7 +752,7 @@ function authMessage(err) {
     'auth/network-request-failed': 'Could not reach the sign-in service. Check your internet, VPN or private DNS, then try again.',
     'auth/user-disabled': 'This account has been turned off.',
     'auth/requires-recent-login': 'For safety, please log out, log in again, then try this.',
-    'auth/operation-not-allowed': 'Email and password sign-in is not enabled for this project yet. App owner: turn on Email/Password in Firebase Authentication.',
+    'auth/operation-not-allowed': 'This sign-in method is not enabled yet. App owner: enable it in Firebase Authentication → Sign-in method.',
     'auth/unauthorized-domain': 'This website address is not authorized yet. App owner: add ' + location.hostname + ' under Firebase Authentication → Settings → Authorized domains.',
     'auth/api-key-not-valid': 'The app key was rejected. App owner: check the Firebase web app configuration.',
     'auth/invalid-api-key': 'The app key was rejected. App owner: check the Firebase web app configuration.',
@@ -723,42 +763,46 @@ function authMessage(err) {
 function dataError(err) {
   console.error(err);
   const code = (err && err.code) || '';
-  if (code === 'permission-denied') toast('Saving is blocked by the database rules. App owner: publish the CustoPadi Firestore rules.');
-  else if (code === 'unavailable' || code === 'failed-precondition' || code === 'cancelled') { /* offline; Firestore queues the write */ }
+  const msg = ((err && err.message) || '').toLowerCase();
+  if (/permission/i.test(code + ' ' + msg)) toast('Saving is blocked by the database rules. App owner: publish the CustoPadi Realtime Database rules.');
+  else if (/not found|404|invalid.*database|database.*url/i.test(code + ' ' + msg)) toast('The Realtime Database is not ready. App owner: create it in Firebase → Realtime Database, then publish its rules.');
+  else if (/network|offline|disconnect|unavailable/i.test(code + ' ' + msg)) { /* offline; Firebase queues the write */ }
   else toast('Problem saving' + (code ? ' (' + code + ')' : ''));
 }
 
-function saveProfile() {
-  if (!FB || !USER || !DATA || !ACCOUNT) return;
-  FB.F.setDoc(profileRef(), clean({
+function profilePayload() {
+  return clean({
     businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone,
-    businessType: ACCOUNT.businessType, email: ACCOUNT.email, createdAt: ACCOUNT.createdAt || todayStr(),
+    businessType: ACCOUNT.businessType, email: ACCOUNT.email || '', createdAt: ACCOUNT.createdAt || todayStr(),
+    authProvider: isGuest() ? 'phone-pin' : 'google',
+    pinHash: ACCOUNT.pinHash || '', pinSalt: ACCOUNT.pinSalt || '', pinAlgo: ACCOUNT.pinAlgo || '',
     templates: DATA.templates, settings: DATA.settings, progress: DATA.progress,
     onboardingDone: DATA.onboardingDone, sentCount: DATA.sentCount, updatedAt: Date.now()
-  }), { merge: true }).catch(dataError);
+  });
 }
-function syncCustomers(deleteIds) {
+function saveProfile() {
+  if (!FB || !USER || !DATA || !ACCOUNT) return;
+  FB.R.update(businessRef(), profilePayload()).catch(dataError);
+}
+function customerMap(list) {
+  const map = {};
+  list.forEach(c => { map[c.id] = clean(c); });
+  return map;
+}
+function syncCustomers() {
   if (!FB || !USER || !DATA) return;
-  const F = FB.F;
-  let batch = F.writeBatch(FB.db), n = 0;
-  const flush = () => { batch.commit().catch(dataError); batch = F.writeBatch(FB.db); n = 0; };
-  (deleteIds || []).forEach(id => { batch.delete(customerRef(id)); if (++n >= 400) flush(); });
-  DATA.customers.forEach(c => { batch.set(customerRef(c.id), clean(c)); if (++n >= 400) flush(); });
-  if (n) flush();
+  FB.R.set(customersRef(), customerMap(DATA.customers)).catch(dataError);
 }
 function saveData() { saveProfile(); syncCustomers(); }
-function removeCustomer(id) { if (FB && USER) FB.F.deleteDoc(customerRef(id)).catch(dataError); }
-function writeCustomers(uid, list, deleteIds) {
-  const F = FB.F; let batch = F.writeBatch(FB.db), n = 0;
-  const flush = () => { batch.commit().catch(dataError); batch = F.writeBatch(FB.db); n = 0; };
-  (deleteIds || []).forEach(id => { batch.delete(customerRef(id, uid)); if (++n >= 400) flush(); });
-  list.forEach(c => { batch.set(customerRef(c.id, uid), clean(c)); if (++n >= 400) flush(); });
-  if (n) flush();
+function removeCustomer(id) { if (FB && USER) FB.R.remove(customerRef(id)).catch(dataError); }
+function writeCustomers(uid, list) {
+  if (!FB) return;
+  FB.R.set(customersRef(uid), customerMap(list)).catch(dataError);
 }
 
 function applyProfile(p) {
   const base = freshData();
-  ACCOUNT = { uid: USER.uid, email: USER.email || p.email || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || '', businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr() };
+  ACCOUNT = { uid: USER.uid, email: USER.email || p.email || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || '', businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr(), pinHash: p.pinHash || '', pinSalt: p.pinSalt || '', pinAlgo: p.pinAlgo || 'simple', authProvider: p.authProvider || (USER.isAnonymous ? 'phone-pin' : 'google') };
   DATA.templates = Array.isArray(p.templates) && p.templates.length ? p.templates.map(t => ({ ...t })) : base.templates;
   DATA.settings = Object.assign(base.settings, p.settings || {});
   DATA.progress = Object.assign(base.progress, p.progress || {});
@@ -769,32 +813,40 @@ function applyProfile(p) {
 
 function enterApp(user) {
   USER = user;
+  if (!user.isAnonymous) {
+    removeGuestRecord(user.uid);
+    if (Store.get('cp_linking_google', false)) { Store.remove('cp_linking_google'); setTimeout(() => toast('Google linked. This account now works on other phones.'), 600); }
+  }
   leaveListeners(false);
   appShown = false;
   DATA = freshData(); ACCOUNT = null;
   let gotP = false, gotC = false;
   const ready = () => { if (gotP && gotC) { if (!appShown) showApp(); else if (!document.activeElement?.closest('form')) rerender(); } };
   let creatingProfile = false;
-  unsubProfile = FB.F.onSnapshot(profileRef(), snap => {
-    if (!snap.exists()) {
+  unsubProfile = FB.R.onValue(businessRef(), snap => {
+    const value = snap.val();
+    if (!value || !value.businessName) {
       // Covers a login whose profile was never saved (e.g. an earlier failed sign-up).
       if (!creatingProfile) {
         creatingProfile = true;
         const base = freshData();
-        FB.F.setDoc(profileRef(), clean({
-          businessName: 'My business', ownerName: (user.email || '').split('@')[0], phone: '',
+        FB.R.set(businessRef(), clean({
+          businessName: user.displayName ? user.displayName + "'s business" : 'My business',
+          ownerName: user.displayName || '', phone: '',
           businessType: 'Other', email: user.email || '', createdAt: todayStr(),
+          authProvider: user.isAnonymous ? 'phone-pin' : 'google',
           templates: base.templates, settings: base.settings, progress: base.progress,
           onboardingDone: false, sentCount: 0
         })).catch(dataError);
       }
       return;
     }
-    applyProfile(snap.data());
+    applyProfile(value);
     gotP = true; ready();
   }, dataError);
-  unsubCustomers = FB.F.onSnapshot(customersCol(), snap => {
-    DATA.customers = snap.docs.map(d => normalizeCustomer(d.id, d.data()));
+  unsubCustomers = FB.R.onValue(customersRef(), snap => {
+    const value = snap.val() || {};
+    DATA.customers = Object.keys(value).map(id => normalizeCustomer(id, value[id]));
     gotC = true; ready();
   }, dataError);
 }
@@ -818,9 +870,9 @@ function showAuth(mode) {
   appShown = false;
   $('appView').classList.add('hidden');
   $('authView').classList.remove('hidden');
-  const last = Store.get('cp_last_email', '');
-  if (last && !$('logEmail').value) $('logEmail').value = last;
-  setAuthMode(mode || (last ? 'login' : 'register'));
+  const last = Store.get('cp_last_phone', '');
+  if (last && !$('logPhone').value) $('logPhone').value = last;
+  setAuthMode(mode || (getGuests().length ? 'login' : 'register'));
   window.scrollTo(0, 0);
   updateBars();
 }
@@ -850,27 +902,31 @@ async function register(e) {
   const ownerName = $('regOwner').value.trim();
   const phone = normalizePhone($('regPhone').value);
   const businessType = $('regType').value;
-  const email = $('regEmail').value.trim().toLowerCase();
-  const pw = $('regPw').value;
+  const pin = $('regPin').value.trim();
   if (businessName.length < 2 || businessName.length > 60) return showError('regError', 'Please type a business name between 2 and 60 characters.');
   if (ownerName.length < 2 || ownerName.length > 50) return showError('regError', 'Please type your name (2 to 50 characters).');
   if (!validPhone(phone)) return showError('regError', 'Please type a correct Nigerian number, like 08031234567.');
-  if (!validEmail(email)) return showError('regError', 'Please type a correct email address.');
-  if (pw.length < 6) return showError('regError', 'Your password must be at least 6 characters.');
+  if (!/^\d{4}$/.test(pin)) return showError('regError', 'Choose a PIN with exactly 4 numbers.');
   if (!FB) return showError('regError', 'Still loading. Please wait a moment and try again.');
 
   const btn = $('regSubmit'); btn.disabled = true;
   authAction = 'register';
   try {
-    const cred = await FB.A.createUserWithEmailAndPassword(FB.auth, email, pw);
-    // Save the business profile before opening the app, so a retry never creates a second account.
+    const cred = await FB.A.signInAnonymously(FB.auth);
+    const pinAlgo = canSha ? 'sha256' : 'simple';
+    const pinSalt = uid() + uid();
+    const pinHash = await hashPin(pin, pinSalt, pinAlgo);
     const base = freshData();
-    await FB.F.setDoc(profileRef(cred.user.uid), clean({
-      businessName, ownerName, phone, businessType, email, createdAt: todayStr(),
+    const profile = {
+      businessName, ownerName, phone, businessType, email: '', createdAt: todayStr(),
+      authProvider: 'phone-pin', pinHash, pinSalt, pinAlgo,
       templates: base.templates, settings: base.settings, progress: base.progress,
       onboardingDone: false, sentCount: 0
-    }));
-    Store.set('cp_last_email', email);
+    };
+    await FB.R.set(businessRef(cred.user.uid), clean(profile));
+    saveGuestRecord({ uid: cred.user.uid, businessName, phone, pinHash, pinSalt, pinAlgo });
+    unlockGuest(cred.user.uid);
+    Store.set('cp_last_phone', phone);
     $('registerForm').reset();
     enterApp(cred.user);
     toast('Welcome to CustoPadi, ' + firstName(ownerName) + '!');
@@ -886,88 +942,133 @@ async function register(e) {
 async function login(e) {
   e.preventDefault();
   hideError('logError'); $('logInfo').classList.add('hidden');
-  const email = $('logEmail').value.trim().toLowerCase();
-  const pw = $('logPw').value;
-  if (!validEmail(email)) return showError('logError', 'Please type your email address.');
-  if (!pw) return showError('logError', 'Please type your password.');
+  const phone = normalizePhone($('logPhone').value);
+  const pin = $('logPin').value.trim();
+  if (!validPhone(phone)) return showError('logError', 'Type your WhatsApp number, like 08031234567.');
+  if (!/^\d{4}$/.test(pin)) return showError('logError', 'Type your 4-number PIN.');
   if (!FB) return showError('logError', 'Still loading. Please wait a moment and try again.');
-  const btn = $('logSubmit'); btn.disabled = true;
-  authAction = 'login';
-  try {
-    await FB.A.signInWithEmailAndPassword(FB.auth, email, pw);
-    Store.set('cp_last_email', email);
-    $('logPw').value = '';
-    enterApp(FB.auth.currentUser);
-    toast('Welcome back!');
-  } catch (err) {
-    console.error('Login failed:', err);
-    $('logPw').value = '';
-    showError('logError', authMessage(err));
-  } finally {
-    authAction = '';
-    btn.disabled = false;
+  const guest = getGuests().find(g => g.phone === phone);
+  if (!guest) return showError('logError', 'No phone + PIN account with this number on this phone. Phone + PIN works on the phone used to register. On another phone, use Continue with Google.');
+  const hash = await hashPin(pin, guest.pinSalt, guest.pinAlgo);
+  if (hash !== guest.pinHash) { $('logPin').value = ''; return showError('logError', 'Wrong PIN. Please try again.'); }
+  const current = FB.auth.currentUser;
+  if (!current || current.uid !== guest.uid) {
+    return showError('logError', 'This phone no longer has the original account session. Open the account on the phone used to register and link Google, or restore a backup here.');
   }
+  unlockGuest(guest.uid);
+  Store.set('cp_last_phone', phone);
+  $('logPin').value = '';
+  enterApp(current);
+  toast('Welcome back!');
 }
 
-async function forgotPassword() {
-  hideError('logError'); $('logInfo').classList.add('hidden');
-  const email = $('logEmail').value.trim().toLowerCase();
-  if (!validEmail(email)) return showError('logError', 'Type your email above first, then tap "Forgot password?".');
-  if (!FB) return showError('logError', 'Still loading. Please wait a moment and try again.');
+const googleProvider = () => {
+  const provider = new FB.A.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  return provider;
+};
+const useRedirectForGoogle = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia('(display-mode: standalone)').matches;
+
+async function googleSignIn(mode) {
+  const errorId = mode === 'login' ? 'logError' : 'regError';
+  hideError(errorId);
+  if (!FB) return showError(errorId, 'Still loading. Please wait a moment and try again.');
+  authAction = 'google';
   try {
-    await FB.A.sendPasswordResetEmail(FB.auth, email);
-    const info = $('logInfo');
-    info.textContent = 'We sent a reset link to ' + email + '. Check your inbox (and spam folder), then come back and log in.';
-    info.classList.remove('hidden');
-  } catch (err) { showError('logError', authMessage(err)); }
+    if (useRedirectForGoogle()) { await FB.A.signInWithRedirect(FB.auth, googleProvider()); return; }
+    const cred = await FB.A.signInWithPopup(FB.auth, googleProvider());
+    enterApp(cred.user);
+    toast('Signed in with Google');
+  } catch (err) {
+    if (err && err.code === 'auth/popup-blocked') {
+      try { await FB.A.signInWithRedirect(FB.auth, googleProvider()); return; }
+      catch (redirectErr) { showError(errorId, authMessage(redirectErr)); }
+    } else if (err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+      console.error('Google sign-in failed:', err);
+      showError(errorId, authMessage(err));
+    }
+  } finally { authAction = ''; }
+}
+
+async function linkGoogle() {
+  if (!FB || !USER) return;
+  try {
+    if (useRedirectForGoogle()) {
+      Store.set('cp_linking_google', true);
+      await FB.A.linkWithRedirect(USER, googleProvider());
+      return;
+    }
+    const cred = await FB.A.linkWithPopup(USER, googleProvider());
+    USER = cred.user;
+    removeGuestRecord(USER.uid);
+    ACCOUNT.authProvider = 'google';
+    saveProfile();
+    closeSheet('business');
+    toast('Google linked. This account now works on other phones.');
+  } catch (err) {
+    if (err && err.code === 'auth/popup-blocked') {
+      Store.set('cp_linking_google', true);
+      await FB.A.linkWithRedirect(USER, googleProvider());
+      return;
+    }
+    if (err && (err.code === 'auth/credential-already-in-use' || err.code === 'auth/email-already-in-use')) {
+      return toast('That Google account already belongs to another CustoPadi account. Choose a different Google account.');
+    }
+    if (err && err.code !== 'auth/popup-closed-by-user') toast(authMessage(err));
+  }
 }
 
 function logout() {
   closeAllSheets();
+  if (isGuest()) {
+    lockGuestSession();
+    leaveListeners();
+    showAuth('login');
+    toast('Locked. Use your WhatsApp number and PIN to open it again.');
+    return;
+  }
   if (FB) FB.A.signOut(FB.auth).catch(() => { leaveListeners(); showAuth('login'); });
   else { leaveListeners(); showAuth('login'); }
   toast('You are logged out');
 }
 
-async function reauth(pw) {
-  await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(USER.email, pw));
-}
-
 async function changePassword(e) {
   e.preventDefault();
   hideError('pwError');
-  const oldPw = $('pwOld').value, newPw = $('pwNew').value;
-  if (!oldPw) return showError('pwError', 'Type your current password.');
-  if (newPw.length < 6) return showError('pwError', 'Your new password must be at least 6 characters.');
-  try {
-    await reauth(oldPw);
-    await FB.A.updatePassword(USER, newPw);
-    $('pwOld').value = ''; $('pwNew').value = '';
-    toast('Password updated');
-  } catch (err) {
-    const code = err && err.code;
-    showError('pwError', (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') ? 'Your current password is not correct.' : authMessage(err));
-  }
+  if (!isGuest()) return;
+  const oldPin = $('pwOld').value.trim(), newPin = $('pwNew').value.trim();
+  if (!/^\d{4}$/.test(oldPin) || !/^\d{4}$/.test(newPin)) return showError('pwError', 'Both PINs must be exactly 4 numbers.');
+  const oldHash = await hashPin(oldPin, ACCOUNT.pinSalt, ACCOUNT.pinAlgo);
+  if (oldHash !== ACCOUNT.pinHash) return showError('pwError', 'Your current PIN is not correct.');
+  const pinAlgo = canSha ? 'sha256' : 'simple';
+  const pinSalt = uid() + uid();
+  ACCOUNT.pinHash = await hashPin(newPin, pinSalt, pinAlgo);
+  ACCOUNT.pinSalt = pinSalt;
+  ACCOUNT.pinAlgo = pinAlgo;
+  saveProfile();
+  saveGuestRecord(ACCOUNT);
+  $('pwOld').value = ''; $('pwNew').value = '';
+  toast('PIN updated');
 }
 
 async function deleteBusiness() {
   if (!navigator.onLine) return toast('You need internet to delete your business.');
   if (!confirm('Delete "' + ACCOUNT.businessName + '" and ALL its customers and sales? This cannot be undone.')) return;
   if (!confirm('Are you very sure? Everything for this business will be gone.')) return;
-  const pw = prompt('Type your password to confirm:');
-  if (!pw) return;
   try {
-    await reauth(pw);
-    const uid = USER.uid, user = USER;
-    leaveListeners(false);
-    const snap = await FB.F.getDocs(customersCol(uid));
-    const ids = snap.docs.map(d => d.id);
-    for (let i = 0; i < ids.length; i += 400) {
-      const b = FB.F.writeBatch(FB.db);
-      ids.slice(i, i + 400).forEach(id => b.delete(customerRef(id, uid)));
-      await b.commit();
+    if (isGuest()) {
+      const pin = prompt('Type your 4-digit PIN to confirm:');
+      if (!pin) return;
+      const hash = await hashPin(pin, ACCOUNT.pinSalt, ACCOUNT.pinAlgo);
+      if (hash !== ACCOUNT.pinHash) return toast('Wrong PIN. Business not deleted.');
+    } else {
+      await FB.A.reauthenticateWithPopup(USER, googleProvider());
     }
-    await FB.F.deleteDoc(profileRef(uid));
+    const user = USER;
+    removeGuestRecord(user.uid);
+    lockGuestSession();
+    leaveListeners(false);
+    await FB.R.remove(businessRef(user.uid));
     closeAllSheets();
     await FB.A.deleteUser(user);
     toast('Business deleted');
@@ -998,7 +1099,15 @@ function openBusinessSheet() {
   $('bizOwner').value = ACCOUNT.ownerName;
   $('bizType').value = ACCOUNT.businessType;
   $('bizPhone').value = ACCOUNT.phone;
-  $('bizEmail').textContent = ACCOUNT.email;
+  $('bizEmail').textContent = isGuest() ? 'Phone + PIN (this phone)' : (ACCOUNT.email || 'Google account');
+  $('accountModeText').innerHTML = isGuest()
+    ? '<b>Saved online.</b> Phone + PIN opens this account on this phone. Link Google below to use the same account on another phone.'
+    : '<b>Saved online.</b> Sign in with Google on any phone to open this business.';
+  $('pinChangeForm').classList.toggle('hidden', !isGuest());
+  $('linkGoogleBox').classList.toggle('hidden', !isGuest());
+  $('logoutBtn').innerHTML = isGuest()
+    ? '<i class="fa-solid fa-lock"></i> Lock with PIN'
+    : '<i class="fa-solid fa-right-from-bracket"></i> Log out';
   $('pwOld').value = ''; $('pwNew').value = '';
   hideError('bizError'); hideError('pwError');
   openSheet('business');
@@ -1013,6 +1122,7 @@ function saveBusiness(e) {
   if (!validPhone(phone)) return showError('bizError', 'Please type a correct number, like 08031234567.');
   Object.assign(ACCOUNT, { businessName: name, ownerName: owner, businessType: $('bizType').value, phone });
   saveProfile();
+  if (isGuest()) saveGuestRecord(ACCOUNT);
   renderHeader();
   closeSheet('business');
   rerender();
@@ -1045,7 +1155,7 @@ function importBackup(e) {
       const parsed = JSON.parse(reader.result);
       const incoming = parsed && parsed.data && Array.isArray(parsed.data.customers) ? parsed.data : (Array.isArray(parsed.customers) ? parsed : null);
       if (!incoming) return toast('This file is not a CustoPadi backup.');
-      if (!confirm('Replace your current customers and sales with the backup file (' + incoming.customers.length + ' customers)?')) return;
+      if (!confirm('Replace your current customers and sales with the backup file (' + incoming.customers.length + ' customers)? This replaces the records saved online for this business.')) return;
       DATA.customers = incoming.customers.map(c => normalizeCustomer(c.id || uid(), c));
       if (Array.isArray(incoming.templates) && incoming.templates.length) DATA.templates = incoming.templates;
       if (incoming.settings) DATA.settings = Object.assign({}, DATA.settings, incoming.settings);
@@ -1776,6 +1886,9 @@ function renderStats() {
 })();
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllSheets(); });
+['regPin', 'logPin', 'pwOld', 'pwNew'].forEach(id => $(id).addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+}));
 
 updateBars();
 </script>
@@ -1795,18 +1908,19 @@ updateBars();
   const base = 'https://www.gstatic.com/firebasejs/13.1.0/';
   (async () => {
     try {
-      const [appMod, A, F] = await Promise.all([
+      const [appMod, A, R] = await Promise.all([
         import(base + 'firebase-app.js'),
         import(base + 'firebase-auth.js'),
-        import(base + 'firebase-firestore.js')
+        import(base + 'firebase-database.js')
       ]);
       const app = appMod.initializeApp(firebaseConfig);
       const auth = A.getAuth(app);
-      let db;
-      try { db = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); }
-      catch (e) { db = F.getFirestore(app); }
+      const db = R.getDatabase(app); // uses databaseURL from firebaseConfig
+      let redirectError = null;
+      try { await A.getRedirectResult(auth); } catch (err) { redirectError = err; }
       import(base + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if (ok) G.getAnalytics(app); })).catch(() => {});
-      window.boot({ app, auth, db, A, F });
+      window.boot({ app, auth, db, A, R });
+      if (redirectError) setTimeout(() => { showAuth('login'); showError('logError', authMessage(redirectError)); }, 0);
     } catch (err) { window.bootFailed(err); }
   })();
 </script>

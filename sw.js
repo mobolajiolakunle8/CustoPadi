@@ -1,7 +1,7 @@
 // Cache public app files only. CustoPadi has no Firebase or other backend:
 // all accounts and customer records stay in the browser's local storage.
-const VERSION = 'CP-FB-2';
-const CACHE = 'custopadi-fb-2';
+const VERSION = 'CP-AUTH-2';
+const CACHE = 'custopadi-auth-2';
 const ROOT = new URL('./', self.location.href);
 const PAGE = new URL('index.html', ROOT).href;
 const STATIC_HOSTS = new Set(['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com']);
@@ -38,7 +38,7 @@ self.addEventListener('install', event => {
     const optional = [
       ...Array.from(LOCAL_FILES).filter(name => !name.startsWith('logo.')).map(name => new URL(name, ROOT).href),
       'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4',
-      SDK + 'firebase-app.js', SDK + 'firebase-auth.js', SDK + 'firebase-firestore.js'
+      SDK + 'firebase-app.js', SDK + 'firebase-auth.js', SDK + 'firebase-database.js'
     ];
     await Promise.all(optional.map(async url => {
       try { await savePublicFile(cache, url, await fetchWithTimeout(url)); } catch (error) {}
@@ -82,8 +82,8 @@ self.addEventListener('fetch', event => {
     event.respondWith(loadPage(request));
     return;
   }
-  // Identity Toolkit, Secure Token, Firestore, RTDB, and analytics use the real network;
-  // only the Firebase SDK code files are cached.
+  // Identity Toolkit, Secure Token, the Realtime Database endpoint, and analytics use
+  // the real network; only the Firebase SDK code files are cached.
   if (!isStaticAsset(url)) return;
   const refresh = caches.open(CACHE).then(async cache => {
     try {

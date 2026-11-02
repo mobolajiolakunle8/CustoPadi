@@ -1,11 +1,12 @@
-// Cache public app files only. Firebase requests and user records never enter this cache.
-const VERSION = 'CP-AUTH-5';
-const CACHE = 'custopadi-v5-auth';
+// Cache public app files only. CustoPadi has no Firebase or other backend:
+// all accounts and customer records stay in the browser's local storage.
+const VERSION = 'CP-FB-2';
+const CACHE = 'custopadi-fb-2';
 const ROOT = new URL('./', self.location.href);
 const PAGE = new URL('index.html', ROOT).href;
 const STATIC_HOSTS = new Set(['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com']);
 const LOCAL_FILES = new Set(['manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'logo.png', 'logo.svg', 'logo.webp', 'logo.jpg', 'logo.jpeg']);
-const SDK = 'https://www.gstatic.com/firebasejs/12.18.0/';
+const SDK = 'https://www.gstatic.com/firebasejs/13.1.0/';
 
 function isAppPage(url) {
   return url.origin === ROOT.origin && (url.pathname === ROOT.pathname || url.pathname === new URL(PAGE).pathname);
@@ -81,7 +82,8 @@ self.addEventListener('fetch', event => {
     event.respondWith(loadPage(request));
     return;
   }
-  // Identity Toolkit, Secure Token, Firestore, API routes, and analytics use the real network.
+  // Identity Toolkit, Secure Token, Firestore, RTDB, and analytics use the real network;
+  // only the Firebase SDK code files are cached.
   if (!isStaticAsset(url)) return;
   const refresh = caches.open(CACHE).then(async cache => {
     try {

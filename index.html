@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-AUTH-2" />
+  <meta name="application-version" content="CP-AUTH-3" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -207,7 +207,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-AUTH-2</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-AUTH-3</span></p>
   </div>
 </div>
 
@@ -561,7 +561,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-AUTH-2';
+const APP_BUILD = 'CP-AUTH-3';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -739,6 +739,8 @@ function authMessage(err) {
     if (authAction === 'google') return 'Google sign-in is not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Google, then try again.';
   }
   if (code === 'auth/credential-already-in-use') return 'That Google account is already linked to another CustoPadi account. Sign in with Google instead.';
+  if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') return 'Your browser blocked the Google window. Allow pop-ups for this site, then try again.';
+  if (code === 'auth/web-storage-unsupported') return 'This browser blocks sign-in storage. Open CustoPadi in a normal browser tab and allow site data.';
   const map = {
     'auth/email-already-in-use': 'This email already has an account. Please log in instead.',
     'auth/invalid-email': 'Please type a correct email address.',
@@ -813,10 +815,7 @@ function applyProfile(p) {
 
 function enterApp(user) {
   USER = user;
-  if (!user.isAnonymous) {
-    removeGuestRecord(user.uid);
-    if (Store.get('cp_linking_google', false)) { Store.remove('cp_linking_google'); setTimeout(() => toast('Google linked. This account now works on other phones.'), 600); }
-  }
+  if (!user.isAnonymous) removeGuestRecord(user.uid);
   leaveListeners(false);
   appShown = false;
   DATA = freshData(); ACCOUNT = null;
@@ -912,6 +911,9 @@ async function register(e) {
   const btn = $('regSubmit'); btn.disabled = true;
   authAction = 'register';
   try {
+    // Start a fresh anonymous identity. Reusing an old one would overwrite that
+    // phone's earlier business with this new one.
+    if (FB.auth.currentUser) await FB.A.signOut(FB.auth);
     const cred = await FB.A.signInAnonymously(FB.auth);
     const pinAlgo = canSha ? 'sha256' : 'simple';
     const pinSalt = uid() + uid();
@@ -967,7 +969,11 @@ const googleProvider = () => {
   provider.setCustomParameters({ prompt: 'select_account' });
   return provider;
 };
-const useRedirectForGoogle = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia('(display-mode: standalone)').matches;
+// Google always uses a popup window. signInWithRedirect breaks in storage-partitioned
+// browsers (Chrome mobile, in-app browsers) with "missing initial state", so it is never used.
+function popupHint() {
+  return 'Your browser blocked the Google window. Allow pop-ups for this site, then tap Continue with Google again.';
+}
 
 async function googleSignIn(mode) {
   const errorId = mode === 'login' ? 'logError' : 'regError';
@@ -975,29 +981,22 @@ async function googleSignIn(mode) {
   if (!FB) return showError(errorId, 'Still loading. Please wait a moment and try again.');
   authAction = 'google';
   try {
-    if (useRedirectForGoogle()) { await FB.A.signInWithRedirect(FB.auth, googleProvider()); return; }
     const cred = await FB.A.signInWithPopup(FB.auth, googleProvider());
     enterApp(cred.user);
     toast('Signed in with Google');
   } catch (err) {
-    if (err && err.code === 'auth/popup-blocked') {
-      try { await FB.A.signInWithRedirect(FB.auth, googleProvider()); return; }
-      catch (redirectErr) { showError(errorId, authMessage(redirectErr)); }
-    } else if (err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-      console.error('Google sign-in failed:', err);
-      showError(errorId, authMessage(err));
-    }
+    const code = err && err.code;
+    console.error('Google sign-in failed:', err);
+    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') showError(errorId, popupHint());
+    else if (code === 'auth/popup-closed-by-user') { /* the owner closed it, say nothing */ }
+    else if (code === 'auth/web-storage-unsupported') showError(errorId, 'This browser blocks sign-in storage. Open CustoPadi in a normal browser tab and allow site data.');
+    else showError(errorId, authMessage(err));
   } finally { authAction = ''; }
 }
 
 async function linkGoogle() {
   if (!FB || !USER) return;
   try {
-    if (useRedirectForGoogle()) {
-      Store.set('cp_linking_google', true);
-      await FB.A.linkWithRedirect(USER, googleProvider());
-      return;
-    }
     const cred = await FB.A.linkWithPopup(USER, googleProvider());
     USER = cred.user;
     removeGuestRecord(USER.uid);
@@ -1006,15 +1005,12 @@ async function linkGoogle() {
     closeSheet('business');
     toast('Google linked. This account now works on other phones.');
   } catch (err) {
-    if (err && err.code === 'auth/popup-blocked') {
-      Store.set('cp_linking_google', true);
-      await FB.A.linkWithRedirect(USER, googleProvider());
-      return;
-    }
-    if (err && (err.code === 'auth/credential-already-in-use' || err.code === 'auth/email-already-in-use')) {
-      return toast('That Google account already belongs to another CustoPadi account. Choose a different Google account.');
-    }
-    if (err && err.code !== 'auth/popup-closed-by-user') toast(authMessage(err));
+    const code = err && err.code;
+    console.error('Google link failed:', err);
+    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') toast(popupHint());
+    else if (code === 'auth/popup-closed-by-user') { /* cancelled, say nothing */ }
+    else if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') toast('That Google account already belongs to another CustoPadi account. Choose a different Google account.');
+    else toast(authMessage(err));
   }
 }
 
@@ -1916,11 +1912,10 @@ updateBars();
       const app = appMod.initializeApp(firebaseConfig);
       const auth = A.getAuth(app);
       const db = R.getDatabase(app); // uses databaseURL from firebaseConfig
-      let redirectError = null;
-      try { await A.getRedirectResult(auth); } catch (err) { redirectError = err; }
+      // Safely absorb any redirect left over from an older version of the app.
+      try { await A.getRedirectResult(auth); } catch (err) { console.warn('Ignoring old redirect result:', err && err.code); }
       import(base + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if (ok) G.getAnalytics(app); })).catch(() => {});
       window.boot({ app, auth, db, A, R });
-      if (redirectError) setTimeout(() => { showAuth('login'); showError('logError', authMessage(redirectError)); }, 0);
     } catch (err) { window.bootFailed(err); }
   })();
 </script>

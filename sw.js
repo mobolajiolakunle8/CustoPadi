@@ -1,7 +1,7 @@
 // Cache public app files only. CustoPadi has no Firebase or other backend:
 // all accounts and customer records stay in the browser's local storage.
-const VERSION = 'CP-AUTH-2';
-const CACHE = 'custopadi-auth-2';
+const VERSION = 'CP-AUTH-3';
+const CACHE = 'custopadi-auth-3';
 const ROOT = new URL('./', self.location.href);
 const PAGE = new URL('index.html', ROOT).href;
 const STATIC_HOSTS = new Set(['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com']);

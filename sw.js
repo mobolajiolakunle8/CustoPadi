@@ -1,6 +1,7 @@
-// Only cache public app assets. Identity and business data always use Firebase directly.
-const VERSION = 'CP-SYNC-1';
-const CACHE = 'custopadi-sync-1';
+// Cache public app files only. CustoPadi has no Firebase or other backend:
+// all accounts and customer records stay in the browser's local storage.
+const VERSION = 'CP-SYNC-2';
+const CACHE = 'custopadi-sync-2';
 const ROOT = new URL('./', self.location.href);
 const PAGE = new URL('index.html', ROOT).href;
 const STATIC_HOSTS = new Set(['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com']);

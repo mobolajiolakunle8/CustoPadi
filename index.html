@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-SYNC-1" />
+  <meta name="application-version" content="CP-SYNC-2" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -54,12 +54,7 @@
     .btn-ghost { background: #eef2ec; color: #3f463b; }
     .btn-outline { background: #fff; color: #178A45; border: 2px solid #178A45; }
     .btn-danger { background: #fdecea; color: #d0473a; }
-    .btn:disabled, button:disabled { opacity: .6; pointer-events: none; }
-    .sync-line { display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 8px 20px; width: 100%; text-align: left; font-size: 16px; color: #5d655a; }
-    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #F5A623; flex-shrink: 0; }
-    .sync-line[data-state="synced"] .sync-dot { background: #178A45; }
-    .sync-line[data-state="error"] .sync-dot { background: #d0473a; }
-    .sync-line[data-state="saving"] .sync-dot { animation: fadeUp .9s ease-in-out infinite alternate; }
+    .btn:disabled { opacity: .6; pointer-events: none; }
     .wa-btn { min-height: 48px; padding: 0 16px; border-radius: 14px; background: #178A45; color: #fff; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0; }
     .wa-btn:active { transform: scale(0.96); }
     .wa-btn.done { background: #E5F3EA; color: #0F6B34; }
@@ -119,20 +114,10 @@
   </div>
 </div>
 
-<div id="accountLoading" class="hidden fixed inset-0 z-[70] bg-white flex flex-col items-center justify-center gap-4 p-6 text-center" role="status" aria-live="polite">
-  <div id="accountSpinner" class="spinner"></div>
-  <h2 class="text-[24px] font-bold">Opening your business</h2>
-  <p id="accountLoadingText" class="text-stone max-w-sm">Getting your latest records from CustoPadi.</p>
-  <div id="accountLoadingActions" class="hidden flex flex-wrap justify-center gap-3">
-    <button type="button" onclick="retrySync()" class="btn btn-primary">Try again</button>
-    <button type="button" onclick="logout()" class="btn btn-ghost">Back to sign-in</button>
-  </div>
-</div>
-
 <!-- ===================================================== -->
 <!-- AUTH: REGISTER / LOG IN                                -->
 <!-- ===================================================== -->
-<div id="authView" class="min-h-screen max-w-md mx-auto">
+<div id="authView" class="hidden min-h-screen max-w-md mx-auto">
   <div class="bg-white px-6 pt-10 pb-16 rounded-b-[2.25rem] relative overflow-hidden shadow-[0_8px_30px_rgba(23,138,69,0.08)]">
     <div class="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-amber/25"></div>
     <div class="absolute top-24 -right-5 w-20 h-20 rounded-full bg-leaf/10"></div>
@@ -150,14 +135,13 @@
         <button id="segRegister" onclick="setAuthMode('register')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Create account</button>
         <button id="segLogin" onclick="setAuthMode('login')" class="flex-1 rounded-xl font-bold text-[16px] text-stone">Log in</button>
       </div>
-      <p id="authNotice" class="text-[16px] text-stone mb-4" role="status">Connecting to secure sign-in...</p>
 
       <!-- Register -->
       <form id="registerForm" onsubmit="register(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Register your business</h2>
-        <p class="text-stone text-[16px] mb-4">Use the same Google account to see your business in Chrome, Safari, or another phone.</p>
-        <button id="regGoogleBtn" type="button" onclick="googleSignIn('register')" class="btn btn-primary w-full mb-3" disabled><i class="fa-brands fa-google"></i> Continue with Google</button>
-        <p class="text-center text-[16px] text-stone mb-4">Or start on this browser with phone + PIN</p>
+        <p class="text-stone text-[15px] mb-4">No email needed. Your WhatsApp number and a password open your business on any phone or browser.</p>
+        <button id="regGoogleBtn" type="button" onclick="googleSignIn('register')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
+        <p class="text-center text-[14px] text-stone mb-4">or use your WhatsApp number and a password</p>
         <div class="space-y-4">
           <div>
             <label class="label" for="regBiz">Business name</label>
@@ -185,35 +169,42 @@
             </select>
           </div>
           <div>
-            <label class="label" for="regPin">Choose a 4-digit PIN</label>
-            <input id="regPin" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="new-password" />
-            <p class="text-[14px] text-stone mt-1">Use a PIN you can remember. Do not use your bank PIN.</p>
+            <label class="label" for="regPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label>
+            <div class="relative">
+              <input id="regPw" class="field !pr-14" type="password" placeholder="Choose a password" autocomplete="new-password" />
+              <button type="button" onclick="togglePw('regPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
+            </div>
+            <p class="text-[14px] text-stone mt-1">Numbers are fine, for example 482913. Do not use your bank PIN.</p>
           </div>
         </div>
         <p id="regError" role="alert" class="hidden mt-4 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-        <button id="regSubmit" type="submit" class="btn btn-outline w-full mt-5" disabled>Start on this browser <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[16px] text-stone text-center mt-4 leading-relaxed">The PIN only unlocks this browser. Link Google before switching browsers or clearing site data.</p>
+        <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your customers sync to every phone and browser where you log in. Only you can see them. There is no email reset, so keep your password safe.</p>
       </form>
 
       <!-- Login -->
       <form id="loginForm" class="hidden" onsubmit="login(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Welcome back</h2>
-        <p class="text-stone text-[16px] mb-4">Choose the same Google account you linked to your business. Your records will load automatically.</p>
-        <button id="logGoogleBtn" type="button" onclick="googleSignIn('login')" class="btn btn-primary w-full mb-3" disabled><i class="fa-brands fa-google"></i> Continue with Google</button>
-        <p class="text-center text-[16px] text-stone mb-4">Or unlock a PIN account on this browser</p>
+        <p class="text-stone text-[15px] mb-4">Log in on any phone or browser and your customers are there.</p>
+        <button id="logGoogleBtn" type="button" onclick="googleSignIn('login')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
+        <p class="text-center text-[14px] text-stone mb-4">or use your WhatsApp number and password</p>
         <div class="space-y-4">
           <div>
             <label class="label" for="logPhone">WhatsApp number</label>
             <input id="logPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
           </div>
           <div>
-            <label class="label" for="logPin">4-digit PIN</label>
-            <input id="logPin" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="current-password" />
+            <label class="label" for="logPw">Password</label>
+            <div class="relative">
+              <input id="logPw" class="field !pr-14" type="password" placeholder="Your password" autocomplete="current-password" />
+              <button type="button" onclick="togglePw('logPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
+            </div>
           </div>
         </div>
         <p id="logError" role="alert" class="hidden mt-2 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <p id="logInfo" class="hidden mt-2 text-leaf-deep text-[15px] font-medium bg-leaf-light rounded-xl px-4 py-3"></p>
-        <button id="logSubmit" type="submit" class="btn btn-outline w-full mt-4" disabled>Open my business <i class="fa-solid fa-arrow-right"></i></button>
+        <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-4">Log in <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone text-center mt-3 leading-relaxed">Forgot your password? There is no email reset. If you linked Google in Business settings, use Continue with Google.</p>
         <p class="text-[14px] text-stone text-center mt-4">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
       </form>
     </div>
@@ -223,7 +214,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-SYNC-1</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-SYNC-2</span></p>
   </div>
 </div>
 
@@ -235,12 +226,14 @@
     <button onclick="switchTab('today')" aria-label="CustoPadi home" class="min-h-[48px] flex items-center">
       <svg viewBox="0 0 640 130" class="h-9 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
     </button>
+    <span id="syncPill" role="status" aria-live="polite" class="ml-auto inline-flex items-center gap-1.5 rounded-full bg-white border border-black/10 px-3 py-1.5 text-[13px] font-semibold text-stone whitespace-nowrap">
+      <i id="syncIcon" class="fa-solid fa-circle-check text-leaf"></i><span id="syncText">Synced</span>
+    </span>
     <button onclick="openBusinessSheet()" aria-label="My business and settings" class="relative w-12 h-12 rounded-full bg-leaf text-white flex items-center justify-center shrink-0 shadow-sm">
       <span id="hdrAvatar" class="font-extrabold text-[16px]">K</span>
       <span class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-white border border-black/10 flex items-center justify-center"><i class="fa-solid fa-gear text-[10px] text-stone"></i></span>
     </button>
   </header>
-  <button id="syncStatus" class="sync-line" data-state="loading" onclick="openSyncSheet()" aria-label="View account and sync status"><span class="sync-dot" aria-hidden="true"></span><span id="syncStatusText" aria-live="polite">Loading your records...</span><i class="fa-solid fa-chevron-right ml-auto text-[12px]" aria-hidden="true"></i></button>
 
   <main class="px-4 pt-2 pb-32">
 
@@ -438,7 +431,7 @@
     <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
     <h3 class="font-extrabold text-[21px] mb-2">Did you send it?</h3>
     <p id="confirmText" class="text-[16px] text-stone leading-relaxed mb-5">WhatsApp has opened. Only mark it sent after you press Send there.</p>
-    <button id="confirmSentButton" onclick="confirmMessageSent()" class="btn btn-primary w-full mb-2"><i class="fa-solid fa-check"></i> Yes, I sent it</button>
+    <button onclick="confirmMessageSent()" class="btn btn-primary w-full mb-2"><i class="fa-solid fa-check"></i> Yes, I sent it</button>
     <button onclick="closeSheet('confirm')" class="btn btn-ghost w-full">Not yet</button>
   </div>
 </div>
@@ -472,9 +465,8 @@
       <i class="fa-solid fa-mobile-screen text-leaf text-lg mt-0.5"></i>
       <div id="accountModeText"><b>Saved online.</b> Your customers are backed up to your account.</div>
     </div>
-    <button type="button" onclick="closeSheet('business'); openSyncSheet()" class="btn btn-ghost w-full mb-5"><i class="fa-solid fa-arrows-rotate"></i> Account & sync</button>
 
-    <form id="businessForm" onsubmit="saveBusiness(event)" class="space-y-4 mb-6" novalidate>
+    <form onsubmit="saveBusiness(event)" class="space-y-4 mb-6" novalidate>
       <h4 class="font-bold text-[17px]">Business details</h4>
       <div><label class="label" for="bizName">Business name</label><input id="bizName" class="field" maxlength="60" /></div>
       <div><label class="label" for="bizOwner">Your name</label><input id="bizOwner" class="field" maxlength="50" /></div>
@@ -489,19 +481,26 @@
       <button type="submit" class="btn btn-primary w-full">Save changes</button>
     </form>
 
-    <div id="linkGoogleBox" class="hidden border-t border-black/5 pt-5 mb-6">
-      <h4 class="font-bold text-[17px] mb-1">Use this account on another phone</h4>
-      <p class="text-[16px] text-stone mb-3">Link Google here first. Then choose that same Google account in the other browser. Your customer records stay with this business.</p>
-      <button type="button" data-link-google onclick="linkGoogle()" class="btn btn-outline w-full"><i class="fa-brands fa-google"></i> Link Google for sync</button>
-    </div>
-    <p id="accountError" class="hidden text-rose text-[16px] mb-4" role="alert"></p>
+    <form id="upgradeBox" onsubmit="upgradeToSync(event)" class="hidden border-t border-black/5 pt-5 mb-6 space-y-3" novalidate>
+      <h4 class="font-bold text-[17px]">Turn on sync for this business</h4>
+      <p class="text-[15px] text-stone">Right now this business only opens in this browser. Choose a password, then log in with your WhatsApp number and that password on any phone or browser.</p>
+      <div><label class="label" for="upPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="upPw" class="field" type="password" autocomplete="new-password" /></div>
+      <p id="upError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+      <button type="submit" class="btn btn-primary w-full"><i class="fa-solid fa-arrows-rotate"></i> Turn on sync</button>
+    </form>
 
-    <form id="pinChangeForm" onsubmit="changePassword(event)" class="space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
-      <h4 class="font-bold text-[17px]">Change PIN</h4>
-      <div><label class="label" for="pwOld">Current PIN</label><input id="pwOld" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" /></div>
-      <div><label class="label" for="pwNew">New 4-digit PIN</label><input id="pwNew" class="field tracking-[0.4em]" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></div>
+    <div id="linkGoogleBox" class="hidden border-t border-black/5 pt-5 mb-6">
+      <h4 class="font-bold text-[17px] mb-1">Add Google as a backup sign-in</h4>
+      <p class="text-[15px] text-stone mb-3">There is no email reset for your password. Linking Google lets you open this same business with Google if you ever forget it.</p>
+      <button type="button" onclick="linkGoogle()" class="btn btn-outline w-full"><i class="fa-brands fa-google"></i> Link Google account</button>
+    </div>
+
+    <form id="pwChangeForm" onsubmit="changePassword(event)" class="hidden space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
+      <h4 class="font-bold text-[17px]">Change password</h4>
+      <div><label class="label" for="pwOld">Current password</label><input id="pwOld" class="field" type="password" autocomplete="current-password" /></div>
+      <div><label class="label" for="pwNew">New password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="pwNew" class="field" type="password" autocomplete="new-password" /></div>
       <p id="pwError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-      <button type="submit" class="btn btn-ghost w-full">Update PIN</button>
+      <button type="submit" class="btn btn-ghost w-full">Update password</button>
     </form>
 
     <div class="border-t border-black/5 pt-5 mb-6 space-y-3">
@@ -526,29 +525,7 @@
     <div class="pt-6 flex flex-col items-center gap-1 opacity-90">
       <svg viewBox="0 0 640 130" class="h-7 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
       <p class="text-[13px] text-stone">Made for small businesses in Nigeria</p>
-      <p class="text-[16px] text-stone">Version <span data-build>CP-SYNC-1</span></p>
     </div>
-  </div>
-</div>
-
-<div id="sheet-sync" class="fixed inset-0 z-[55] hidden" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
-  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('sync')"></div>
-  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[90vh] overflow-y-auto p-5 pb-8">
-    <button onclick="closeSheet('sync')" aria-label="Close sync details" class="absolute top-3 right-3 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-solid fa-xmark"></i></button>
-    <h3 id="syncTitle" class="font-bold text-[22px] pr-12 mb-1">One business. Every browser.</h3>
-    <p id="syncDetail" class="text-stone text-[16px] leading-relaxed mb-5"></p>
-    <dl class="space-y-4 mb-5">
-      <div><dt class="label">Signed in as</dt><dd id="syncEmail" class="break-all"></dd></div>
-      <div><dt class="label">Business reference</dt><dd id="syncUid" class="text-[16px] break-all font-mono"></dd></div>
-      <div><dt class="label">Connection</dt><dd id="syncConnection"></dd></div>
-    </dl>
-    <div id="syncGuestActions" class="hidden">
-      <button type="button" data-link-google onclick="linkGoogle()" class="btn btn-primary w-full mb-3"><i class="fa-brands fa-google"></i> Link Google for sync</button>
-      <p id="syncLinkNote" class="text-[16px] text-stone mb-4">Your phone number is a contact detail, not a verified cross-browser login. A PIN alone cannot recover an anonymous account.</p>
-    </div>
-    <p id="syncErrorText" class="hidden text-rose text-[16px] mb-4" role="alert"></p>
-    <p class="text-[16px] text-stone mb-4">On the other browser, open CustoPadi and choose the same Google account. The business reference above should match. Wait for "Saved online" before closing this page.</p>
-    <button type="button" onclick="retrySync()" class="btn btn-ghost w-full">Refresh records</button>
   </div>
 </div>
 
@@ -602,7 +579,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-SYNC-1';
+const APP_BUILD = 'CP-SYNC-2';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -611,12 +588,6 @@ const toDateStr = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad
 const todayStr = () => toDateStr(new Date());
 function startOfToday() { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
 function parseDate(s) { if (!s) return null; const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); }
-function dateValue(value, fallback = '') {
-  const text = typeof value === 'string' ? value.slice(0, 10) : '';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return fallback;
-  const parsed = parseDate(text);
-  return parsed && !Number.isNaN(parsed.getTime()) && toDateStr(parsed) === text ? text : fallback;
-}
 function daysAgoStr(n) { const d = startOfToday(); d.setDate(d.getDate() - n); return toDateStr(d); }
 function daysSince(s) { const d = parseDate(s); return d ? Math.round((startOfToday() - d) / 86400000) : 0; }
 function fmtMoney(n) { return '₦' + Math.round(Number(n) || 0).toLocaleString('en-US'); }
@@ -650,39 +621,17 @@ function togglePw(id, btn) {
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
 }
 
-/* Phone + PIN accounts use Firebase anonymous Auth. The PIN is a device lock,
-   not a password that can recreate an anonymous account on another phone.
-   Google linking is what makes the same account portable to other phones. */
-const canSha = !!(window.crypto && crypto.subtle && window.TextEncoder);
-function cyrb53(str) {
-  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-  for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
-}
-async function hashPin(pin, salt, algo) {
-  const text = salt + ':' + pin;
-  if (algo === 'sha256' && canSha) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-  return cyrb53(text);
-}
+/* WhatsApp number + password accounts use Firebase Email/Password behind the scenes.
+   The number becomes an internal login name (234xxxxxxxxxx@phone.custopadi.app) that
+   people never see or type. Because the account lives on Firebase, not in one browser,
+   the same number + password opens the same business on any phone or browser.
+   Google can be linked as a second way in (and as the recovery path, since there is
+   no real inbox to send a password reset to). */
+const PHONE_EMAIL_DOMAIN = '@phone.custopadi.app';
+const phoneEmail = phone => phone + PHONE_EMAIL_DOMAIN;
+const realEmail = u => (u && u.email && !u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email : '';
 const isGuest = () => !!(USER && USER.isAnonymous);
-const hasGoogle = user => !!((user || USER)?.providerData?.some(provider => provider.providerId === 'google.com'));
-const getGuests = () => { const value = Store.get('cp_guest_accounts', []); return Array.isArray(value) ? value : []; };
-function saveGuestRecord(account) {
-  if (!account || !account.pinHash) return;
-  const guests = getGuests().filter(g => g.uid !== account.uid);
-  guests.push({ uid: account.uid, phone: account.phone, businessName: account.businessName, pinHash: account.pinHash, pinSalt: account.pinSalt, pinAlgo: account.pinAlgo });
-  Store.set('cp_guest_accounts', guests);
-}
-function removeGuestRecord(uid) { Store.set('cp_guest_accounts', getGuests().filter(g => g.uid !== uid)); }
-let unlockedGuestUid = null;
-function unlockGuest(uid) { unlockedGuestUid = uid; try { sessionStorage.setItem('cp_unlocked_guest', uid); } catch (e) {} }
-function guestIsUnlocked(uid) { try { return unlockedGuestUid === uid || sessionStorage.getItem('cp_unlocked_guest') === uid; } catch (e) { return unlockedGuestUid === uid; } }
-function lockGuestSession() { unlockedGuestUid = null; try { sessionStorage.removeItem('cp_unlocked_guest'); } catch (e) {} }
+const hasProvider = id => !!(USER && USER.providerData && USER.providerData.some(p => p.providerId === id));
 
 let toastTimer;
 function toast(msg) {
@@ -694,17 +643,16 @@ function toast(msg) {
 }
 
 function updateBars() {
-  const waiting = appShown && (!SYNC.connected || SYNC.pending.size > 0 || SYNC.error);
-  $('storageBanner').classList.toggle('hidden', !waiting && navigator.onLine !== false);
-  $('storageBanner').firstElementChild.textContent = SYNC.error || (appShown
-    ? (SYNC.pending.size ? 'Changes are not saved online yet. Keep this tab open until saving finishes.' : 'Reconnecting. Other browsers will update when the connection returns.')
-    : 'You are offline. Sign-in needs an internet connection.');
+  $('storageBanner').classList.toggle('hidden', navigator.onLine !== false || $('storageBanner').dataset.dismissed === '1');
+  $('storageBanner').firstElementChild.textContent = appShown
+    ? 'You are offline. Showing the saved copy. Changes will sync when you are back online.'
+    : 'You are offline. This saved page can open, but sign-in and saving need internet.';
   document.documentElement.style.setProperty('--bars', $('topBars').offsetHeight + 'px');
 }
-function dismissStorageBanner() { $('storageBanner').classList.add('hidden'); document.documentElement.style.setProperty('--bars', $('topBars').offsetHeight + 'px'); }
+function dismissStorageBanner() { $('storageBanner').dataset.dismissed = '1'; updateBars(); }
 window.addEventListener('resize', () => document.documentElement.style.setProperty('--bars', $('topBars').offsetHeight + 'px'));
-window.addEventListener('online', () => { if (FB) FB.R.goOnline(FB.db); renderSyncState(); });
-window.addEventListener('offline', () => { SYNC.connected = false; renderSyncState(); });
+window.addEventListener('online', updateBars);
+window.addEventListener('offline', updateBars);
 window.addEventListener('pageshow', updateBars);
 
 
@@ -731,42 +679,34 @@ function freshData() {
   };
 }
 
-const safeKey = key => typeof key === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(key);
-function recordEntries(value) {
-  return value && typeof value === 'object' ? Object.entries(value).filter(([key, item]) => safeKey(key) && item && typeof item === 'object') : [];
-}
 function normalizeCustomer(id, d) {
   d = d || {};
   return {
     id,
     name: String(d.name || ''),
-    phone: normalizePhone(d.phone),
-    birthday: dateValue(d.birthday),
-    tag: ['New', 'Regular', 'VIP'].includes(d.tag) ? d.tag : 'New',
+    phone: String(d.phone || ''),
+    birthday: d.birthday ? String(d.birthday).slice(0, 10) : '',
+    tag: d.tag || 'New',
     notes: String(d.notes || ''),
-    createdAt: dateValue(d.createdAt, todayStr()),
-    lastContacted: dateValue(d.lastContacted) || null,
-    nextFollowUp: dateValue(d.nextFollowUp),
-    contactHistory: recordEntries(d.contactHistory).map(([key, h]) => ({ id: safeKey(h.id) ? h.id : key, _key: key, date: dateValue(h.date), template: String(h.template || 'Follow-up') })).sort((a, b) => a.date.localeCompare(b.date) || a._key.localeCompare(b._key)),
-    purchases: recordEntries(d.purchases).map(([key, p]) => ({ id: safeKey(p.id) ? p.id : key, _key: key, date: dateValue(p.date), item: String(p.item || ''), amount: Number.isFinite(Number(p.amount)) ? Math.max(0, Number(p.amount)) : 0 }))
+    createdAt: d.createdAt ? String(d.createdAt).slice(0, 10) : todayStr(),
+    lastContacted: d.lastContacted || null,
+    nextFollowUp: d.nextFollowUp || '',
+    contactHistory: Array.isArray(d.contactHistory) ? d.contactHistory : [],
+    purchases: (Array.isArray(d.purchases) ? d.purchases : []).map(p => ({ id: p.id || uid(), date: String(p.date || '').slice(0, 10), item: String(p.item || ''), amount: Number(p.amount) || 0 }))
   };
 }
 
 /* =========================================================
    FIREBASE: ACCOUNTS AND ONLINE STORAGE
-   A linked Google identity uses the same UID in every browser.
+   Auth: Firebase Authentication (email + password).
    Data: Firebase Realtime Database at
      businesses/{uid}                  (business profile, messages, settings)
      businesses/{uid}/customers/{id}   (customers and their purchase history)
-   The web SDK queues writes only while this page remains open.
+   Realtime Database keeps a local cache and queues writes while offline.
    ========================================================= */
-let FB = null, BOOTED = false, authReady = false;
-let USER = null, ACCOUNT = null, DATA = null, RAW_BUSINESS = null;
-let unsubBusiness = null, appShown = false, authAction = '', sessionEpoch = 0, loadTimer = null;
-let DETAIL_ID = null, BUSINESS_BASE = null;
-const SYNC = { connected: false, loaded: false, pending: new Map(), failures: new Map(), error: '', lastAck: null };
-const templateDrafts = new Map();
-let writeChain = Promise.resolve();
+let FB = null, BOOTED = false;
+let USER = null, ACCOUNT = null, DATA = null;
+let unsubProfile = null, unsubCustomers = null, appShown = false, authAction = '';
 
 const businessRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid));
 const customersRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid) + '/customers');
@@ -774,55 +714,47 @@ const customerRef = (id, uid) => FB.R.ref(FB.db, 'businesses/' + (uid || USER.ui
 
 window.boot = function (fb) {
   FB = fb; BOOTED = true;
+  // Firebase's own connection flag: true only while the database socket is live.
   FB.R.onValue(FB.R.ref(FB.db, '.info/connected'), snap => {
-    SYNC.connected = snap.val() === true;
-    renderSyncState();
+    const wasOffline = !CONNECTED;
+    CONNECTED = snap.val() === true;
+    renderSync();
+    if (CONNECTED && wasOffline && appShown) toast('Back online. Your changes are synced.');
   });
   FB.A.onAuthStateChanged(FB.auth, user => {
-    authReady = true;
-    setAuthControls();
-    if (authAction) return;
+    // An explicit register/login call drives its own transition.
+    if (authAction === 'register' || authAction === 'login' || authAction === 'google') return;
     if (user) {
-      if (USER && USER.uid === user.uid && unsubBusiness) { USER = user; renderSyncState(); return; }
-      if (user.isAnonymous && !guestIsUnlocked(user.uid)) {
-        leaveListeners(); USER = user; closeAllSheets(); showAuth('login'); return;
-      }
+      if (USER && USER.uid === user.uid && unsubProfile) return;
+
       enterApp(user);
-    } else { leaveListeners(); closeAllSheets(); showAuth(); }
-  }, err => { authReady = true; showAuth('login'); showError('logError', authMessage(err)); });
+    } else { leaveListeners(); showAuth('login'); }
+  }, err => { console.error(err); showAuth('login'); });
 };
 window.bootFailed = function (err) {
-  BOOTED = false;
+  console.error(err);
   showAuth('register');
-  $('authNotice').textContent = 'Secure sign-in could not load. Reconnect and refresh this page. Your saved business has not been changed.';
-  showError('regError', 'Could not load secure sign-in. Please refresh when connected.');
+  showError('regError', 'Could not load the sign-in service. Check your internet and reload the page.');
 };
-
-function setAuthControls() {
-  ['regGoogleBtn', 'logGoogleBtn', 'regSubmit', 'logSubmit'].forEach(id => { $(id).disabled = !FB || !authReady || !!authAction; });
-  document.querySelectorAll('[data-link-google]').forEach(button => { button.disabled = !authReady || !!authAction; });
-  if (FB && authReady) $('authNotice').textContent = authAction ? 'Please finish the sign-in window...' : '';
-}
 
 function authMessage(err) {
   const code = (err && err.code) || '';
   if (code === 'auth/admin-restricted-operation' || code === 'auth/operation-not-allowed') {
-    if (authAction === 'register') return 'Phone + PIN sign-up is not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Anonymous, then try again.';
-    if (authAction === 'google' || authAction === 'link') return 'Google sign-in is not enabled yet. App owner: enable Google in Firebase Authentication, then try again.';
+    if (authAction === 'google') return 'Google sign-in is not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Google, then try again.';
+    return 'Number + password accounts are not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Email/Password. It runs behind the scenes, so nobody ever types an email. Then try again.';
   }
   if (code === 'auth/credential-already-in-use') return 'That Google account is already linked to another CustoPadi account. Sign in with Google instead.';
-  if (code === 'auth/account-exists-with-different-credential') return 'This Google email already uses another sign-in method. Open the existing account in its original browser and link Google there to keep its records.';
   if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') return 'Your browser blocked the Google window. Allow pop-ups for this site, then try again.';
   if (code === 'auth/web-storage-unsupported') return 'This browser blocks sign-in storage. Open CustoPadi in a normal browser tab and allow site data.';
   const map = {
-    'auth/email-already-in-use': 'This email already has an account. Please log in instead.',
-    'auth/invalid-email': 'Please type a correct email address.',
+    'auth/email-already-in-use': 'This WhatsApp number already has an account. Tap Log in and use the same password.',
+    'auth/invalid-email': 'Please type a correct WhatsApp number, like 08031234567.',
     'auth/weak-password': 'Your password must be at least 6 characters.',
     'auth/missing-password': 'Please type your password.',
-    'auth/user-not-found': 'Wrong email or password. Please try again.',
-    'auth/wrong-password': 'Wrong email or password. Please try again.',
-    'auth/invalid-credential': 'Wrong email or password. Please try again.',
-    'auth/invalid-login-credentials': 'Wrong email or password. Please try again.',
+    'auth/user-not-found': 'Wrong WhatsApp number or password. If this number is new, tap Create account.',
+    'auth/wrong-password': 'Wrong WhatsApp number or password. If this number is new, tap Create account.',
+    'auth/invalid-credential': 'Wrong WhatsApp number or password. If this number is new, tap Create account.',
+    'auth/invalid-login-credentials': 'Wrong WhatsApp number or password. If this number is new, tap Create account.',
     'auth/too-many-requests': 'Too many tries. Please wait a few minutes and try again.',
     'auth/network-request-failed': 'Could not reach the sign-in service. Check your internet, VPN or private DNS, then try again.',
     'auth/user-disabled': 'This account has been turned off.',
@@ -835,153 +767,91 @@ function authMessage(err) {
   };
   return map[code] || ('Something went wrong. Please try again.' + (code ? ' (' + code + ')' : ''));
 }
-function databaseMessage(err) {
+function dataError(err) {
+  console.error(err);
   const code = (err && err.code) || '';
   const msg = ((err && err.message) || '').toLowerCase();
-  if (code === 'app/conflict') return 'This record changed in another browser. Reopen it to see the latest version before saving.';
-  if (code === 'app/duplicate-phone') return 'A customer with that number was just saved in another browser. Find them in Customers instead.';
-  if (code === 'app/customer-gone') return 'This customer was removed in another browser. Your change was not saved.';
-  if (/permission/i.test(code + ' ' + msg)) return 'Database access was denied. Your changes are not saved online. Check the Realtime Database rules for this account.';
-  if (/network|offline|disconnect|unavailable/i.test(code + ' ' + msg)) return 'The database connection was interrupted. Keep this page open and reconnect.';
-  return 'Could not save this change online. Try again.' + (code ? ' Reference: ' + code : '');
-}
-function dataError(err, key = 'read') {
-  SYNC.failures.set(key, databaseMessage(err));
-  SYNC.error = [...SYNC.failures.values()][0] || '';
-  renderSyncState();
-  if (!appShown) showLoadProblem(SYNC.error);
-}
-function appError(code) { return Object.assign(new Error(code), { code }); }
-function hasUnsavedChanges() { return SYNC.pending.size > 0 || templateDrafts.size > 0; }
-
-function renderSyncState() {
-  SYNC.error = [...SYNC.failures.values()][0] || '';
-  let state = 'loading', text = 'Loading your records...';
-  if (SYNC.error) { state = 'error'; text = 'Sync needs attention'; }
-  else if (SYNC.pending.size || templateDrafts.size) { state = 'saving'; text = SYNC.connected ? 'Saving changes...' : 'Waiting to save online'; }
-  else if (!SYNC.connected) { state = 'offline'; text = 'Reconnecting...'; }
-  else if (SYNC.loaded) { state = 'synced'; text = hasGoogle() ? 'Saved online' : 'Saved online / link Google for browser sync'; }
-  $('syncStatus').dataset.state = state;
-  $('syncStatusText').textContent = text;
-  if ($('syncConnection')) $('syncConnection').textContent = text + (SYNC.lastAck ? ' / Last confirmed ' + new Date(SYNC.lastAck).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
-  $('syncErrorText').textContent = SYNC.error;
-  $('syncErrorText').classList.toggle('hidden', !SYNC.error);
-  if (ACCOUNT) {
-    $('syncEmail').textContent = isGuest() ? 'Unlinked PIN account on this browser' : (USER.email || 'Google account');
-    $('syncUid').textContent = USER.uid;
-    $('syncGuestActions').classList.toggle('hidden', hasGoogle());
-    $('syncDetail').textContent = !hasGoogle()
-      ? 'Link Google on this browser to keep this business when you sign in elsewhere. Linking keeps the business reference and existing records.'
-      : 'Your records follow your Google account, not your browser. Use the account shown below everywhere.';
-    $('syncLinkNote').textContent = isGuest()
-      ? 'Your phone number is a contact detail, not a verified cross-browser login. A PIN alone cannot recover an anonymous account.'
-      : 'Link Google to this existing account so its business reference stays the same.';
-    if (!$('accountModeText').closest('.hidden')) $('accountModeText').textContent = !hasGoogle()
-      ? 'Link Google to use these same records in another browser. A PIN is only a local screen lock.'
-      : 'Use ' + (USER.email || 'this Google account') + ' in every browser to open the same business.';
-  }
-  updateBars();
-}
-function openSyncSheet() { renderSyncState(); openSheet('sync'); }
-function showLoadProblem(text) {
-  $('accountSpinner').classList.add('hidden');
-  $('accountLoadingText').textContent = text;
-  $('accountLoadingActions').classList.remove('hidden');
-}
-function retrySync() {
-  if (templateDrafts.size && !SYNC.pending.size) {
-    [...templateDrafts.keys()].forEach(flushTemplate);
-    return toast('Retrying your unsaved messages.');
-  }
-  if (hasUnsavedChanges()) return toast('Please wait for your current changes to finish saving.');
-  if (!FB?.auth.currentUser) return showAuth('login');
-  if (FB.auth.currentUser.isAnonymous && !guestIsUnlocked(FB.auth.currentUser.uid)) return showAuth('login');
-  FB.R.goOnline(FB.db);
-  enterApp(FB.auth.currentUser);
+  if (/permission/i.test(code + ' ' + msg)) toast('Saving is blocked by the database rules. App owner: publish the CustoPadi Realtime Database rules.');
+  else if (/not found|404|invalid.*database|database.*url/i.test(code + ' ' + msg)) toast('The Realtime Database is not ready. App owner: create it in Firebase → Realtime Database, then publish its rules.');
+  else if (/network|offline|disconnect|unavailable/i.test(code + ' ' + msg)) { /* offline; Firebase queues the write */ }
+  else toast('Problem saving' + (code ? ' (' + code + ')' : ''));
 }
 
-// A server acknowledgement, not a local onValue event, marks a write as saved.
-async function cloudTask(factory, label, requireLoaded = true) {
-  const owner = USER?.uid, epoch = sessionEpoch;
-  if (!FB || !owner || FB.auth.currentUser?.uid !== owner || (requireLoaded && !SYNC.loaded)) {
-    toast('Wait for your business records to load before saving.'); return false;
-  }
-  const token = uid();
-  SYNC.pending.set(token, label);
-  SYNC.failures.delete(label);
-  renderSyncState();
-  try {
-    // Serialize this tab's writes; database transactions handle writes from other browsers.
-    const job = writeChain.then(() => {
-      if (epoch !== sessionEpoch || FB.auth.currentUser?.uid !== owner) throw appError('app/account-changed');
-      return factory(owner);
-    });
-    writeChain = job.catch(() => {});
-    await job;
-    if (epoch !== sessionEpoch || USER?.uid !== owner) return false;
-    SYNC.lastAck = Date.now();
-    return true;
-  } catch (err) {
-    if (epoch === sessionEpoch && USER?.uid === owner) dataError(err, label);
-    return false;
-  } finally {
-    if (epoch === sessionEpoch) { SYNC.pending.delete(token); renderSyncState(); }
-  }
+function profilePayload() {
+  return clean({
+    businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone,
+    businessType: ACCOUNT.businessType, email: realEmail(USER), createdAt: ACCOUNT.createdAt || todayStr(),
+    authProvider: isGuest() ? 'anonymous' : (hasProvider('password') ? 'phone-password' : 'google'),
+    pinHash: null, pinSalt: null, pinAlgo: null, // clears any old PIN hash left by earlier versions
+    templates: DATA.templates, settings: DATA.settings, progress: DATA.progress,
+    onboardingDone: DATA.onboardingDone, sentCount: DATA.sentCount, updatedAt: Date.now()
+  });
 }
-function patchBusiness(patch, label = 'Business details') {
-  const changes = clean(patch);
-  return cloudTask(owner => FB.R.update(businessRef(owner), { ...changes, updatedAt: FB.R.serverTimestamp() }), label);
+/* Auto-sync status. Every edit writes to Firebase straight away; this tracks
+   whether those writes have reached the server so the header can say so. */
+let PENDING_WRITES = 0, CONNECTED = true, SYNC_FAILED = false;
+function renderSync() {
+  const icon = $('syncIcon'), text = $('syncText');
+  if (!icon) return;
+  let cls = 'fa-solid fa-circle-check text-leaf', label = 'Synced';
+  if (SYNC_FAILED) { cls = 'fa-solid fa-triangle-exclamation text-rose'; label = 'Not saved'; }
+  else if (!CONNECTED || navigator.onLine === false) { cls = 'fa-solid fa-cloud-arrow-up text-amber'; label = PENDING_WRITES ? 'Offline, will sync' : 'Offline'; }
+  else if (PENDING_WRITES) { cls = 'fa-solid fa-arrows-rotate fa-spin text-leaf'; label = 'Syncing…'; }
+  icon.className = cls;
+  text.textContent = label;
 }
-function changeCustomer(id, change, label) {
-  return cloudTask(async owner => {
-    const result = await FB.R.runTransaction(customerRef(id, owner), current => {
-      if (!current) return current;
-      return change(clean(current));
-    }, { applyLocally: false });
-    if (!result.committed) throw appError('app/conflict');
-    if (!result.snapshot.exists()) throw appError('app/customer-gone');
-  }, label + ':' + id);
+function track(promise) {
+  PENDING_WRITES++; SYNC_FAILED = false; renderSync();
+  return promise
+    .then(() => { SYNC_FAILED = false; })
+    .catch(err => { SYNC_FAILED = true; dataError(err); })
+    .finally(() => { PENDING_WRITES = Math.max(0, PENDING_WRITES - 1); renderSync(); });
 }
-function insertCustomer(customer) {
-  return cloudTask(async owner => {
-    let duplicate = false;
-    const result = await FB.R.runTransaction(businessRef(owner), current => {
-      if (!current) return current;
-      duplicate = recordEntries(current.customers).some(([, c]) => normalizePhone(c.phone) === customer.phone);
-      if (duplicate) return;
-      return { ...current, customers: { ...(current.customers || {}), [customer.id]: customer },
-        progress: { ...(current.progress || {}), customer: true }, updatedAt: FB.R.serverTimestamp() };
-    }, { applyLocally: false });
-    if (!result.committed) throw appError(duplicate ? 'app/duplicate-phone' : 'app/conflict');
-    if (!result.snapshot.exists()) throw appError('app/customer-gone');
-  }, 'New customer:' + customer.phone);
+window.addEventListener('online', renderSync);
+window.addEventListener('offline', renderSync);
+
+function saveProfile() {
+  if (!FB || !USER || !DATA || !ACCOUNT) return;
+  track(FB.R.update(businessRef(), profilePayload()));
 }
-async function submitCloudForm(form, work) {
-  if (!form || !SYNC.loaded || !USER) return toast('Wait for the latest records to load first.');
-  if (form.dataset.saving === '1') return;
-  const owner = USER?.uid;
-  const submit = form.querySelector('button[type="submit"]');
-  const oldText = submit?.textContent;
-  const controls = [...form.querySelectorAll('input, select, textarea')].map(input => [input, input.disabled]);
-  form.dataset.saving = '1';
-  controls.forEach(([input]) => { input.disabled = true; });
-  if (submit) { submit.disabled = true; submit.textContent = 'Saving...'; }
-  try { await work(owner); }
-  catch (err) { if (USER?.uid === owner) dataError(err); }
-  finally {
-    form.dataset.saving = '';
-    controls.forEach(([input, disabled]) => { input.disabled = disabled; });
-    if (submit) { submit.disabled = false; submit.textContent = oldText; }
-  }
+/* Per-customer sync. Only customers that actually changed are written, and only removed
+   ones are deleted. Rewriting the whole list on every save would let a browser with an
+   out-of-date list wipe out customers added from another phone or browser. */
+let SYNCED = {}; // customer id -> JSON of what the database currently holds
+function syncCustomers() {
+  if (!FB || !USER || !DATA) return;
+  const updates = {};
+  let changed = 0;
+  const seen = new Set();
+  DATA.customers.forEach(c => {
+    seen.add(c.id);
+    const json = JSON.stringify(clean(c));
+    if (SYNCED[c.id] !== json) { updates[c.id] = JSON.parse(json); SYNCED[c.id] = json; changed++; }
+  });
+  Object.keys(SYNCED).forEach(id => {
+    if (!seen.has(id)) { updates[id] = null; delete SYNCED[id]; changed++; }
+  });
+  if (changed) track(FB.R.update(customersRef(), updates));
 }
+function saveData() { saveProfile(); syncCustomers(); }
+function removeCustomer(id) { delete SYNCED[id]; if (FB && USER) track(FB.R.remove(customerRef(id))); }
+
+// Save any message still being typed before the app is hidden or closed.
+function flushPendingSaves() {
+  const ids = Object.keys(saveTimers);
+  if (!ids.length) return;
+  ids.forEach(id => clearTimeout(saveTimers[id]));
+  saveTimers = {};
+  saveData();
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPendingSaves(); });
+window.addEventListener('pagehide', flushPendingSaves);
 
 function applyProfile(p) {
   const base = freshData();
-  ACCOUNT = { uid: USER.uid, email: USER.email || p.email || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || '', businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr(), pinHash: p.pinHash || '', pinSalt: p.pinSalt || '', pinAlgo: p.pinAlgo || 'simple', authProvider: p.authProvider || (USER.isAnonymous ? 'phone-pin' : 'google') };
-  const templates = recordEntries(p.templates).map(([key, t]) => ({ ...t, id: safeKey(t.id) ? t.id : key, _key: key, title: String(t.title || 'Message'), body: String(t.body || ''), icon: /^fa-[a-z-]+$/.test(t.icon || '') ? t.icon : 'fa-comment' }));
-  const known = new Map(templates.map(t => [t.id, t]));
-  DATA.templates = base.templates.map(t => known.get(t.id) || { ...t, _key: t.id });
-  templates.filter(t => !base.templates.some(defaultTemplate => defaultTemplate.id === t.id)).forEach(t => DATA.templates.push(t));
+  const ownPhone = USER.email && USER.email.endsWith(PHONE_EMAIL_DOMAIN) ? USER.email.slice(0, -PHONE_EMAIL_DOMAIN.length) : '';
+  ACCOUNT = { uid: USER.uid, email: realEmail(USER) || p.email || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || ownPhone, businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr() };
+  DATA.templates = Array.isArray(p.templates) && p.templates.length ? p.templates.map(t => ({ ...t })) : base.templates;
   DATA.settings = Object.assign(base.settings, p.settings || {});
   DATA.progress = Object.assign(base.progress, p.progress || {});
   DATA.onboardingDone = !!p.onboardingDone;
@@ -989,80 +859,51 @@ function applyProfile(p) {
   if (appShown) renderHeader();
 }
 
-function initialProfile(user, draft = {}) {
-  const base = freshData();
-  return { businessName: user.displayName ? user.displayName + "'s business" : 'My business', ownerName: user.displayName || '', phone: '',
-    businessType: 'Other', email: user.email || '', createdAt: todayStr(), authProvider: user.isAnonymous ? 'phone-pin' : 'google',
-    templates: Object.fromEntries(base.templates.map(t => [t.id, t])), settings: base.settings, progress: base.progress,
-    onboardingDone: false, sentCount: 0, ...draft };
-}
-function ensureBusiness(user, draft = {}) {
-  return cloudTask(() => FB.R.runTransaction(businessRef(user.uid), current => {
-    if (current?.businessName) return; // Never replace an existing business or its children.
-    return { ...initialProfile(user, draft), ...(current || {}), businessName: current?.businessName || draft.businessName || initialProfile(user).businessName };
-  }, { applyLocally: false }), 'Account setup', false);
-}
 function enterApp(user) {
-  if (!user || FB.auth.currentUser?.uid !== user.uid) return;
-  leaveListeners();
-  closeAllSheets(true); hideInstallPrompt();
   USER = user;
-  DATA = freshData(); ACCOUNT = null; RAW_BUSINESS = null;
-  const epoch = sessionEpoch;
-  $('authView').classList.add('hidden'); $('appView').classList.add('hidden');
-  $('accountLoading').classList.remove('hidden');
-  $('accountSpinner').classList.remove('hidden'); $('accountLoadingActions').classList.add('hidden');
-  $('accountLoadingText').textContent = 'Getting your latest records from CustoPadi.';
-  loadTimer = setTimeout(() => {
-    if (epoch === sessionEpoch && !SYNC.loaded) showLoadProblem('Your account is signed in, but its records have not loaded yet. Reconnect or try again. We have not replaced your data.');
-  }, 15000);
-  let attemptedSetup = false;
-  // One snapshot keeps profile and customers consistent; listeners never save data back.
-  unsubBusiness = FB.R.onValue(businessRef(user.uid), snap => {
-    if (epoch !== sessionEpoch || USER?.uid !== user.uid) return;
+  leaveListeners(false);
+  appShown = false;
+  DATA = freshData(); ACCOUNT = null;
+  let gotP = false, gotC = false;
+  const ready = () => { if (gotP && gotC) { if (!appShown) showApp(); else if (!document.activeElement?.closest('form')) rerender(); } };
+  let creatingProfile = false;
+  unsubProfile = FB.R.onValue(businessRef(), snap => {
     const value = snap.val();
-    if (!value?.businessName) {
-      if (SYNC.loaded) {
-        leaveListeners(); closeAllSheets(); showAuth('login');
-        showError('logError', 'This business was removed in another browser. No records have been recreated.');
-        return;
-      }
-      if (!attemptedSetup) {
-        attemptedSetup = true;
-        const draft = Store.get('cp_pending_setup_' + user.uid, {});
-        ensureBusiness(user, draft);
+    if (!value || !value.businessName) {
+      // Covers a login whose profile was never saved (e.g. an earlier failed sign-up).
+      if (!creatingProfile) {
+        creatingProfile = true;
+        const base = freshData();
+        FB.R.set(businessRef(), clean({
+          businessName: user.displayName ? user.displayName + "'s business" : 'My business',
+          ownerName: user.displayName || '',
+          phone: (user.email || '').endsWith(PHONE_EMAIL_DOMAIN) ? user.email.slice(0, -PHONE_EMAIL_DOMAIN.length) : '',
+          businessType: 'Other', email: realEmail(user), createdAt: todayStr(),
+          authProvider: user.isAnonymous ? 'anonymous' : (user.providerData.some(p => p.providerId === 'password') ? 'phone-password' : 'google'),
+          templates: base.templates, settings: base.settings, progress: base.progress,
+          onboardingDone: false, sentCount: 0
+        })).catch(dataError);
       }
       return;
     }
-    RAW_BUSINESS = value;
     applyProfile(value);
-    DATA.customers = recordEntries(value.customers).map(([id, c]) => normalizeCustomer(id, c));
-    SYNC.loaded = true;
-    SYNC.failures.delete('read');
-    clearTimeout(loadTimer);
-    Store.remove('cp_pending_setup_' + user.uid);
-    if (user.isAnonymous && ACCOUNT.pinHash) saveGuestRecord(ACCOUNT);
-    if (!appShown) showApp(); else refreshLiveViews();
-    renderSyncState();
-  }, err => {
-    if (epoch !== sessionEpoch) return;
-    clearTimeout(loadTimer); SYNC.loaded = false; dataError(err);
-  });
-  renderSyncState();
+    gotP = true; ready();
+  }, dataError);
+  unsubCustomers = FB.R.onValue(customersRef(), snap => {
+    const value = snap.val() || {};
+    DATA.customers = Object.keys(value).map(id => normalizeCustomer(id, value[id]));
+    // Remember what the database holds, so only real edits are written back.
+    SYNCED = {};
+    DATA.customers.forEach(c => { SYNCED[c.id] = JSON.stringify(clean(c)); });
+    gotC = true; ready();
+  }, dataError);
 }
 
 function leaveListeners(resetState = true) {
-  if (unsubBusiness) unsubBusiness();
-  unsubBusiness = null;
-  clearTimeout(loadTimer);
-  sessionEpoch++;
-  Object.values(saveTimers).forEach(clearTimeout);
-  saveTimers = {};
-  templateDrafts.clear();
-  SYNC.pending.clear(); SYNC.failures.clear(); SYNC.loaded = false; SYNC.error = ''; SYNC.lastAck = null;
-  writeChain = Promise.resolve();
-  DETAIL_ID = null; BUSINESS_BASE = null;
-  if (resetState) { USER = null; ACCOUNT = null; DATA = null; RAW_BUSINESS = null; appShown = false; }
+  if (unsubProfile) unsubProfile(); if (unsubCustomers) unsubCustomers();
+  unsubProfile = unsubCustomers = null;
+  SYNCED = {};
+  if (resetState) { USER = null; ACCOUNT = null; DATA = null; appShown = false; }
 }
 
 /* ---------- Register / log in / log out ---------- */
@@ -1076,26 +917,22 @@ function setAuthMode(mode) {
 
 function showAuth(mode) {
   appShown = false;
-  $('accountLoading').classList.add('hidden');
   $('appView').classList.add('hidden');
   $('authView').classList.remove('hidden');
-  hideInstallPrompt();
   const last = Store.get('cp_last_phone', '');
   if (last && !$('logPhone').value) $('logPhone').value = last;
-  setAuthMode(mode || (getGuests().length ? 'login' : 'register'));
+  setAuthMode(mode || (last ? 'login' : 'register'));
   window.scrollTo(0, 0);
-  setAuthControls();
   updateBars();
 }
 
 function showApp() {
   appShown = true;
-  $('accountLoading').classList.add('hidden');
   $('authView').classList.add('hidden');
   $('appView').classList.remove('hidden');
   renderHeader();
   switchTab('today');
-  renderSyncState();
+  updateBars();
   startInstallPrompts();
   try {
     const pending = JSON.parse(sessionStorage.getItem('cp_pending_message') || 'null');
@@ -1109,79 +946,73 @@ function showApp() {
 
 async function register(e) {
   e.preventDefault();
-  if (authAction) return;
   hideError('regError');
   const businessName = $('regBiz').value.trim();
   const ownerName = $('regOwner').value.trim();
   const phone = normalizePhone($('regPhone').value);
   const businessType = $('regType').value;
-  const pin = $('regPin').value.trim();
+  const pw = $('regPw').value;
   if (businessName.length < 2 || businessName.length > 60) return showError('regError', 'Please type a business name between 2 and 60 characters.');
   if (ownerName.length < 2 || ownerName.length > 50) return showError('regError', 'Please type your name (2 to 50 characters).');
   if (!validPhone(phone)) return showError('regError', 'Please type a correct Nigerian number, like 08031234567.');
-  if (!/^\d{4}$/.test(pin)) return showError('regError', 'Choose a PIN with exactly 4 numbers.');
-  if (!FB || !authReady) return showError('regError', 'Secure sign-in is still loading.');
-  const current = FB.auth.currentUser;
-  if (current && !Store.get('cp_pending_setup_' + current.uid, null)) {
-    return showError('regError', 'This browser already has an account. Open it from Log in and link Google there. Creating another account would separate your records.');
-  }
+  if (pw.length < 6) return showError('regError', 'Your password must be at least 6 characters.');
+  if (!FB) return showError('regError', 'Still loading. Please wait a moment and try again.');
+
+  const btn = $('regSubmit'); btn.disabled = true;
   authAction = 'register';
-  setAuthControls();
+  let created = null;
   try {
-    const cred = current ? { user: current } : await FB.A.signInAnonymously(FB.auth);
-    const pinAlgo = canSha ? 'sha256' : 'simple';
-    const pinSalt = uid() + uid();
-    const pinHash = await hashPin(pin, pinSalt, pinAlgo);
+    // The WhatsApp number is the login name, so the same number + password works in any browser.
+    const cred = await FB.A.createUserWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
+    created = cred.user;
     const base = freshData();
-    const profile = {
+    await FB.R.set(businessRef(cred.user.uid), clean({
       businessName, ownerName, phone, businessType, email: '', createdAt: todayStr(),
-      authProvider: 'phone-pin', pinHash, pinSalt, pinAlgo,
+      authProvider: 'phone-password',
       templates: base.templates, settings: base.settings, progress: base.progress,
       onboardingDone: false, sentCount: 0
-    };
-    // Retain the setup draft, never the raw PIN, if the first database write fails.
-    Store.set('cp_pending_setup_' + cred.user.uid, profile);
-    USER = cred.user;
-    saveGuestRecord({ uid: cred.user.uid, businessName, phone, pinHash, pinSalt, pinAlgo });
-    if (!(await ensureBusiness(cred.user, profile))) return showError('regError', 'Your sign-in was created, but the business was not saved yet. ' + SYNC.error);
-    unlockGuest(cred.user.uid);
+    }));
     Store.set('cp_last_phone', phone);
     $('registerForm').reset();
     enterApp(cred.user);
     toast('Welcome to CustoPadi, ' + firstName(ownerName) + '!');
   } catch (err) {
-    showError('regError', authMessage(err));
+    console.error('Sign-up failed:', err);
+    if (created) {
+      // The login exists but the database refused the profile. Sign out cleanly so Log in can finish it.
+      try { await FB.A.signOut(FB.auth); } catch (e) {}
+      showError('regError', 'Your account was created, but the database refused to save your business. App owner: publish the Realtime Database rules. Then tap Log in with the same number and password.');
+    } else showError('regError', authMessage(err));
   } finally {
     authAction = '';
-    setAuthControls();
+    btn.disabled = false;
   }
 }
 
 async function login(e) {
   e.preventDefault();
-  if (authAction) return;
   hideError('logError'); $('logInfo').classList.add('hidden');
   const phone = normalizePhone($('logPhone').value);
-  const pin = $('logPin').value.trim();
+  const pw = $('logPw').value;
   if (!validPhone(phone)) return showError('logError', 'Type your WhatsApp number, like 08031234567.');
-  if (!/^\d{4}$/.test(pin)) return showError('logError', 'Type your 4-number PIN.');
-  if (!FB || !authReady) return showError('logError', 'Secure sign-in is still loading.');
-  const current = FB.auth.currentUser;
-  const guest = getGuests().find(g => g.phone === phone && g.uid === current?.uid);
-  if (!guest) return showError('logError', 'No phone + PIN account with this number on this phone. Phone + PIN works on the phone used to register. On another phone, use Continue with Google.');
-  authAction = 'unlock'; setAuthControls();
+  if (!pw) return showError('logError', 'Type your password.');
+  if (!FB) return showError('logError', 'Still loading. Please wait a moment and try again.');
+  const btn = $('logSubmit'); btn.disabled = true;
+  authAction = 'login';
   try {
-    const hash = await hashPin(pin, guest.pinSalt, guest.pinAlgo);
-    if (hash !== guest.pinHash) { $('logPin').value = ''; return showError('logError', 'Wrong PIN. Please try again.'); }
-    if (!current || current.uid !== guest.uid || FB.auth.currentUser?.uid !== current.uid) {
-      return showError('logError', 'The account session has changed. Use the linked Google account to sign in.');
-    }
-    unlockGuest(guest.uid);
+    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
     Store.set('cp_last_phone', phone);
-    $('logPin').value = '';
-    enterApp(FB.auth.currentUser);
-  } catch (error) { showError('logError', 'Could not unlock this browser. Try again.'); }
-  finally { authAction = ''; setAuthControls(); }
+    $('logPw').value = '';
+    enterApp(cred.user);
+    toast('Welcome back!');
+  } catch (err) {
+    console.error('Login failed:', err);
+    $('logPw').value = '';
+    showError('logError', authMessage(err));
+  } finally {
+    authAction = '';
+    btn.disabled = false;
+  }
 }
 
 const googleProvider = () => {
@@ -1198,137 +1029,116 @@ function popupHint() {
 async function googleSignIn(mode) {
   const errorId = mode === 'login' ? 'logError' : 'regError';
   hideError(errorId);
-  if (!FB || !authReady || authAction) return;
-  const current = FB.auth.currentUser;
-  if (current && !hasGoogle(current)) {
-    if ((current.isAnonymous && !guestIsUnlocked(current.uid)) || !ACCOUNT) return showError(errorId, 'Open your existing business in this browser first, then choose Link Google for sync in Account & sync. This keeps your existing records.');
-    return linkGoogle();
-  }
+  if (!FB) return showError(errorId, 'Still loading. Please wait a moment and try again.');
   authAction = 'google';
-  setAuthControls();
   try {
     const cred = await FB.A.signInWithPopup(FB.auth, googleProvider());
     enterApp(cred.user);
+    toast('Signed in with Google');
   } catch (err) {
     const code = err && err.code;
+    console.error('Google sign-in failed:', err);
     if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') showError(errorId, popupHint());
     else if (code === 'auth/popup-closed-by-user') { /* the owner closed it, say nothing */ }
     else if (code === 'auth/web-storage-unsupported') showError(errorId, 'This browser blocks sign-in storage. Open CustoPadi in a normal browser tab and allow site data.');
     else showError(errorId, authMessage(err));
-  } finally { authAction = ''; setAuthControls(); }
+  } finally { authAction = ''; }
 }
 
 async function linkGoogle() {
-  if (!FB || !USER || !ACCOUNT || authAction) return;
-  if (hasGoogle()) return openSyncSheet();
-  if (USER.isAnonymous && !guestIsUnlocked(USER.uid)) return;
-  if (hasUnsavedChanges()) return toast('Wait for your changes to finish saving, then link Google.');
-  const sourceUid = USER.uid;
-  hideError('accountError');
-  authAction = 'link';
-  setAuthControls();
+  if (!FB || !USER) return;
   try {
     const cred = await FB.A.linkWithPopup(USER, googleProvider());
-    if (cred.user.uid !== sourceUid) throw appError('app/account-changed');
     USER = cred.user;
-    // Linking preserves the Firebase UID, so no customer data has to move.
-    ACCOUNT.email = USER.email || '';
-    const saved = await patchBusiness({ authProvider: 'google', email: ACCOUNT.email, pinHash: null, pinSalt: null, pinAlgo: null }, 'Google account link');
-    removeGuestRecord(sourceUid);
-    lockGuestSession();
+    ACCOUNT.authProvider = hasProvider('password') ? 'phone-password' : 'google';
+    saveProfile();
     closeSheet('business');
-    openSyncSheet();
-    toast(saved ? 'Google linked. Use this Google account in your other browser.' : 'Google linked. Your database connection still needs attention.');
+    toast('Google linked. You can now open this business with Google too.');
   } catch (err) {
     const code = err && err.code;
-    if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
-      const message = code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use'
-        ? 'That Google account already has a separate CustoPadi business. Your current records are unchanged. Export a backup here, then open the other browser, sign in with that Google account, and import the backup to add missing customers. Or link a different Google account here.'
-        : authMessage(err);
-      showError('accountError', message); showError('syncErrorText', message);
-      toast('Google was not linked. See the account message.');
-    }
-  } finally {
-    authAction = ''; setAuthControls();
+    console.error('Google link failed:', err);
+    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') toast(popupHint());
+    else if (code === 'auth/popup-closed-by-user') { /* cancelled, say nothing */ }
+    else if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') toast('That Google account already belongs to another CustoPadi account. Choose a different Google account.');
+    else toast(authMessage(err));
   }
 }
 
-async function logout() {
-  if (authAction) return;
-  if (SYNC.pending.size) return toast('Changes are still sending. Keep this page open until they are saved online.');
-  if (templateDrafts.size && !confirm('Some message edits were not saved. Discard these local edits and leave?')) return;
-  closeAllSheets();
-  hideInstallPrompt();
-  if (isGuest()) {
-    lockGuestSession();
-    leaveListeners();
-    showAuth('login');
-    toast('Locked. Use your WhatsApp number and PIN to open it again.');
-    return;
-  }
+// Upgrades a browser-only (anonymous) business so it can be opened from any browser.
+// The business keeps its id, so every customer and sale stays attached to it.
+async function upgradeToSync(e) {
+  e.preventDefault();
+  hideError('upError');
+  if (!FB || !USER || !isGuest()) return;
+  const phone = normalizePhone(ACCOUNT.phone);
+  const pw = $('upPw').value;
+  if (!validPhone(phone)) return showError('upError', 'Add your WhatsApp number under Business details, save it, then try again.');
+  if (pw.length < 6) return showError('upError', 'Your password must be at least 6 characters.');
   try {
-    if (FB) await FB.A.signOut(FB.auth);
-    leaveListeners(); showAuth('login'); toast('You are logged out');
-  } catch (err) { toast(authMessage(err)); }
+    const res = await FB.A.linkWithCredential(USER, FB.A.EmailAuthProvider.credential(phoneEmail(phone), pw));
+    USER = res.user;
+    ACCOUNT.authProvider = 'phone-password';
+    saveProfile();
+    Store.set('cp_last_phone', phone);
+    $('upPw').value = '';
+    closeSheet('business');
+    toast('Sync is on. Log in with your WhatsApp number and password on any phone or browser.');
+  } catch (err) {
+    console.error('Sync upgrade failed:', err);
+    showError('upError', err && err.code === 'auth/email-already-in-use'
+      ? 'This WhatsApp number already has another CustoPadi login. Log in with it instead, or save a different number first.'
+      : authMessage(err));
+  }
+}
+
+function logout() {
+  closeAllSheets();
+  if (isGuest() && !confirm('This business is only saved for this browser. If you log out you cannot open it again. Turn on sync in Business settings first. Log out anyway?')) return;
+  if (FB) FB.A.signOut(FB.auth).catch(() => { leaveListeners(); showAuth('login'); });
+  else { leaveListeners(); showAuth('login'); }
+  toast('You are logged out');
 }
 
 async function changePassword(e) {
   e.preventDefault();
-  const form = e.currentTarget, owner = USER?.uid;
   hideError('pwError');
-  if (!isGuest()) return;
-  const oldPin = $('pwOld').value.trim(), newPin = $('pwNew').value.trim();
-  if (!/^\d{4}$/.test(oldPin) || !/^\d{4}$/.test(newPin)) return showError('pwError', 'Both PINs must be exactly 4 numbers.');
-  const oldHash = await hashPin(oldPin, ACCOUNT.pinSalt, ACCOUNT.pinAlgo);
-  if (oldHash !== ACCOUNT.pinHash) return showError('pwError', 'Your current PIN is not correct.');
-  const pinAlgo = canSha ? 'sha256' : 'simple';
-  const pinSalt = uid() + uid();
-  const pinHash = await hashPin(newPin, pinSalt, pinAlgo);
-  if (USER?.uid !== owner || !USER.isAnonymous) return;
-  await submitCloudForm(form, async () => {
-    if (await patchBusiness({ pinHash, pinSalt, pinAlgo }, 'PIN update')) {
-      Object.assign(ACCOUNT, { pinHash, pinSalt, pinAlgo });
-      saveGuestRecord(ACCOUNT);
-      $('pwOld').value = ''; $('pwNew').value = '';
-      toast('PIN updated');
-    }
-  });
+  if (!hasProvider('password')) return;
+  const oldPw = $('pwOld').value, newPw = $('pwNew').value;
+  if (!oldPw) return showError('pwError', 'Type your current password.');
+  if (newPw.length < 6) return showError('pwError', 'Your new password must be at least 6 characters.');
+  try {
+    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(USER.email, oldPw));
+    await FB.A.updatePassword(USER, newPw);
+    $('pwOld').value = ''; $('pwNew').value = '';
+    toast('Password updated');
+  } catch (err) {
+    const code = err && err.code;
+    showError('pwError', ['auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(code)
+      ? 'Your current password is not correct.' : authMessage(err));
+  }
 }
 
 async function deleteBusiness() {
-  if (authAction || hasUnsavedChanges()) return toast('Wait for pending changes before deleting the business.');
   if (!navigator.onLine) return toast('You need internet to delete your business.');
   if (!confirm('Delete "' + ACCOUNT.businessName + '" and ALL its customers and sales? This cannot be undone.')) return;
   if (!confirm('Are you very sure? Everything for this business will be gone.')) return;
-  let recordsRemoved = false;
-  authAction = 'delete'; setAuthControls();
   try {
-    if (isGuest()) {
-      const pin = prompt('Type your 4-digit PIN to confirm:');
-      if (!pin) return;
-      const hash = await hashPin(pin, ACCOUNT.pinSalt, ACCOUNT.pinAlgo);
-      if (hash !== ACCOUNT.pinHash) return toast('Wrong PIN. Business not deleted.');
-    } else {
+    if (hasProvider('password')) {
+      const pw = prompt('Type your password to confirm:');
+      if (!pw) return;
+      await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(USER.email, pw));
+    } else if (hasProvider('google.com')) {
       await FB.A.reauthenticateWithPopup(USER, googleProvider());
     }
     const user = USER;
     leaveListeners(false);
     await FB.R.remove(businessRef(user.uid));
-    recordsRemoved = true;
     closeAllSheets();
     await FB.A.deleteUser(user);
-    removeGuestRecord(user.uid); lockGuestSession();
-    leaveListeners(); showAuth('register');
     toast('Business deleted');
   } catch (err) {
     toast(authMessage(err));
-    if (recordsRemoved) {
-      await FB.A.signOut(FB.auth).catch(() => {});
-      leaveListeners(); showAuth('login');
-      showError('logError', 'Business records were deleted, but the sign-in account could not be removed.');
-    } else if (USER) enterApp(USER);
-  } finally {
-    authAction = ''; setAuthControls();
+    if (USER) enterApp(USER);
   }
 }
 
@@ -1346,7 +1156,6 @@ function renderHeader() {
 }
 
 function openBusinessSheet() {
-  BUSINESS_BASE = clean(ACCOUNT);
   $('bizAvatar').textContent = initials(ACCOUNT.businessName);
   $('bizSheetName').textContent = ACCOUNT.businessName;
   $('bizSheetMeta').textContent = ACCOUNT.businessType + ' · ' + DATA.customers.length + ' ' + plural(DATA.customers.length, 'customer', 'customers');
@@ -1354,36 +1163,36 @@ function openBusinessSheet() {
   $('bizOwner').value = ACCOUNT.ownerName;
   $('bizType').value = ACCOUNT.businessType;
   $('bizPhone').value = ACCOUNT.phone;
-  $('bizEmail').textContent = isGuest() ? 'PIN unlock (this browser only)' : (USER.email || 'Google account');
-  $('accountModeText').textContent = !hasGoogle()
-    ? 'Link Google on this browser to open these same records in other browsers. A PIN is only a local screen lock.'
-    : 'Sign in with the same Google account in every browser to open this business.';
-  $('pinChangeForm').classList.toggle('hidden', !isGuest());
-  $('linkGoogleBox').classList.toggle('hidden', hasGoogle());
-  $('logoutBtn').innerHTML = isGuest()
-    ? '<i class="fa-solid fa-lock"></i> Lock with PIN'
-    : '<i class="fa-solid fa-right-from-bracket"></i> Log out';
+  const methods = [];
+  if (hasProvider('password')) methods.push('WhatsApp number + password');
+  if (hasProvider('google.com')) methods.push('Google' + (realEmail(USER) ? ' (' + realEmail(USER) + ')' : ''));
+  $('bizEmail').textContent = isGuest() ? 'This browser only (not synced yet)' : (methods.join(' and ') || 'Signed in');
+  $('accountModeText').innerHTML = isGuest()
+    ? '<b>Not synced yet.</b> This business only opens in this browser. Turn on sync below to open it from any phone or browser.'
+    : '<b>Synced online.</b> Log in on any phone or browser and the same customers appear, updating live.';
+  $('upgradeBox').classList.toggle('hidden', !isGuest());
+  $('pwChangeForm').classList.toggle('hidden', !hasProvider('password'));
+  $('linkGoogleBox').classList.toggle('hidden', hasProvider('google.com'));
+  hideError('upError');
+  $('logoutBtn').innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Log out';
   $('pwOld').value = ''; $('pwNew').value = '';
-  hideError('bizError'); hideError('pwError'); hideError('accountError');
+  hideError('bizError'); hideError('pwError');
   openSheet('business');
 }
 
-async function saveBusiness(e) {
+function saveBusiness(e) {
   e.preventDefault();
   hideError('bizError');
   const name = $('bizName').value.trim(), owner = $('bizOwner').value.trim(), phone = normalizePhone($('bizPhone').value);
   if (name.length < 2 || name.length > 60) return showError('bizError', 'Please type a business name between 2 and 60 characters.');
   if (owner.length < 2 || owner.length > 50) return showError('bizError', 'Please type your name (2 to 50 characters).');
   if (!validPhone(phone)) return showError('bizError', 'Please type a correct number, like 08031234567.');
-  const values = { businessName: name, ownerName: owner, businessType: $('bizType').value, phone };
-  const changed = Object.fromEntries(Object.entries(values).filter(([key, value]) => value !== BUSINESS_BASE?.[key]));
-  if (Object.keys(changed).some(key => ACCOUNT[key] !== BUSINESS_BASE?.[key] && ACCOUNT[key] !== changed[key])) return showError('bizError', 'Business details changed in another browser. Reopen settings before saving.');
-  await submitCloudForm(e.currentTarget, async () => {
-    if (await patchBusiness(changed, 'Business details')) {
-      if (isGuest()) saveGuestRecord(ACCOUNT);
-      closeSheet('business'); toast('Business details saved online');
-    }
-  });
+  Object.assign(ACCOUNT, { businessName: name, ownerName: owner, businessType: $('bizType').value, phone });
+  saveProfile();
+  renderHeader();
+  closeSheet('business');
+  rerender();
+  toast('Business details saved');
 }
 
 /* =========================================================
@@ -1406,42 +1215,22 @@ function importBackup(e) {
   const file = e.target.files && e.target.files[0];
   e.target.value = '';
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) return toast('Please choose a backup smaller than 5 MB.');
-  if (!USER || !SYNC.loaded) return toast('Wait for your business to load first.');
-  if (hasUnsavedChanges()) return toast('Wait for other changes to finish saving before importing a backup.');
-  const owner = USER.uid;
   const reader = new FileReader();
-  reader.onload = async () => {
-    if (USER?.uid !== owner) return;
+  reader.onload = () => {
     try {
       const parsed = JSON.parse(reader.result);
-      const incoming = parsed?.data || parsed;
-      if (!Array.isArray(incoming?.customers) || incoming.customers.length > 5000) throw new Error('Invalid backup');
-      const list = incoming.customers.map(raw => {
-        const c = normalizeCustomer(FB.R.push(customersRef(owner)).key, raw);
-        c.phone = normalizePhone(c.phone);
-        if (c.name.trim().length < 2 || c.name.length > 50 || !validPhone(c.phone) || !['New', 'Regular', 'VIP'].includes(c.tag)) throw new Error('Invalid customer');
-        if (c.purchases.some(p => !Number.isFinite(p.amount) || p.amount <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(p.date))) throw new Error('Invalid sale');
-        const encode = entries => Object.fromEntries(entries.map((item, index) => { const { _key, ...value } = item; return ['import_' + index, value]; }));
-        return { ...c, purchases: encode(c.purchases), contactHistory: encode(c.contactHistory) };
-      });
-      if (!confirm('Add missing customers from this backup? Existing customers, sales, messages and settings will stay unchanged. Customers already saved with the same phone number are skipped.')) return;
-      let added = 0;
-      const ok = await cloudTask(async () => {
-        const result = await FB.R.runTransaction(businessRef(owner), current => {
-          if (!current) return current;
-          const customers = { ...(current.customers || {}) };
-          const phones = new Set(Object.values(customers).map(c => c.phone));
-          added = 0;
-          list.forEach(c => { if (!phones.has(c.phone)) { customers[c.id] = c; phones.add(c.phone); added++; } });
-          return { ...current, customers, updatedAt: FB.R.serverTimestamp() };
-        }, { applyLocally: false });
-        if (!result.snapshot.exists()) throw appError('app/customer-gone');
-      }, 'Backup import');
-      if (ok) { closeSheet('business'); toast(added + ' customers added online. Existing records kept.'); }
+      const incoming = parsed && parsed.data && Array.isArray(parsed.data.customers) ? parsed.data : (Array.isArray(parsed.customers) ? parsed : null);
+      if (!incoming) return toast('This file is not a CustoPadi backup.');
+      if (!confirm('Replace your current customers and sales with the backup file (' + incoming.customers.length + ' customers)? This replaces the records saved online for this business.')) return;
+      DATA.customers = incoming.customers.map(c => normalizeCustomer(c.id || uid(), c));
+      if (Array.isArray(incoming.templates) && incoming.templates.length) DATA.templates = incoming.templates;
+      if (incoming.settings) DATA.settings = Object.assign({}, DATA.settings, incoming.settings);
+      saveData();
+      closeSheet('business');
+      rerender();
+      toast('Backup restored (' + DATA.customers.length + ' customers)');
     } catch (err) { toast('Could not read that backup file.'); }
   };
-  reader.onerror = () => toast('Could not open that file.');
   reader.readAsText(file);
 }
 
@@ -1551,23 +1340,16 @@ function shareAppWhatsApp() {
 /* =========================================================
    SHEETS & NAV
    ========================================================= */
-function openSheet(name) { $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden'; hideInstallPrompt(); }
+function openSheet(name) { $('sheet-' + name).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
 function closeSheet(name) {
   $('sheet-' + name).classList.add('hidden');
-  if (name === 'customer') DETAIL_ID = null;
   if (name === 'confirm') {
     PENDING_MESSAGE = null;
     try { sessionStorage.removeItem('cp_pending_message'); } catch (e) {}
   }
   if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
 }
-function closeAllSheets(preservePending = false) {
-  ['customer', 'picker', 'edit', 'confirm', 'business', 'sync'].forEach(name => {
-    if (name === 'confirm' && preservePending) $('sheet-confirm').classList.add('hidden');
-    else closeSheet(name);
-  });
-  document.body.style.overflow = '';
-}
+function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business'].forEach(closeSheet); }
 
 let CURRENT_TAB = 'today';
 function switchTab(name) {
@@ -1586,27 +1368,6 @@ function rerender() {
   if (CURRENT_TAB === 'customers') renderCustomers();
   if (CURRENT_TAB === 'messages') renderTemplates();
   if (CURRENT_TAB === 'stats') renderStats();
-}
-
-function refreshLiveViews() {
-  renderHeader();
-  rerender();
-  if (DETAIL_ID && !$('sheet-customer').classList.contains('hidden')) {
-    const c = getCustomer(DETAIL_ID);
-    if (!c) { closeSheet('customer'); toast('This customer has been removed.'); }
-    else openCustomer(c.id, true);
-  }
-  if (!$('sheet-edit').classList.contains('hidden') && !getCustomer(EDIT_ID)) {
-    closeSheet('edit'); toast('This customer was removed in another browser.');
-  }
-  // Update choices without resetting an item, amount, date or other typed draft.
-  if (!$('saleForm').classList.contains('hidden')) {
-    const selected = $('saleCustomer').value;
-    $('saleCustomer').innerHTML = '<option value="">Choose a customer</option>' + [...DATA.customers].sort((a, b) => a.name.localeCompare(b.name)).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-    $('saleCustomer').value = getCustomer(selected) ? selected : '';
-    $('saleEmpty').classList.toggle('hidden', DATA.customers.length > 0);
-    $('saleFields').classList.toggle('hidden', !DATA.customers.length);
-  }
 }
 
 /* =========================================================
@@ -1642,7 +1403,7 @@ function followUpDue(c, days) {
 /* =========================================================
    TODAY
    ========================================================= */
-function setDays(v) { patchBusiness({ 'settings/followUpDays': parseInt(v, 10) || 30 }, 'Reminder setting'); }
+function setDays(v) { DATA.settings.followUpDays = parseInt(v, 10) || 30; saveData(); renderToday(); }
 
 function renderOnboarding() {
   const el = $('onboarding');
@@ -1679,7 +1440,7 @@ function renderOnboarding() {
       </div>
     </div>`;
 }
-function hideOnboarding() { patchBusiness({ onboardingDone: true }, 'Getting started'); }
+function hideOnboarding() { DATA.onboardingDone = true; saveData(); renderOnboarding(); }
 function goAdd(kind, preId) {
   switchTab('add');
   if (kind === 'customer') showNewForm(); else showSaleForm(preId);
@@ -1820,12 +1581,9 @@ function renderCustomers() {
 }
 function clearCustomerSearch() { $('customerSearch').value = ''; FILTER = 'all'; renderCustomers(); }
 
-function openCustomer(id, refresh = false) {
+function openCustomer(id) {
   const c = getCustomer(id);
   if (!c) return;
-  DETAIL_ID = id;
-  const panel = $('customerSheetBody').parentElement;
-  const scroll = panel.scrollTop;
   const d = daysSince(lastDate(c));
   const s = statusOf(d);
   const purchases = [...c.purchases].sort((a, b) => b.date.localeCompare(a.date));
@@ -1871,17 +1629,14 @@ function openCustomer(id, refresh = false) {
         <div class="bg-cream rounded-xl px-4 py-3 flex justify-between gap-3 text-[15px]"><span>${esc(h.template || 'Follow-up')}</span><span class="text-stone">${esc(fmtDate(h.date))}</span></div>`).join('') : '<p class="text-stone text-[15px]">None confirmed yet. You decide when a message is marked sent.</p>'}
     </div>
     <button onclick="deleteCustomer('${c.id}')" class="w-full min-h-[48px] text-rose font-semibold text-[15px]"><i class="fa-regular fa-trash-can mr-1"></i> Delete this customer</button>`;
-  if (!refresh) openSheet('customer');
-  panel.scrollTop = refresh ? scroll : 0;
+  openSheet('customer');
 }
 
 let EDIT_ID = null;
-let EDIT_BASE = null;
 function openEditCustomer(id) {
   const c = getCustomer(id);
   if (!c) return;
   EDIT_ID = id;
-  EDIT_BASE = clean(c);
   $('editName').value = c.name;
   $('editPhone').value = c.phone;
   $('editBirthday').value = c.birthday || '';
@@ -1893,9 +1648,8 @@ function openEditCustomer(id) {
   closeSheet('customer');
   openSheet('edit');
 }
-async function saveCustomerEdit(e) {
+function saveCustomerEdit(e) {
   e.preventDefault();
-  const form = e.currentTarget;
   const c = getCustomer(EDIT_ID);
   if (!c) return;
   const name = $('editName').value.trim().replace(/\s+/g, ' ');
@@ -1904,40 +1658,28 @@ async function saveCustomerEdit(e) {
   if (!validPhone(phone)) return showError('editError', 'Please type a correct Nigerian number.');
   if (DATA.customers.some(other => other.id !== c.id && other.phone === phone)) return showError('editError', 'That number belongs to another customer.');
   if ($('editBirthday').value > todayStr()) return showError('editError', 'Birthday cannot be in the future.');
-  const values = { name, phone, birthday: $('editBirthday').value, tag: $('editTag').value, notes: $('editNotes').value.trim(), nextFollowUp: $('editNext').value };
-  const baseline = clean(EDIT_BASE);
-  const changed = Object.fromEntries(Object.entries(values).filter(([key, value]) => value !== baseline[key]));
-  await submitCloudForm(form, async () => {
-    const ok = await changeCustomer(c.id, current => {
-      const latest = normalizeCustomer(c.id, current);
-      if (Object.keys(changed).some(key => latest[key] !== baseline[key] && latest[key] !== changed[key])) return;
-      return { ...current, ...changed, updatedAt: FB.R.serverTimestamp() };
-    }, 'Customer details');
-    if (ok) {
-      if (EDIT_ID === c.id && !$('sheet-edit').classList.contains('hidden')) { closeSheet('edit'); openCustomer(c.id); }
-      toast('Customer updated online');
-    }
-    else showError('editError', SYNC.error || 'The change could not be saved.');
-  });
+  Object.assign(c, { name, phone, birthday: $('editBirthday').value, tag: $('editTag').value, notes: $('editNotes').value.trim(), nextFollowUp: $('editNext').value });
+  saveData();
+  closeSheet('edit');
+  openCustomer(c.id);
+  rerender();
+  toast('Customer updated');
 }
 
-async function deletePurchase(cid, pid) {
+function deletePurchase(cid, pid) {
   const c = getCustomer(cid);
   if (!c || !confirm('Remove this sale?')) return;
-  const p = c.purchases.find(p => p.id === pid);
-  if (!p) return;
-  const ok = await changeCustomer(cid, current => {
-    const purchases = { ...(current.purchases || {}) };
-    delete purchases[p._key || p.id];
-    return { ...current, purchases, updatedAt: FB.R.serverTimestamp() };
-  }, 'Remove sale');
-  if (ok) toast('Sale removed online');
+  c.purchases = c.purchases.filter(p => p.id !== pid);
+  saveData(); openCustomer(cid); rerender();
+  toast('Sale removed');
 }
-async function deleteCustomer(cid) {
+function deleteCustomer(cid) {
   const c = getCustomer(cid);
   if (!c || !confirm('Delete ' + c.name + ' and all their sales?')) return;
-  const ok = await patchBusiness({ ['customers/' + cid]: null }, 'Remove customer');
-  if (ok) { closeSheet('customer'); toast(firstName(c.name) + ' deleted online'); }
+  DATA.customers = DATA.customers.filter(x => x.id !== cid);
+  removeCustomer(cid);
+  saveData(); closeSheet('customer'); rerender();
+  toast(firstName(c.name) + ' deleted');
 }
 
 /* =========================================================
@@ -1950,7 +1692,6 @@ function hideForms() {
 }
 function showNewForm() {
   $('newForm').reset(); hideError('ncError');
-  $('newForm').dataset.draftId = uid();
   $('ncBirthday').max = todayStr();
   $('saleForm').classList.add('hidden');
   $('newForm').classList.remove('hidden');
@@ -1974,9 +1715,8 @@ function showSaleForm(preId) {
   setTimeout(() => (preId ? $('saleItem') : $('saleCustomer')).focus(), 50);
 }
 
-async function addCustomer(e) {
+function addCustomer(e) {
   e.preventDefault();
-  const form = e.currentTarget, draftId = form.dataset.draftId;
   hideError('ncError');
   const name = $('ncName').value.trim().replace(/\s+/g, ' ');
   const phone = normalizePhone($('ncPhone').value);
@@ -1984,18 +1724,16 @@ async function addCustomer(e) {
   if (!validPhone(phone)) return showError('ncError', 'Please type a correct number, like 08031234567.');
   const dup = DATA.customers.find(c => c.phone === phone);
   if (dup) return showError('ncError', 'This number is already saved for ' + dup.name + '.');
-  const c = { id: FB.R.push(customersRef()).key, name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, nextFollowUp: '' };
-  await submitCloudForm(form, async () => {
-    const ok = await insertCustomer(c);
-    if (ok) {
-      if (CURRENT_TAB === 'add' && !form.classList.contains('hidden') && form.dataset.draftId === draftId) { hideForms(); showSaleForm(c.id); }
-      toast(firstName(name) + ' saved online');
-    }
-    else showError('ncError', SYNC.error || 'Could not save the customer.');
-  });
+  const c = { id: uid(), name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, nextFollowUp: '', contactHistory: [], purchases: [] };
+  DATA.customers.push(c);
+  DATA.progress.customer = true;
+  saveData();
+  hideForms();
+  toast(firstName(name) + ' added. Log what they bought?');
+  showSaleForm(c.id);
 }
 
-async function addSale(e) {
+function addSale(e) {
   e.preventDefault();
   hideError('saleError');
   const c = getCustomer($('saleCustomer').value);
@@ -2004,19 +1742,14 @@ async function addSale(e) {
   const date = $('saleDate').value || todayStr();
   if (!c) return showError('saleError', 'Please choose the customer.');
   if (!item) return showError('saleError', 'Please type what they bought.');
-  if (!Number.isSafeInteger(amount) || amount <= 0) return showError('saleError', 'Please type a valid amount in naira.');
+  if (!amount || amount <= 0) return showError('saleError', 'Please type the amount in naira.');
   if (date > todayStr()) return showError('saleError', 'The date cannot be in the future.');
-  const sale = { id: FB.R.push(FB.R.child(customerRef(c.id), 'purchases')).key, date, item, amount };
-  await submitCloudForm(e.currentTarget, async () => {
-    const ok = await changeCustomer(c.id, current => {
-      const purchases = { ...(current.purchases || {}), [sale.id]: sale };
-      return { ...current, purchases, tag: recordEntries(purchases).length > 3 && current.tag === 'New' ? 'Regular' : (current.tag || 'New'), updatedAt: FB.R.serverTimestamp() };
-    }, 'New sale');
-    if (ok) {
-      patchBusiness({ 'progress/sale': true }, 'Getting started');
-      hideForms(); toast(fmtMoney(amount) + ' sale saved online');
-    } else showError('saleError', SYNC.error || 'Could not save the sale.');
-  });
+  c.purchases.push({ id: uid(), date, item, amount });
+  if (c.purchases.length > 3 && c.tag === 'New') c.tag = 'Regular';
+  DATA.progress.sale = true;
+  saveData();
+  hideForms();
+  toast(fmtMoney(amount) + ' sale saved for ' + firstName(c.name));
 }
 
 /* =========================================================
@@ -2024,16 +1757,9 @@ async function addSale(e) {
    ========================================================= */
 let saveTimers = {};
 function renderTemplates() {
-  if (!ACCOUNT || !DATA) return;
   $('msgBizName').textContent = ACCOUNT.businessName;
-  const existing = DATA.templates.every(t => $('tpl-' + t.id)) && $('templateList').querySelectorAll('textarea').length === DATA.templates.length;
-  if (existing) {
-    DATA.templates.forEach(t => {
-      const input = $('tpl-' + t.id);
-      if (document.activeElement !== input && !templateDrafts.has(t.id)) input.value = t.body;
-    });
-    return;
-  }
+  const ae = document.activeElement;
+  if (ae && ae.id && ae.id.startsWith('tpl-')) return; // don't interrupt typing
   $('templateList').innerHTML = DATA.templates.map(t => `
     <div class="card p-4">
       <div class="flex items-center gap-3 mb-3">
@@ -2041,8 +1767,7 @@ function renderTemplates() {
         <h3 class="font-bold text-[17px] flex-1">${esc(t.title)}</h3>
         <span id="saved-${t.id}" class="text-[14px] text-leaf font-semibold opacity-0 transition-opacity"><i class="fa-solid fa-check"></i> Saved</span>
       </div>
-      <textarea id="tpl-${t.id}" aria-label="${esc(t.title)} message" class="field resize-none leading-relaxed" rows="4" oninput="updateTemplate('${t.id}', this.value)" onblur="setTimeout(renderTemplates, 0)">${esc(templateDrafts.get(t.id)?.value ?? t.body)}</textarea>
-      <button id="retryTemplate-${t.id}" type="button" onclick="flushTemplate('${t.id}')" class="hidden btn btn-outline w-full mt-2">Retry saving this message</button>
+      <textarea id="tpl-${t.id}" class="field resize-none leading-relaxed" rows="4" oninput="updateTemplate('${t.id}', this.value)">${esc(t.body)}</textarea>
       ${t.body.includes('{name}') ? '' : '<p class="text-[14px] text-amber mt-2"><i class="fa-solid fa-circle-info"></i> Tip: add {name} so it feels personal.</p>'}
       <div class="flex gap-2 mt-3">
         <button onclick="copyTemplate('${t.id}')" class="btn btn-ghost flex-1 !text-[15px]"><i class="fa-regular fa-copy"></i> Copy</button>
@@ -2053,45 +1778,33 @@ function renderTemplates() {
 function updateTemplate(id, val) {
   const t = DATA.templates.find(x => x.id === id);
   if (!t) return;
-  const previous = templateDrafts.get(id);
-  templateDrafts.set(id, { value: val, key: t._key || t.id, owner: USER.uid, revision: (previous?.revision || 0) + 1 });
+  t.body = val;
   clearTimeout(saveTimers[id]);
-  saveTimers[id] = setTimeout(() => flushTemplate(id), 500);
-  const state = $('saved-' + id);
-  if (state) { state.textContent = 'Not saved yet'; state.style.opacity = 1; }
-  renderSyncState();
+  PENDING_WRITES || renderSyncTyping();
+  saveTimers[id] = setTimeout(() => {
+    delete saveTimers[id];
+    saveData();
+    const s = $('saved-' + id);
+    if (s) { s.style.opacity = 1; setTimeout(() => s.style.opacity = 0, 1200); }
+  }, 400);
 }
-async function flushTemplate(id) {
-  clearTimeout(saveTimers[id]); delete saveTimers[id];
-  const draft = templateDrafts.get(id);
-  if (!draft || draft.owner !== USER?.uid) return;
-  const revision = draft.revision;
-  const template = DATA.templates.find(t => t.id === id);
-  const path = 'templates/' + draft.key;
-  const patch = RAW_BUSINESS?.templates?.[draft.key]
-    ? { [path + '/body']: draft.value }
-    : { [path]: { id, title: template?.title || 'Message', icon: template?.icon || 'fa-comment', body: draft.value } };
-  const ok = await patchBusiness(patch, 'Message template:' + id);
-  if (draft.owner !== USER?.uid || templateDrafts.get(id)?.revision !== revision) return;
-  if (ok) templateDrafts.delete(id);
-  const state = $('saved-' + id), retry = $('retryTemplate-' + id);
-  if (state) { state.textContent = ok ? 'Saved online' : 'Not saved'; state.style.opacity = 1; }
-  if (retry) retry.classList.toggle('hidden', ok);
-  renderSyncState();
+function renderSyncTyping() {
+  if (CONNECTED && navigator.onLine !== false && $('syncText')) {
+    $('syncIcon').className = 'fa-solid fa-pen text-stone';
+    $('syncText').textContent = 'Saving…';
+  }
 }
 function resetTemplate(id) {
   const def = DEFAULT_TEMPLATES.find(x => x.id === id);
   const t = DATA.templates.find(x => x.id === id);
   if (!def || !t) return;
-  if (!confirm('Go back to the original message?')) return;
-  $('tpl-' + id).value = def.body;
-  updateTemplate(id, def.body);
-  flushTemplate(id);
+  if (t.body !== def.body && !confirm('Go back to the original message?')) return;
+  t.body = def.body; saveData(); renderTemplates();
+  toast('Message reset');
 }
 function copyTemplate(id) {
   const t = DATA.templates.find(x => x.id === id);
-  if (!t) return;
-  const text = (templateDrafts.get(id)?.value ?? t.body).replace(/\{business\}/gi, () => ACCOUNT.businessName);
+  const text = t.body.replace(/\{business\}/gi, ACCOUNT.businessName);
   const done = () => toast('Message copied');
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
   else fallbackCopy(text, done);
@@ -2100,7 +1813,7 @@ function fallbackCopy(text, done) {
   const ta = document.createElement('textarea');
   ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
   document.body.appendChild(ta); ta.select();
-  try { if (document.execCommand('copy')) done(); else toast('Could not copy. Please copy by hand.'); } catch (e) { toast('Could not copy. Please copy by hand.'); }
+  try { document.execCommand('copy'); done(); } catch (e) { toast('Could not copy. Please copy by hand.'); }
   ta.remove();
 }
 
@@ -2110,7 +1823,7 @@ function fallbackCopy(text, done) {
 let PICK_ID = null;
 let PENDING_MESSAGE = null;
 function fillTemplate(body, c) {
-  return body.replace(/\{name\}/gi, () => firstName(c.name)).replace(/\{business\}/gi, () => ACCOUNT.businessName);
+  return body.replace(/\{name\}/gi, firstName(c.name)).replace(/\{business\}/gi, ACCOUNT.businessName);
 }
 function openPicker(customerId, suggested) {
   const c = getCustomer(customerId);
@@ -2135,9 +1848,8 @@ function sendTemplate(tid) {
   const c = getCustomer(PICK_ID);
   const t = DATA.templates.find(x => x.id === tid);
   if (!c || !t) return;
-  if (!validPhone(c.phone)) return toast('Please correct this customer\'s WhatsApp number first.');
   const url = 'https://wa.me/' + c.phone + '?text=' + encodeURIComponent(fillTemplate(t.body, c));
-  PENDING_MESSAGE = { id: FB.R.push(FB.R.child(customerRef(c.id), 'contactHistory')).key, accountId: USER.uid, customerId: c.id, template: t.title };
+  PENDING_MESSAGE = { accountId: USER.uid, customerId: c.id, template: t.title };
   try { sessionStorage.setItem('cp_pending_message', JSON.stringify(PENDING_MESSAGE)); } catch (e) {}
   closeSheet('picker');
   const w = window.open(url, '_blank');
@@ -2145,35 +1857,23 @@ function sendTemplate(tid) {
   $('confirmText').textContent = 'After you press Send in WhatsApp, return here and confirm your message to ' + firstName(c.name) + '. Opening WhatsApp alone does not mark it sent.';
   openSheet('confirm');
 }
-async function confirmMessageSent() {
+function confirmMessageSent() {
   if (!PENDING_MESSAGE || PENDING_MESSAGE.accountId !== USER?.uid) return closeSheet('confirm');
-  const button = $('confirmSentButton');
-  if (button.disabled) return;
-  const pending = { ...PENDING_MESSAGE };
-  const c = getCustomer(pending.customerId);
-  if (!c) { closeSheet('confirm'); return toast('This customer is no longer saved.'); }
-  pending.id = pending.id || FB.R.push(FB.R.child(customerRef(c.id), 'contactHistory')).key;
-  PENDING_MESSAGE.id = pending.id;
-  try { sessionStorage.setItem('cp_pending_message', JSON.stringify(pending)); } catch (e) {}
-  button.disabled = true;
-  const date = todayStr();
-  try {
-    const ok = await changeCustomer(c.id, current => {
-      const history = { ...(current.contactHistory || {}) };
-      if (history[pending.id]) return current;
-      history[pending.id] = { id: pending.id, date, template: pending.template };
-      return { ...current, contactHistory: history,
-        lastContacted: current.lastContacted && current.lastContacted > date ? current.lastContacted : date,
-        nextFollowUp: current.nextFollowUp && current.nextFollowUp > date ? current.nextFollowUp : '', updatedAt: FB.R.serverTimestamp() };
-    }, 'Message confirmation');
-    if (ok) {
-      patchBusiness({ 'progress/sent': true }, 'Getting started');
-      if (PENDING_MESSAGE?.id === pending.id) closeSheet('confirm');
-      toast('Message confirmation saved online');
-    }
-  } finally {
-    button.disabled = false;
+  const c = getCustomer(PENDING_MESSAGE.customerId);
+  if (c) {
+    c.lastContacted = todayStr();
+    c.contactHistory = Array.isArray(c.contactHistory) ? c.contactHistory : [];
+    c.contactHistory.push({ id: uid(), date: todayStr(), template: PENDING_MESSAGE.template });
+    c.nextFollowUp = '';
+    DATA.progress.sent = true;
+    DATA.sentCount++;
+    saveData();
   }
+  PENDING_MESSAGE = null;
+  closeSheet('confirm');
+  if (c && !$('sheet-customer').classList.contains('hidden')) openCustomer(c.id);
+  rerender();
+  toast('Message marked sent');
 }
 
 /* =========================================================
@@ -2259,17 +1959,7 @@ function renderStats() {
 })();
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllSheets(); });
-['regPin', 'logPin', 'pwOld', 'pwNew'].forEach(id => $(id).addEventListener('input', e => {
-  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-}));
 
-window.addEventListener('beforeunload', e => {
-  if (hasUnsavedChanges()) { e.preventDefault(); e.returnValue = ''; }
-});
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') [...templateDrafts.keys()].forEach(flushTemplate);
-});
-showAuth();
 updateBars();
 </script>
 
@@ -2293,15 +1983,11 @@ updateBars();
         import(base + 'firebase-auth.js'),
         import(base + 'firebase-database.js')
       ]);
-      const app = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
+      const app = appMod.initializeApp(firebaseConfig);
       const auth = A.getAuth(app);
-      // Auth persistence restores the same UID on this browser; Google restores it elsewhere.
-      try { await A.setPersistence(auth, A.browserLocalPersistence); }
-      catch (error) {
-        try { await A.setPersistence(auth, A.browserSessionPersistence); }
-        catch (storageError) { await A.setPersistence(auth, A.inMemoryPersistence); }
-      }
       const db = R.getDatabase(app); // uses databaseURL from firebaseConfig
+      // Safely absorb any redirect left over from an older version of the app.
+      try { await A.getRedirectResult(auth); } catch (err) { console.warn('Ignoring old redirect result:', err && err.code); }
       import(base + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if (ok) G.getAnalytics(app); })).catch(() => {});
       window.boot({ app, auth, db, A, R });
     } catch (err) { window.bootFailed(err); }

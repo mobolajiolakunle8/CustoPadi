@@ -138,7 +138,6 @@
         "time": { ".validate": "newData.isString() && newData.val().matches(/^([01][0-9]|2[0-3]):[0-5][0-9]$/)" },
         "timeZone": { ".validate": "newData.isString() && newData.val().length <= 100" },
         "tokens": {
-          ".validate": "newData.numChildren() <= 20",
           "$id": {
             ".validate": "newData.hasChildren(['token','updatedAt'])",
             "token": { ".validate": "newData.isString() && newData.val().length <= 3000" },

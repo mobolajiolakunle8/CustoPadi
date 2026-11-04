@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-GROW-1" />
+  <meta name="application-version" content="CP-GROW-2" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -169,7 +169,7 @@
       <!-- Register -->
       <form id="registerForm" onsubmit="register(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Register your business</h2>
-        <p class="text-stone text-[15px] mb-4">No email needed. Your WhatsApp number and a password open your business on any phone or browser.</p>
+        <p class="text-stone text-[15px] mb-4">Verify your WhatsApp number, then sign in on any phone with the same number and password.</p>
         <button id="regGoogleBtn" type="button" onclick="googleSignIn('register')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
         <p class="text-center text-[14px] text-stone mb-4">or use your WhatsApp number and a password</p>
         <div class="space-y-4">
@@ -184,6 +184,12 @@
           <div>
             <label class="label" for="regPhone">Your WhatsApp number</label>
             <input id="regPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
+            <button id="regOtpSend" type="button" onclick="sendWhatsAppCode('regPhone','regOtpStatus')" class="btn btn-ghost w-full mt-2">Send WhatsApp verification code</button>
+            <p id="regOtpStatus" role="status" class="muted mt-1"></p>
+          </div>
+          <div>
+            <label class="label" for="regOtp">WhatsApp verification code</label>
+            <input id="regOtp" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from WhatsApp" />
           </div>
           <div>
             <label class="label" for="regType">What do you sell?</label>
@@ -209,7 +215,7 @@
         </div>
         <p id="regError" role="alert" class="hidden mt-4 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your customers sync to every phone and browser where you log in. Only you can see them. After sign-up you get a recovery code that resets your password if you ever forget it.</p>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Keep your password safe. WhatsApp verification is required when you create an account or reset its password.</p>
       </form>
 
       <!-- Login -->
@@ -217,7 +223,7 @@
         <h2 class="text-[20px] font-bold mb-1">Welcome back</h2>
         <p class="text-stone text-[15px] mb-4">Log in on any phone or browser and your customers are there.</p>
         <button id="logGoogleBtn" type="button" onclick="googleSignIn('login')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
-        <p class="text-center text-[14px] text-stone mb-4">or use your WhatsApp number and password</p>
+        <p class="text-center text-[14px] text-stone mb-4">or use your verified WhatsApp number and password</p>
         <div class="space-y-4">
           <div>
             <label class="label" for="logPhone">WhatsApp number</label>
@@ -243,15 +249,17 @@
       <!-- Forgot password -->
       <form id="forgotForm" class="hidden" onsubmit="resetWithCode(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Reset your password</h2>
-        <p class="text-stone text-[15px] mb-4">Type your WhatsApp number, the recovery code you saved, and a new password.</p>
+        <p class="text-stone text-[15px] mb-4">Verify your WhatsApp number, then choose a new password. Any linked Google sign-in will keep working.</p>
         <div class="space-y-4">
           <div>
             <label class="label" for="fpPhone">WhatsApp number</label>
             <input id="fpPhone" class="field" type="tel" inputmode="tel" placeholder="+234 803 123 4567" autocomplete="tel" />
+            <button type="button" onclick="sendWhatsAppCode('fpPhone','fpOtpStatus')" class="btn btn-ghost w-full mt-2">Send WhatsApp reset code</button>
+            <p id="fpOtpStatus" role="status" class="muted mt-1"></p>
           </div>
           <div>
-            <label class="label" for="fpCode">Recovery code</label>
-            <input id="fpCode" class="field uppercase tracking-wider" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="24" placeholder="ABCD-EFGH-JKLM-NPQR" />
+            <label class="label" for="fpCode">WhatsApp verification code</label>
+            <input id="fpCode" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from WhatsApp" />
           </div>
           <div>
             <label class="label" for="fpNewPw">New password <span class="font-normal text-stone">(6 or more characters)</span></label>
@@ -263,7 +271,7 @@
         </div>
         <p id="fpError" role="alert" class="hidden mt-3 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="fpSubmit" type="submit" class="btn btn-primary w-full mt-4">Reset password <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone mt-3 leading-relaxed">Linked Google to this business? Go back and tap Continue with Google instead. No code? A password cannot be reset without one, because there is no email address to send a link to.</p>
+        <p class="text-[14px] text-stone mt-3 leading-relaxed">A code will be sent through WhatsApp. If you have not connected WhatsApp here, use Continue with Google.</p>
         <button type="button" onclick="setAuthMode('login')" class="text-leaf font-bold min-h-[48px] w-full">Back to log in</button>
       </form>
     </div>
@@ -273,7 +281,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-GROW-1</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-GROW-2</span></p>
   </div>
 </div>
 
@@ -595,18 +603,13 @@
       <h4 class="font-bold text-[17px]">Add a WhatsApp number + password</h4>
       <p class="text-[15px] text-stone">You sign in with Google only, so there is no password to change in CustoPadi yet. Link a WhatsApp number and password below, then change that password here anytime. Or change your Google password from Google itself.</p>
       <div><label class="label" for="linkPhone">WhatsApp number</label><input id="linkPhone" class="field" type="tel" inputmode="tel" placeholder="+234 803 123 4567" autocomplete="tel" /></div>
+      <button type="button" onclick="sendWhatsAppCode('linkPhone','linkOtpStatus')" class="btn btn-ghost w-full">Verify number on WhatsApp</button>
+      <p id="linkOtpStatus" role="status" class="muted"></p>
+      <div><label class="label" for="linkOtp">WhatsApp verification code</label><input id="linkOtp" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from WhatsApp" /></div>
       <div><label class="label" for="linkPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="linkPw" class="field" type="password" autocomplete="new-password" /></div>
       <p id="linkError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
       <button type="submit" class="btn btn-primary w-full"><i class="fa-solid fa-link"></i> Link number + password</button>
       <a href="https://myaccount.google.com/security/password" target="_blank" rel="noopener" class="min-h-[48px] flex items-center justify-center text-leaf font-bold text-[15px]">Change Google password instead (opens Google)</a>
-    </form>
-
-    <form id="recoveryBox" onsubmit="createRecoveryCode(event)" class="hidden space-y-3 mb-6 border-t border-black/5 pt-5" novalidate>
-      <h4 class="font-bold text-[17px]">Password recovery code</h4>
-      <p id="recoveryStatus" class="text-[15px] text-stone"></p>
-      <div><label class="label" for="rcPw">Your current password</label><input id="rcPw" class="field" type="password" autocomplete="current-password" /></div>
-      <p id="rcError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-      <button type="submit" class="btn btn-outline w-full"><i class="fa-solid fa-key"></i> <span id="rcBtnText">Create recovery code</span></button>
     </form>
 
     <form id="pwChangeForm" onsubmit="changePassword(event)" class="hidden space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
@@ -720,7 +723,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-GROW-1';
+const APP_BUILD = 'CP-GROW-2';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1085,6 +1088,27 @@ const phoneEmail = phone => phone + PHONE_EMAIL_DOMAIN;
 const realEmail = u => (u && u.email && !u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email : '';
 const isGuest = () => !!(USER && USER.isAnonymous);
 const hasProvider = id => !!(USER && USER.providerData && USER.providerData.some(p => p.providerId === id));
+const OTP_SENT = Object.create(null);
+function sendWhatsAppCode(inputId, statusId) {
+  const phone = normalizePhone($(inputId).value), status = $(statusId);
+  if (!validPhone(phone)) { status.textContent = 'Type the full WhatsApp number with country code first.'; status.className = 'error-text mt-1'; return; }
+  if (!FB?.C?.sendWhatsAppCode) { status.textContent = 'WhatsApp verification service is not deployed yet. Ask the app owner to deploy functions and configure Twilio Verify.'; status.className = 'error-text mt-1'; return; }
+  const buttonId = inputId === 'regPhone' ? 'regOtpSend' : inputId === 'fpPhone' ? 'fpOtpSend' : 'linkOtpSend';
+  const button = $(buttonId); if (button) button.disabled = true;
+  status.textContent = 'Sending code to WhatsApp...'; status.className = 'muted mt-1';
+  FB.C.sendWhatsAppCode({ phone }).then(() => {
+    OTP_SENT[inputId] = { phone, sentAt: Date.now() };
+    status.textContent = 'Code sent to WhatsApp. It expires in 10 minutes.';
+    status.className = 'text-leaf text-[15px] mt-1';
+  }).catch(err => {
+    status.textContent = err.message || 'Could not send the WhatsApp code. Try again.';
+    status.className = 'error-text mt-1';
+  }).finally(() => { if (button) button.disabled = false; });
+}
+function otpMatches(inputId) {
+  const record = OTP_SENT[inputId];
+  return !!record && record.phone === normalizePhone($(inputId).value) && Date.now() - record.sentAt < 10 * 60 * 1000;
+}
 // The email of the password login (needed to re-check a password), and the WhatsApp number
 // behind it when the account was made with a number. Recovery codes need that number.
 const passwordEmail = u => { const p = u && u.providerData && u.providerData.find(x => x.providerId === 'password'); return (p && p.email) || (u && u.email) || ''; };
@@ -1462,14 +1486,18 @@ async function register(e) {
   if (ownerName.length < 2 || ownerName.length > 50) return showError('regError', 'Please type your name (2 to 50 characters).');
   if (!validPhone(phone)) return showError('regError', 'Type the full WhatsApp number with country code, e.g. +234 803 123 4567.');
   if (pw.length < 6) return showError('regError', 'Your password must be at least 6 characters.');
+  if (!otpMatches('regPhone')) return showError('regError', 'Verify this WhatsApp number first. Send a code and enter the code you receive.');
+  const code = $('regOtp').value.trim();
+  if (!/^\d{4,10}$/.test(code)) return showError('regError', 'Type the code sent to WhatsApp.');
   if (!FB) return showError('regError', 'Still loading. Please wait a moment and try again.');
 
   const btn = $('regSubmit'); btn.disabled = true;
   authAction = 'register';
   let created = null;
   try {
-    // The WhatsApp number is the login name, so the same number + password works in any browser.
-    const cred = await FB.A.createUserWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
+    // The server validates the OTP, creates the Firebase login, and saves the profile.
+    await FB.C.createPhoneBusiness({ phone, code, password: pw, businessName, ownerName, businessType });
+    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
     created = cred.user;
     const base = freshData();
     await FB.R.set(businessRef(cred.user.uid), clean({
@@ -3427,7 +3455,6 @@ const CUSTOPADI_RULES_FALLBACK = `{
         "time": { ".validate": "newData.isString() && newData.val().matches(/^([01][0-9]|2[0-3]):[0-5][0-9]$/)" },
         "timeZone": { ".validate": "newData.isString() && newData.val().length <= 100" },
         "tokens": {
-          ".validate": "newData.numChildren() <= 20",
           "$id": {
             ".validate": "newData.hasChildren(['token','updatedAt'])",
             "token": { ".validate": "newData.isString() && newData.val().length <= 3000" },

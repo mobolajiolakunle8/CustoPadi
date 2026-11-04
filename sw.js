@@ -1,6 +1,6 @@
 // Cache public app files only. Firebase authentication and business data use the network.
-const VERSION = 'CP-TEAM-2';
-const CACHE = 'custopadi-team-2';
+const VERSION = 'CP-GROW-1';
+const CACHE = 'custopadi-grow-1';
 const ROOT = new URL('./', self.location.href);
 const PAGE = new URL('index.html', ROOT).href;
 const STATIC_HOSTS = new Set(['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com']);

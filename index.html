@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-SYNC-3" />
+  <meta name="application-version" content="CP-RECOVER-1" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -179,7 +179,7 @@
         </div>
         <p id="regError" role="alert" class="hidden mt-4 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your customers sync to every phone and browser where you log in. Only you can see them. There is no email reset, so keep your password safe.</p>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your customers sync to every phone and browser where you log in. Only you can see them. After sign-up you get a recovery code that resets your password if you ever forget it.</p>
       </form>
 
       <!-- Login -->
@@ -204,8 +204,37 @@
         <p id="logError" role="alert" class="hidden mt-2 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <p id="logInfo" class="hidden mt-2 text-leaf-deep text-[15px] font-medium bg-leaf-light rounded-xl px-4 py-3"></p>
         <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-4">Log in <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-3 leading-relaxed">Forgot your password? There is no email reset. If you linked Google in Business settings, use Continue with Google.</p>
+        <div class="text-center mt-2">
+          <button id="forgotLink" type="button" onclick="openForgot()" class="text-leaf font-bold text-[16px] min-h-[48px] px-3">Forgot password?</button>
+        </div>
         <p class="text-[14px] text-stone text-center mt-4">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
+      </form>
+
+      <!-- Forgot password -->
+      <form id="forgotForm" class="hidden" onsubmit="resetWithCode(event)" novalidate>
+        <h2 class="text-[20px] font-bold mb-1">Reset your password</h2>
+        <p class="text-stone text-[15px] mb-4">Type your WhatsApp number, the recovery code you saved, and a new password.</p>
+        <div class="space-y-4">
+          <div>
+            <label class="label" for="fpPhone">WhatsApp number</label>
+            <input id="fpPhone" class="field" type="tel" inputmode="tel" placeholder="+234 803 123 4567" autocomplete="tel" />
+          </div>
+          <div>
+            <label class="label" for="fpCode">Recovery code</label>
+            <input id="fpCode" class="field uppercase tracking-wider" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="24" placeholder="ABCD-EFGH-JKLM-NPQR" />
+          </div>
+          <div>
+            <label class="label" for="fpNewPw">New password <span class="font-normal text-stone">(6 or more characters)</span></label>
+            <div class="relative">
+              <input id="fpNewPw" class="field !pr-14" type="password" placeholder="Choose a new password" autocomplete="new-password" />
+              <button type="button" onclick="togglePw('fpNewPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <p id="fpError" role="alert" class="hidden mt-3 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+        <button id="fpSubmit" type="submit" class="btn btn-primary w-full mt-4">Reset password <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone mt-3 leading-relaxed">Linked Google to this business? Go back and tap Continue with Google instead. No code? A password cannot be reset without one, because there is no email address to send a link to.</p>
+        <button type="button" onclick="setAuthMode('login')" class="text-leaf font-bold min-h-[48px] w-full">Back to log in</button>
       </form>
     </div>
 
@@ -214,7 +243,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-SYNC-3</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-RECOVER-1</span></p>
   </div>
 </div>
 
@@ -495,6 +524,24 @@
       <button type="button" onclick="linkGoogle()" class="btn btn-outline w-full"><i class="fa-brands fa-google"></i> Link Google account</button>
     </div>
 
+    <form id="linkLoginBox" onsubmit="linkPhoneLogin(event)" class="hidden space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
+      <h4 class="font-bold text-[17px]">Add a WhatsApp number + password</h4>
+      <p class="text-[15px] text-stone">You sign in with Google only, so there is no password to change in CustoPadi yet. Link a WhatsApp number and password below, then change that password here anytime. Or change your Google password from Google itself.</p>
+      <div><label class="label" for="linkPhone">WhatsApp number</label><input id="linkPhone" class="field" type="tel" inputmode="tel" placeholder="+234 803 123 4567" autocomplete="tel" /></div>
+      <div><label class="label" for="linkPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="linkPw" class="field" type="password" autocomplete="new-password" /></div>
+      <p id="linkError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+      <button type="submit" class="btn btn-primary w-full"><i class="fa-solid fa-link"></i> Link number + password</button>
+      <a href="https://myaccount.google.com/security/password" target="_blank" rel="noopener" class="min-h-[48px] flex items-center justify-center text-leaf font-bold text-[15px]">Change Google password instead (opens Google)</a>
+    </form>
+
+    <form id="recoveryBox" onsubmit="createRecoveryCode(event)" class="hidden space-y-3 mb-6 border-t border-black/5 pt-5" novalidate>
+      <h4 class="font-bold text-[17px]">Password recovery code</h4>
+      <p id="recoveryStatus" class="text-[15px] text-stone"></p>
+      <div><label class="label" for="rcPw">Your current password</label><input id="rcPw" class="field" type="password" autocomplete="current-password" /></div>
+      <p id="rcError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+      <button type="submit" class="btn btn-outline w-full"><i class="fa-solid fa-key"></i> <span id="rcBtnText">Create recovery code</span></button>
+    </form>
+
     <form id="pwChangeForm" onsubmit="changePassword(event)" class="hidden space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
       <h4 class="font-bold text-[17px]">Change password</h4>
       <div><label class="label" for="pwOld">Current password</label><input id="pwOld" class="field" type="password" autocomplete="current-password" /></div>
@@ -526,6 +573,29 @@
       <svg viewBox="0 0 640 130" class="h-7 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
       <p class="text-[13px] text-stone">Made for small businesses in Nigeria</p>
     </div>
+  </div>
+</div>
+
+<!-- Recovery code (shown once; the backdrop does not close it) -->
+<div id="sheet-recovery" class="fixed inset-0 z-[58] hidden">
+  <div class="absolute inset-0 bg-ink/50"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <h3 class="font-extrabold text-[21px] mb-1">Save your recovery code</h3>
+    <p id="recoveryIntro" class="text-stone text-[15px] mb-3"></p>
+    <div class="bg-leaf-light rounded-2xl p-4 text-center mb-4">
+      <p id="recoveryCodeText" class="font-mono font-extrabold text-[24px] tracking-wider break-all select-all">XXXX-XXXX-XXXX-XXXX</p>
+    </div>
+    <p class="text-[15px] text-stone mb-4 leading-relaxed">If you forget your password, tap <b>Forgot password?</b> on the login screen and type this code. We cannot show it again. Take a screenshot or write it down. Anyone with this code and your number can reset your password, so keep it private.</p>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <button type="button" onclick="copyRecoveryCode()" class="btn btn-ghost"><i class="fa-regular fa-copy"></i> Copy</button>
+      <button type="button" onclick="downloadRecoveryCode()" class="btn btn-ghost"><i class="fa-solid fa-download"></i> Save file</button>
+    </div>
+    <label class="flex items-start gap-3 min-h-[48px] mb-3 cursor-pointer">
+      <input id="recoverySaved" type="checkbox" class="mt-1 w-5 h-5 accent-leaf shrink-0" onchange="document.getElementById('recoveryDone').disabled = !this.checked" />
+      <span class="text-[16px] leading-snug">I have saved my recovery code</span>
+    </label>
+    <button id="recoveryDone" type="button" disabled onclick="closeSheet('recovery')" class="btn btn-primary w-full">Done</button>
   </div>
 </div>
 
@@ -579,7 +649,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-SYNC-3';
+const APP_BUILD = 'CP-RECOVER-1';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -653,7 +723,7 @@ function setPhoneCountry(input, code) {
 }
 /* Adds a country-code list beside every phone box, so foreign WhatsApp numbers work. */
 function enhancePhoneInputs() {
-  ['regPhone', 'logPhone', 'ncPhone', 'editPhone', 'bizPhone'].forEach(id => {
+  ['regPhone', 'logPhone', 'ncPhone', 'editPhone', 'bizPhone', 'linkPhone', 'fpPhone'].forEach(id => {
     const input = $(id);
     if (!input || input.dataset.ccReady) return;
     input.dataset.ccReady = '1';
@@ -704,7 +774,213 @@ function maybeShowSyncBanner() {
   } catch (e) {}
 }
 enhancePhoneInputs();
-new MutationObserver(() => { maybeShowSyncBanner(); }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
+/* =========================================================
+   PASSWORD RECOVERY CODE (works without any email)
+   A number-based login has no real inbox, so Firebase cannot email a reset link.
+   Instead the owner holds a 16-character recovery code. The password is locked with that
+   code (PBKDF2 + AES-GCM, done in the browser) and the locked copy is saved at
+   recovery/{number}. Without the code the copy is unreadable, and with 80 bits of
+   randomness it cannot be guessed. Typing the code on the login screen unlocks the old
+   password, signs in, and sets the new one.
+   ========================================================= */
+let RECOVERY_STATE = 'unknown', RECOVERY_BANNER_DISMISSED = false;
+const recoveryRef = phone => FB.R.ref(FB.db, 'recovery/' + phone);
+const RC_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 letters/digits, no 0 O 1 I
+const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const toB64 = buf => { let s = ''; new Uint8Array(buf).forEach(b => { s += String.fromCharCode(b); }); return btoa(s); };
+const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const hasCrypto = () => !!(window.crypto && crypto.subtle && crypto.getRandomValues);
+
+function newRecoveryCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  let s = '';
+  bytes.forEach(b => { s += RC_ALPHABET[b % 32]; }); // 256 is a multiple of 32, so no bias
+  return s.match(/.{4}/g).join('-');
+}
+async function rcKey(code, salt) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(normCode(code)), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, base,
+    { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function buildRecovery(phone, password) {
+  const code = newRecoveryCode();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await rcKey(code, salt);
+  const locked = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: new TextEncoder().encode(phone) },
+    key, new TextEncoder().encode(JSON.stringify({ p: password })));
+  return { code, record: { v: 1, s: toB64(salt), i: toB64(iv), b: toB64(locked), t: Date.now() } };
+}
+async function openRecovery(phone, code, record) {
+  const key = await rcKey(code, fromB64(record.s));
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(record.i), additionalData: new TextEncoder().encode(phone) },
+    key, fromB64(record.b));
+  return JSON.parse(new TextDecoder().decode(plain)).p;
+}
+
+function showRecoveryCode(code, intro) {
+  $('recoveryCodeText').textContent = code;
+  $('recoveryIntro').textContent = intro || '';
+  $('recoverySaved').checked = false;
+  $('recoveryDone').disabled = true;
+  openSheet('recovery');
+}
+function copyRecoveryCode() {
+  const text = $('recoveryCodeText').textContent;
+  const done = () => toast('Recovery code copied');
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  else fallbackCopy(text, done);
+}
+function downloadRecoveryCode() {
+  const lines = ['CustoPadi recovery code', '', 'Business: ' + (ACCOUNT ? ACCOUNT.businessName : ''), 'WhatsApp number: +' + aliasPhone(USER),
+    'Recovery code: ' + $('recoveryCodeText').textContent, '', 'Keep this private. Anyone with this code and your number can reset your password.'];
+  const url = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'custopadi-recovery-code.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+/* Makes a fresh code for the signed-in business and stores the locked password. Returns true on success. */
+async function issueRecovery(password, intro) {
+  const phone = aliasPhone(USER);
+  if (!FB || !USER || !phone || !password) return false; // only number-based logins can have a code
+  if (!hasCrypto()) { toast('This browser cannot create a recovery code. Open CustoPadi in Chrome or Safari.'); return false; }
+  try {
+    await USER.getIdToken(true); // make sure the sign-in token carries the number the rules check
+    const { code, record } = await buildRecovery(phone, password);
+    await FB.R.set(recoveryRef(phone), record);
+    RECOVERY_STATE = 'set';
+    const old = $('recoveryBanner'); if (old) old.remove();
+    showRecoveryCode(code, intro);
+    return true;
+  } catch (err) {
+    console.error('Recovery code failed:', err && err.code);
+    const denied = /permission/i.test(((err && err.code) || '') + ' ' + ((err && err.message) || ''));
+    toast(denied ? 'Recovery code could not be saved. App owner: publish the updated Realtime Database rules.'
+      : 'Recovery code could not be saved. Create it later in Business settings.');
+    return false;
+  }
+}
+
+function openForgot() {
+  setAuthMode('forgot');
+  $('fpPhone').value = $('logPhone').value || '';
+  $('fpCode').value = ''; $('fpNewPw').value = '';
+  setTimeout(() => ($('fpPhone').value ? $('fpCode') : $('fpPhone')).focus(), 50);
+}
+
+async function resetWithCode(e) {
+  e.preventDefault();
+  hideError('fpError');
+  const phone = normalizePhone($('fpPhone').value);
+  const code = normCode($('fpCode').value);
+  const newPw = $('fpNewPw').value;
+  if (!validPhone(phone)) return showError('fpError', 'Type the full WhatsApp number with country code, e.g. +234 803 123 4567.');
+  if (code.length !== 16) return showError('fpError', 'Type the 16-character recovery code, like ABCD-EFGH-JKLM-NPQR.');
+  if (newPw.length < 6) return showError('fpError', 'Your new password must be at least 6 characters.');
+  if (!FB) return showError('fpError', 'Still loading. Please wait a moment and try again.');
+  if (!hasCrypto()) return showError('fpError', 'This browser cannot check recovery codes. Open CustoPadi in Chrome or Safari.');
+  const btn = $('fpSubmit'); btn.disabled = true;
+  authAction = 'login';
+  try {
+    let snap;
+    try { snap = await FB.R.get(recoveryRef(phone)); }
+    catch (err) { throw (/permission/i.test(((err && err.code) || '') + ' ' + ((err && err.message) || '')) ? { code: 'cp/rules' } : err); }
+    if (!snap.exists()) throw { code: 'cp/no-recovery' };
+    let oldPw;
+    try { oldPw = await openRecovery(phone, code, snap.val()); } catch (err) { throw { code: 'cp/bad-code' }; }
+    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), oldPw);
+    await FB.A.updatePassword(cred.user, newPw);
+    Store.set('cp_last_phone', phone);
+    $('fpCode').value = ''; $('fpNewPw').value = '';
+    enterApp(cred.user);
+    toast('Password reset. Welcome back!');
+    await issueRecovery(newPw, 'Your password is reset. This is your NEW recovery code. The old code no longer works.');
+  } catch (err) {
+    const c = err && err.code;
+    console.error('Password reset failed:', c);
+    const stale = ['auth/invalid-credential', 'auth/wrong-password', 'auth/invalid-login-credentials', 'auth/user-not-found'].includes(c);
+    showError('fpError',
+      c === 'cp/no-recovery' ? 'No recovery code was ever created for this number, so the password cannot be reset here. If you linked Google, go back and tap Continue with Google.'
+      : c === 'cp/bad-code' ? 'That recovery code is not correct. Check each letter and try again.'
+      : c === 'cp/rules' ? 'Password reset is not switched on yet. App owner: publish the updated Realtime Database rules.'
+      : stale ? 'This recovery code is out of date because the password was changed after it was made. If you linked Google, use Continue with Google.'
+      : authMessage(err));
+  } finally {
+    authAction = '';
+    btn.disabled = false;
+  }
+}
+
+/* Settings: create or replace the code for a signed-in business. */
+function renderRecoveryBox() {
+  const box = $('recoveryBox'); if (!box) return;
+  const eligible = !!(USER && !isGuest() && hasProvider('password') && aliasPhone(USER));
+  box.classList.toggle('hidden', !eligible);
+  if (!eligible) return;
+  $('recoveryStatus').textContent = RECOVERY_STATE === 'set'
+    ? 'A recovery code is set. If you forget your password, use it on the login screen. Creating a new code replaces the old one.'
+    : 'You have no recovery code yet. Create one now so you can reset your password if you forget it.';
+  $('rcBtnText').textContent = RECOVERY_STATE === 'set' ? 'Create a new recovery code' : 'Create recovery code';
+  $('rcPw').value = ''; hideError('rcError');
+}
+async function createRecoveryCode(e) {
+  e.preventDefault();
+  hideError('rcError');
+  if (!FB || !USER || !aliasPhone(USER)) return;
+  const pw = $('rcPw').value;
+  if (!pw) return showError('rcError', 'Type your current password.');
+  try {
+    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(passwordEmail(USER), pw));
+  } catch (err) {
+    return showError('rcError', ['auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(err && err.code)
+      ? 'That password is not correct.' : authMessage(err));
+  }
+  $('rcPw').value = '';
+  const ok = await issueRecovery(pw, 'Save this code. Any older recovery code no longer works.');
+  if (ok) renderRecoveryBox();
+}
+
+/* After login: find out if this business has a code, and nudge if not. */
+async function checkRecovery() {
+  const old = $('recoveryBanner'); if (old) old.remove();
+  RECOVERY_STATE = 'unknown';
+  const phone = aliasPhone(USER);
+  if (!FB || !USER || !phone || !hasProvider('password')) { RECOVERY_STATE = 'n/a'; return; }
+  let result = 'unknown';
+  try { const snap = await FB.R.get(recoveryRef(phone)); result = snap.exists() ? 'set' : 'missing'; } catch (err) { /* offline or rules not published */ }
+  if (RECOVERY_STATE !== 'set') RECOVERY_STATE = result; // a code made while we were checking wins
+  maybeShowRecoveryBanner();
+}
+function dismissRecoveryBanner() {
+  RECOVERY_BANNER_DISMISSED = true;
+  const b = $('recoveryBanner'); if (b) b.remove();
+}
+function openRecoverySettings() {
+  openBusinessSheet();
+  setTimeout(() => { const b = $('recoveryBox'); if (b && !b.classList.contains('hidden')) b.scrollIntoView({ block: 'center' }); }, 200);
+}
+function maybeShowRecoveryBanner() {
+  try {
+    const existing = $('recoveryBanner');
+    if (RECOVERY_STATE !== 'missing' || !USER || !appShown) { if (existing && RECOVERY_STATE !== 'missing') existing.remove(); return; }
+    if (RECOVERY_BANNER_DISMISSED || existing) return;
+    const host = $('screen-today');
+    if (!host || host.classList.contains('hidden')) return;
+    const div = document.createElement('div');
+    div.id = 'recoveryBanner';
+    div.className = 'card p-4 mb-5 flex items-center gap-3 fade-up';
+    div.innerHTML = '<span class="w-11 h-11 rounded-2xl bg-amber/20 ico-sun flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-key"></i></span>' +
+      '<span class="flex-1 min-w-0"><b class="block text-[16px]">Create your recovery code</b>' +
+      '<span class="block text-[14px] text-stone">Without it, a forgotten password cannot be reset. It takes 10 seconds.</span></span>' +
+      '<span class="flex flex-col gap-1 shrink-0"><button onclick="openRecoverySettings()" class="btn btn-primary !min-h-[48px] !px-4 !text-[15px]">Create</button>' +
+      '<button onclick="dismissRecoveryBanner()" class="text-stone text-[14px] font-semibold min-h-[44px] px-2">Later</button></span>';
+    host.insertBefore(div, host.firstChild);
+  } catch (e) {}
+}
+
+new MutationObserver(() => { maybeShowSyncBanner(); maybeShowRecoveryBanner(); }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
 
 function showError(id, msg) { const el = $(id); el.textContent = msg; el.classList.remove('hidden'); }
 function hideError(id) { $(id).classList.add('hidden'); }
@@ -726,6 +1002,10 @@ const phoneEmail = phone => phone + PHONE_EMAIL_DOMAIN;
 const realEmail = u => (u && u.email && !u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email : '';
 const isGuest = () => !!(USER && USER.isAnonymous);
 const hasProvider = id => !!(USER && USER.providerData && USER.providerData.some(p => p.providerId === id));
+// The email of the password login (needed to re-check a password), and the WhatsApp number
+// behind it when the account was made with a number. Recovery codes need that number.
+const passwordEmail = u => { const p = u && u.providerData && u.providerData.find(x => x.providerId === 'password'); return (p && p.email) || (u && u.email) || ''; };
+const aliasPhone = u => (u && u.email && u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email.slice(0, -PHONE_EMAIL_DOMAIN.length) : '';
 
 let toastTimer;
 function toast(msg) {
@@ -1004,9 +1284,10 @@ function leaveListeners(resetState = true) {
 function setAuthMode(mode) {
   $('registerForm').classList.toggle('hidden', mode !== 'register');
   $('loginForm').classList.toggle('hidden', mode !== 'login');
+  $('forgotForm').classList.toggle('hidden', mode !== 'forgot');
   $('segRegister').classList.toggle('active', mode === 'register');
-  $('segLogin').classList.toggle('active', mode === 'login');
-  hideError('regError'); hideError('logError'); $('logInfo').classList.add('hidden');
+  $('segLogin').classList.toggle('active', mode === 'login' || mode === 'forgot');
+  hideError('regError'); hideError('logError'); hideError('fpError'); $('logInfo').classList.add('hidden');
 }
 
 function showAuth(mode) {
@@ -1028,6 +1309,7 @@ function showApp() {
   switchTab('today');
   updateBars();
   startInstallPrompts();
+  checkRecovery();
   try {
     const pending = JSON.parse(sessionStorage.getItem('cp_pending_message') || 'null');
     if (pending && pending.accountId === USER.uid && getCustomer(pending.customerId)) {
@@ -1070,6 +1352,7 @@ async function register(e) {
     $('registerForm').reset();
     enterApp(cred.user);
     toast('Welcome to CustoPadi, ' + firstName(ownerName) + '!');
+    issueRecovery(pw, 'Your account is ready. Save this recovery code now. It is the only way to reset your password if you forget it.');
   } catch (err) {
     console.error('Sign-up failed:', err);
     if (created) {
@@ -1177,6 +1460,7 @@ async function upgradeToSync(e) {
     $('upPw').value = '';
     closeSheet('business');
     toast('Sync is on. Log in with your WhatsApp number and password on any phone or browser.');
+    issueRecovery(pw, 'Sync is on. Save this recovery code. It is the only way to reset your password if you forget it.');
   } catch (err) {
     console.error('Sync upgrade failed:', err);
     showError('upError', err && err.code === 'auth/email-already-in-use'
@@ -1193,6 +1477,35 @@ function logout() {
   toast('You are logged out');
 }
 
+/* Google-only businesses have no CustoPadi password of their own. This links a
+   WhatsApp number + password to their account so they can manage it in the app. */
+async function linkPhoneLogin(e) {
+  e.preventDefault();
+  hideError('linkError');
+  if (!FB || !USER) return;
+  const phone = normalizePhone($('linkPhone').value);
+  const pw = $('linkPw').value;
+  if (!validPhone(phone)) return showError('linkError', 'Type the full number with country code, e.g. +234 803 123 4567.');
+  if (pw.length < 6) return showError('linkError', 'Your password must be at least 6 characters.');
+  try {
+    const res = await FB.A.linkWithCredential(USER, FB.A.EmailAuthProvider.credential(phoneEmail(phone), pw));
+    USER = res.user;
+    ACCOUNT.authProvider = 'phone-password';
+    if (!ACCOUNT.phone) ACCOUNT.phone = phone;
+    saveProfile();
+    Store.set('cp_last_phone', phone);
+    $('linkPw').value = '';
+    toast('Linked. You can now change this password here in CustoPadi.');
+    issueRecovery(pw, 'Save this recovery code. It is the only way to reset this password if you forget it.');
+    openBusinessSheet();
+  } catch (err) {
+    console.error('Link failed:', err);
+    showError('linkError', err && err.code === 'auth/email-already-in-use'
+      ? 'This WhatsApp number already belongs to another CustoPadi login. Use a different number.'
+      : authMessage(err));
+  }
+}
+
 async function changePassword(e) {
   e.preventDefault();
   hideError('pwError');
@@ -1201,10 +1514,12 @@ async function changePassword(e) {
   if (!oldPw) return showError('pwError', 'Type your current password.');
   if (newPw.length < 6) return showError('pwError', 'Your new password must be at least 6 characters.');
   try {
-    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(USER.email, oldPw));
+    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(passwordEmail(USER), oldPw));
     await FB.A.updatePassword(USER, newPw);
     $('pwOld').value = ''; $('pwNew').value = '';
     toast('Password updated');
+    // The saved recovery code was locked with the OLD password, so it must be replaced.
+    issueRecovery(newPw, 'Your password is changed. This is your NEW recovery code. Your old code no longer works.');
   } catch (err) {
     const code = err && err.code;
     showError('pwError', ['auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(code)
@@ -1220,13 +1535,16 @@ async function deleteBusiness() {
     if (hasProvider('password')) {
       const pw = prompt('Type your password to confirm:');
       if (!pw) return;
-      await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(USER.email, pw));
+      await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(passwordEmail(USER), pw));
     } else if (hasProvider('google.com')) {
       await FB.A.reauthenticateWithPopup(USER, googleProvider());
     }
     const user = USER;
+    const recPhone = aliasPhone(user);
     leaveListeners(false);
     await FB.R.remove(businessRef(user.uid));
+    // Also remove the locked recovery copy, so nothing about this business is left behind.
+    if (recPhone) { try { await FB.R.remove(recoveryRef(recPhone)); } catch (err) { console.warn('Recovery copy not removed'); } }
     closeAllSheets();
     await FB.A.deleteUser(user);
     toast('Business deleted');
@@ -1267,10 +1585,14 @@ function openBusinessSheet() {
   $('upgradeBox').classList.toggle('hidden', !isGuest());
   $('pwChangeForm').classList.toggle('hidden', !hasProvider('password'));
   $('linkGoogleBox').classList.toggle('hidden', hasProvider('google.com'));
+  $('linkLoginBox').classList.toggle('hidden', isGuest() || hasProvider('password'));
+  renderRecoveryBox();
   hideError('upError');
   $('logoutBtn').innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Log out';
   $('pwOld').value = ''; $('pwNew').value = '';
-  hideError('bizError'); hideError('pwError');
+  $('linkPhone').value = ACCOUNT.phone ? '+' + ACCOUNT.phone : '';
+  $('linkPw').value = '';
+  hideError('bizError'); hideError('pwError'); hideError('linkError');
   openSheet('business');
 }
 
@@ -1443,7 +1765,7 @@ function closeSheet(name) {
   }
   if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
 }
-function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business'].forEach(closeSheet); }
+function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business', 'recovery'].forEach(closeSheet); }
 
 let CURRENT_TAB = 'today';
 function switchTab(name) {

@@ -1,7 +1,6 @@
-// Cache public app files only. CustoPadi has no Firebase or other backend:
-// all accounts and customer records stay in the browser's local storage.
-const VERSION = 'CP-V2';
-const CACHE = 'custopadi-v2';
+// Cache public app files only. Firebase authentication and business data use the network.
+const VERSION = 'CP-GROW-1';
+const CACHE = 'custopadi-grow-1';
 const ROOT = new URL('./', self.location.href);
 const PAGE = new URL('index.html', ROOT).href;
 const STATIC_HOSTS = new Set(['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com']);
@@ -96,4 +95,31 @@ self.addEventListener('fetch', event => {
   });
   event.waitUntil(refresh.then(() => {}).catch(() => {}));
   event.respondWith(caches.open(CACHE).then(async cache => (await cache.match(request)) || refresh));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const existing = windows.find(client => new URL(client.url).origin === ROOT.origin);
+    if (existing) {
+      await existing.focus();
+      existing.postMessage({ type: 'CUSTOPADI_OPEN_TODAY' });
+    } else await self.clients.openWindow(new URL('./?tab=today', ROOT).href);
+  })());
+});
+
+self.addEventListener('push', event => {
+  if (!event.data) return;
+  try {
+    const payload = event.data.json();
+    const data = payload.data || {};
+    if (data.type !== 'daily-reminder') return;
+    event.waitUntil(self.registration.showNotification(data.title || 'CustoPadi', {
+      body: data.body || 'Open Today to see who to message.',
+      icon: new URL('icon.svg', ROOT).href,
+      tag: 'custopadi-daily',
+      data: { url: ROOT.href }
+    }));
+  } catch (error) { /* Ignore malformed or unrelated push payloads. */ }
 });

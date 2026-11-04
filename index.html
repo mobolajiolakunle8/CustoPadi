@@ -8,8 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
-  <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-SYNC-5" />
+  <meta name="description" content="CustoPadi helps small businesses know who to message today, track who owes them, and follow up with customers on WhatsApp." />
+  <meta name="application-version" content="CP-V2" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -35,11 +35,10 @@
   </style>
 
   <style>
-    /* CustoPadi brand: green #178A45, orange #F5A623 (from the logo) */
     html { -webkit-tap-highlight-color: transparent; }
     .hidden { display: none !important; }
     body { font-family: 'DM Sans', system-ui, sans-serif; background: #F7F9F5; color: #17301f; font-size: 16px; }
-    #appView, #authView { padding-top: var(--bars, 0px); }
+    #appView, #authView, #staffView { padding-top: var(--bars, 0px); }
     .app-header { top: var(--bars, 0px); }
     .card { background: #fff; border-radius: 20px; box-shadow: 0 1px 10px rgba(20,40,20,0.06); border: 1px solid rgba(0,0,0,0.04); }
     .field { width: 100%; min-height: 50px; padding: 12px 14px; background: #f1f5ef; border-radius: 14px; font-size: 16px; color: #17301f; border: 2px solid transparent; outline: none; transition: border-color .15s, background .15s; -webkit-appearance: none; appearance: none; }
@@ -54,6 +53,7 @@
     .btn-ghost { background: #eef2ec; color: #3f463b; }
     .btn-outline { background: #fff; color: #178A45; border: 2px solid #178A45; }
     .btn-danger { background: #fdecea; color: #d0473a; }
+    .btn-amber { background: #F5A623; color: #17301f; }
     .btn:disabled { opacity: .6; pointer-events: none; }
     .wa-btn { min-height: 48px; padding: 0 16px; border-radius: 14px; background: #178A45; color: #fff; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0; }
     .wa-btn:active { transform: scale(0.96); }
@@ -102,11 +102,15 @@
   </symbol>
 </svg>
 
-<!-- Top bars: storage warning / update notice -->
+<!-- Top bars -->
 <div id="topBars" class="fixed top-0 inset-x-0 z-[65]">
   <div id="storageBanner" role="status" aria-live="polite" class="hidden bg-ink text-white text-[16px] font-semibold py-3 pl-4 pr-1 flex items-center gap-2">
     <span class="flex-1 leading-snug py-1">You are offline.</span>
     <button onclick="dismissStorageBanner()" aria-label="Close" class="w-12 h-12 flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="staffBanner" class="hidden bg-amber text-ink text-[16px] font-semibold py-2 pl-4 pr-1 flex items-center gap-2">
+    <i class="fa-solid fa-user-shield"></i>
+    <span class="flex-1 leading-snug">Staff mode: you can add customers and sales. Stats and settings belong to the owner.</span>
   </div>
   <div id="updateNotice" class="hidden bg-leaf-light px-4 py-2 flex items-center justify-between gap-3 text-[16px]" role="status">
     <span>A new version of CustoPadi is ready.</span>
@@ -114,8 +118,23 @@
   </div>
 </div>
 
+<!-- Splash -->
+<div id="splash" class="fixed inset-0 z-[70] bg-white flex flex-col items-center justify-center gap-5 px-8 text-center">
+  <svg viewBox="0 0 640 130" class="h-12 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
+  <div id="splashSpinner" class="spinner"></div>
+  <p id="splashStatus" role="status" aria-live="polite" class="text-stone text-[16px]">Starting CustoPadi...</p>
+  <div id="splashError" class="hidden max-w-sm">
+    <p id="splashErrTitle" class="font-bold text-[18px] mb-1">Could not connect</p>
+    <p id="splashErrText" class="text-stone text-[15px] leading-relaxed">Check your internet and try again.</p>
+    <div class="flex flex-col gap-2 mt-5">
+      <button onclick="location.reload()" class="btn btn-primary">Try again</button>
+      <button id="splashLogout" onclick="logout()" class="btn btn-ghost hidden">Log out</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===================================================== -->
-<!-- AUTH: REGISTER / LOG IN                                -->
+<!-- AUTH                                                  -->
 <!-- ===================================================== -->
 <div id="authView" class="hidden min-h-screen max-w-md mx-auto">
   <div class="bg-white px-6 pt-10 pb-16 rounded-b-[2.25rem] relative overflow-hidden shadow-[0_8px_30px_rgba(23,138,69,0.08)]">
@@ -125,7 +144,7 @@
     <div class="relative">
       <svg viewBox="0 0 640 130" class="h-12 w-auto mb-7" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
       <h1 class="text-[28px] font-extrabold leading-tight mb-2 text-ink">Remember every customer.<br><span class="text-leaf">Bring them back.</span></h1>
-      <p class="text-stone text-[16px] leading-relaxed">Know who to message today and send a warm WhatsApp in one tap.</p>
+      <p class="text-stone text-[16px] leading-relaxed">Know who to message today, who owes you, and send a warm WhatsApp in one tap.</p>
     </div>
   </div>
 
@@ -143,33 +162,15 @@
         <button id="regGoogleBtn" type="button" onclick="googleSignIn('register')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
         <p class="text-center text-[14px] text-stone mb-4">or use your WhatsApp number and a password</p>
         <div class="space-y-4">
-          <div>
-            <label class="label" for="regBiz">Business name</label>
-            <input id="regBiz" class="field" type="text" placeholder="e.g. Ada's Fabrics" autocomplete="organization" maxlength="60" />
-          </div>
-          <div>
-            <label class="label" for="regOwner">Your name</label>
-            <input id="regOwner" class="field" type="text" placeholder="e.g. Adaeze Obi" autocomplete="name" maxlength="50" />
-          </div>
-          <div>
-            <label class="label" for="regPhone">Your WhatsApp number</label>
-            <input id="regPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
-          </div>
-          <div>
-            <label class="label" for="regType">What do you sell?</label>
+          <div><label class="label" for="regBiz">Business name</label><input id="regBiz" class="field" type="text" placeholder="e.g. Ada's Fabrics" autocomplete="organization" maxlength="60" /></div>
+          <div><label class="label" for="regOwner">Your name</label><input id="regOwner" class="field" type="text" placeholder="e.g. Adaeze Obi" autocomplete="name" maxlength="50" /></div>
+          <div><label class="label" for="regPhone">Your WhatsApp number</label><input id="regPhone" class="field" type="tel" placeholder="+234 803 123 4567" autocomplete="tel" /></div>
+          <div><label class="label" for="regType">What do you sell?</label>
             <select id="regType" class="field">
-              <option>Fashion &amp; clothing</option>
-              <option>Food &amp; drinks</option>
-              <option>Hair &amp; beauty</option>
-              <option>Phones &amp; gadgets</option>
-              <option>Provisions &amp; groceries</option>
-              <option>Shoes &amp; bags</option>
-              <option>Services</option>
-              <option>Other</option>
+              <option>Fashion &amp; clothing</option><option>Food &amp; drinks</option><option>Hair &amp; beauty</option><option>Phones &amp; gadgets</option><option>Provisions &amp; groceries</option><option>Shoes &amp; bags</option><option>Services</option><option>Other</option>
             </select>
           </div>
-          <div>
-            <label class="label" for="regPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label>
+          <div><label class="label" for="regPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label>
             <div class="relative">
               <input id="regPw" class="field !pr-14" type="password" placeholder="Choose a password" autocomplete="new-password" />
               <button type="button" onclick="togglePw('regPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
@@ -179,7 +180,7 @@
         </div>
         <p id="regError" role="alert" class="hidden mt-4 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your customers sync to every phone and browser where you log in. Only you can see them. There is no email reset, so keep your password safe.</p>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Your customers sync to every phone and browser where you log in. Only you can see them. After sign-up you get a recovery code that resets your password if you forget it.</p>
       </form>
 
       <!-- Login -->
@@ -189,82 +190,66 @@
         <button id="logGoogleBtn" type="button" onclick="googleSignIn('login')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
         <p class="text-center text-[14px] text-stone mb-4">or use your WhatsApp number and password</p>
         <div class="space-y-4">
-          <div>
-            <label class="label" for="logPhone">WhatsApp number</label>
-            <input id="logPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
-          </div>
-          <div>
-            <label class="label" for="logPw">Password</label>
+          <div><label class="label" for="logPhone">WhatsApp number</label><input id="logPhone" class="field" type="tel" placeholder="+234 803 123 4567" autocomplete="tel" /></div>
+          <div><label class="label" for="logPw">Password</label>
             <div class="relative">
               <input id="logPw" class="field !pr-14" type="password" placeholder="Your password" autocomplete="current-password" />
               <button type="button" onclick="togglePw('logPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
             </div>
           </div>
         </div>
-        <div class="text-right">
-          <button type="button" onclick="showForgot()" class="text-leaf font-bold text-[16px] min-h-[48px] px-1">Forgot password?</button>
-        </div>
         <p id="logError" role="alert" class="hidden mt-2 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <p id="logInfo" class="hidden mt-2 text-leaf-deep text-[15px] font-medium bg-leaf-light rounded-xl px-4 py-3"></p>
-        <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-4">Log in <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-4">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
+        <div class="text-center mt-2">
+          <button id="forgotLink" type="button" onclick="openForgot()" class="text-leaf font-bold text-[16px] min-h-[48px] px-3">Forgot password?</button>
+        </div>
+        <button id="logSubmit" type="submit" class="btn btn-primary w-full mt-3">Log in <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone text-center mt-3 leading-relaxed">Staff member? Log in with your own number and password. The owner adds you to their business from their settings.</p>
+        <p class="text-[14px] text-stone text-center mt-2">New here? <button type="button" onclick="setAuthMode('register')" class="text-leaf font-bold min-h-[48px] px-1">Create an account</button></p>
       </form>
 
-      <!-- Forgot password: routes to a recovery path that genuinely works.
-           CustoPadi never collects a real email address, so there is no inbox to
-           send a reset link to. Google linking is the recovery path. -->
-      <div id="forgotForm" class="hidden">
+      <!-- Forgot password -->
+      <form id="forgotForm" class="hidden" onsubmit="resetWithCode(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Reset your password</h2>
-        <p class="text-stone text-[15px] mb-4">CustoPadi does not use email addresses, so there is no reset link to send. Here is how to get back in.</p>
-
-        <div id="fpSignedIn" class="hidden bg-leaf-light rounded-2xl p-4 mb-3">
-          <p class="font-bold text-[16px] mb-1"><i class="fa-solid fa-circle-check text-leaf mr-1"></i> You are still signed in here</p>
-          <p class="text-[15px] text-stone">No reset needed. Open <b>Business settings</b> and use <b>Change password</b>.</p>
-          <button type="button" onclick="showForgot(false); openBusinessSheet()" class="btn btn-primary w-full mt-3">Change password now</button>
+        <p class="text-stone text-[15px] mb-4">Type your WhatsApp number, the recovery code you saved, and a new password.</p>
+        <div class="space-y-4">
+          <div><label class="label" for="fpPhone">WhatsApp number</label><input id="fpPhone" class="field" type="tel" placeholder="+234 803 123 4567" autocomplete="tel" /></div>
+          <div><label class="label" for="fpCode">Recovery code</label><input id="fpCode" class="field uppercase tracking-wider" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="24" placeholder="ABCD-EFGH-JKLM-NPQR" /></div>
+          <div><label class="label" for="fpNewPw">New password <span class="font-normal text-stone">(6 or more characters)</span></label>
+            <div class="relative">
+              <input id="fpNewPw" class="field !pr-14" type="password" placeholder="Choose a new password" autocomplete="new-password" />
+              <button type="button" onclick="togglePw('fpNewPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
         </div>
-
-        <div class="card p-4 mb-3">
-          <p class="font-bold text-[16px] mb-1">1. Use Google</p>
-          <p class="text-[15px] text-stone">If you linked Google in Business settings, tap Continue with Google below. It opens this same business without a password.</p>
-          <button type="button" onclick="googleSignIn('login')" class="btn btn-outline w-full mt-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
-        </div>
-
-        <div class="card p-4 mb-3">
-          <p class="font-bold text-[16px] mb-1">2. Google is not linked</p>
-          <p class="text-[15px] text-stone">Then the password cannot be recovered, because CustoPadi has no email address for you. Create a fresh account with the same business details, or use <b>Save backup</b> on the phone where you are still logged in and restore it here.</p>
-          <button type="button" onclick="setAuthMode('register')" class="btn btn-ghost w-full mt-3">Create a new account</button>
-        </div>
-
-        <div class="bg-leaf-light/70 rounded-2xl p-4 mb-3 text-[15px] leading-relaxed">
-          <p class="font-bold text-[16px] mb-1">Avoid this next time</p>
-          <p class="text-stone">While you are logged in, open Business settings and tap <b>Link Google account</b>. Then Google becomes your way back in.</p>
-        </div>
-
-        <p class="text-[14px] text-stone text-center mt-2"><button type="button" onclick="showForgot(false)" class="text-leaf font-bold min-h-[48px] px-1">Back to log in</button></p>
-      </div>
+        <p id="fpError" role="alert" class="hidden mt-3 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+        <button id="fpSubmit" type="submit" class="btn btn-primary w-full mt-4">Reset password <i class="fa-solid fa-arrow-right"></i></button>
+        <p class="text-[14px] text-stone mt-3 leading-relaxed">Linked Google to this business? Go back and tap Continue with Google instead. No code? A password cannot be reset without one, because there is no email address to send a link to.</p>
+        <button type="button" onclick="setAuthMode('login')" class="text-leaf font-bold min-h-[48px] w-full">Back to log in</button>
+      </form>
     </div>
 
     <div class="grid grid-cols-3 gap-2 mt-5 text-center">
       <div class="p-3"><i class="fa-solid fa-calendar-check text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Who to message today</p></div>
-      <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
-      <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
+      <div class="p-3"><i class="fa-solid fa-hand-holding-dollar text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Who owes you money</p></div>
+      <div class="p-3"><i class="fa-solid fa-bullhorn ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Message many at once</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-SYNC-5</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-V2</span></p>
   </div>
 </div>
 
 <!-- ===================================================== -->
-<!-- MAIN APP                                               -->
+<!-- MAIN APP                                              -->
 <!-- ===================================================== -->
 <div id="appView" class="hidden max-w-md mx-auto min-h-screen">
-  <header class="app-header sticky z-30 bg-cream/90 backdrop-blur-xl px-4 pt-3 pb-2 flex items-center justify-between gap-3">
+  <header class="app-header sticky z-30 bg-cream/90 backdrop-blur-xl px-4 pt-3 pb-2 flex items-center gap-2">
     <button onclick="switchTab('today')" aria-label="CustoPadi home" class="min-h-[48px] flex items-center">
       <svg viewBox="0 0 640 130" class="h-9 w-auto" role="img" aria-label="CustoPadi" data-logo><use href="#cp-logo"/></svg>
     </button>
     <span id="syncPill" role="status" aria-live="polite" class="ml-auto inline-flex items-center gap-1.5 rounded-full bg-white border border-black/10 px-3 py-1.5 text-[13px] font-semibold text-stone whitespace-nowrap">
       <i id="syncIcon" class="fa-solid fa-circle-check text-leaf"></i><span id="syncText">Synced</span>
     </span>
-    <button onclick="openBusinessSheet()" aria-label="My business and settings" class="relative w-12 h-12 rounded-full bg-leaf text-white flex items-center justify-center shrink-0 shadow-sm">
+    <button id="settingsBtn" onclick="openBusinessSheet()" aria-label="My business and settings" class="relative w-12 h-12 rounded-full bg-leaf text-white flex items-center justify-center shrink-0 shadow-sm">
       <span id="hdrAvatar" class="font-extrabold text-[16px]">K</span>
       <span class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-white border border-black/10 flex items-center justify-center"><i class="fa-solid fa-gear text-[10px] text-stone"></i></span>
     </button>
@@ -288,15 +273,10 @@
         <div class="flex items-center gap-2 mt-3 text-[15px] text-stone flex-wrap">
           <span>Not bought in</span>
           <select id="daysSelect" onchange="setDays(this.value)" class="field !w-auto !min-h-[48px] !py-2 font-bold !text-ink">
-            <option value="7">7 days</option>
-            <option value="14">14 days</option>
-            <option value="21">21 days</option>
-            <option value="30">30 days</option>
-            <option value="45">45 days</option>
-            <option value="60">60 days</option>
-            <option value="90">90 days</option>
+            <option value="7">7 days</option><option value="14">14 days</option><option value="21">21 days</option><option value="30">30 days</option><option value="45">45 days</option><option value="60">60 days</option><option value="90">90 days</option>
           </select>
         </div>
+        <button onclick="openBroadcast()" class="btn btn-amber w-full mt-4"><i class="fa-solid fa-bullhorn"></i> Message a group at once</button>
       </div>
 
       <div id="todayList" class="space-y-3 mb-8"></div>
@@ -311,16 +291,19 @@
     <!-- CUSTOMERS -->
     <section id="screen-customers" class="screen hidden">
       <h2 class="font-extrabold text-[22px] mb-1">Your customers</h2>
-      <p class="text-[15px] text-stone mb-3">Keep their details and your next check-in in one place.</p>
+      <p class="text-[15px] text-stone mb-3">Keep their details, debts and next check-in in one place.</p>
       <div class="relative mb-3">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone/60"></i>
-        <input id="customerSearch" type="search" placeholder="Search name, phone or tag" class="field !pl-11 !bg-white border-black/5" oninput="renderCustomers()" />
+        <input id="customerSearch" type="search" placeholder="Search name, phone or group" class="field !pl-11 !bg-white border-black/5" oninput="renderCustomers()" />
       </div>
       <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 mb-3 -mx-4 px-4" id="chips"></div>
       <div class="flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-stone mb-4">
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-leaf"></span>Bought in 30 days</span>
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber"></span>31–60 days</span>
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose"></span>61+ days</span>
+      </div>
+      <div class="flex gap-2 mb-4">
+        <button onclick="openImport()" class="btn btn-ghost flex-1 !text-[15px]"><i class="fa-solid fa-file-import text-leaf"></i> Import customers</button>
       </div>
       <div id="customerList" class="space-y-3"></div>
     </section>
@@ -344,11 +327,12 @@
         <h3 class="font-bold text-[19px] mb-4">New customer</h3>
         <div class="space-y-4">
           <div><label class="label" for="ncName">Name</label><input id="ncName" class="field" type="text" placeholder="e.g. Chiamaka Okafor" maxlength="50" /></div>
-          <div><label class="label" for="ncPhone">WhatsApp number</label><input id="ncPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" /></div>
+          <div><label class="label" for="ncPhone">WhatsApp number</label><input id="ncPhone" class="field" type="tel" placeholder="+234 803 123 4567" /></div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="label" for="ncBirthday">Birthday <span class="font-normal text-stone">(optional)</span></label><input id="ncBirthday" class="field" type="date" /></div>
             <div><label class="label" for="ncTag">Tag</label><select id="ncTag" class="field"><option>New</option><option>Regular</option><option>VIP</option></select></div>
           </div>
+          <div><label class="label">Groups <span class="font-normal text-stone">(optional)</span></label><div id="ncGroups" class="flex flex-wrap gap-2"></div></div>
           <div><label class="label" for="ncNotes">Notes <span class="font-normal text-stone">(optional)</span></label><textarea id="ncNotes" class="field resize-none" rows="2" placeholder="e.g. Size 12, likes bright colours" maxlength="300"></textarea></div>
         </div>
         <p id="ncError" class="hidden mt-4 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
@@ -371,8 +355,9 @@
           <div><label class="label" for="saleItem">What did they buy?</label><input id="saleItem" class="field" type="text" placeholder="e.g. Ankara gown" maxlength="60" /></div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="label" for="saleAmount">Amount (₦)</label><input id="saleAmount" class="field" type="number" inputmode="numeric" min="1" placeholder="12500" /></div>
-            <div><label class="label" for="saleDate">Date</label><input id="saleDate" class="field" type="date" /></div>
+            <div><label class="label" for="salePaid">Amount paid now <span class="font-normal text-stone">(optional)</span></label><input id="salePaid" class="field" type="number" inputmode="numeric" min="0" placeholder="Same as amount" /></div>
           </div>
+          <div><label class="label" for="saleDate">Date</label><input id="saleDate" class="field" type="date" /></div>
           <p id="saleError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
           <div class="flex gap-3 pt-1">
             <button type="button" onclick="hideForms()" class="btn btn-ghost flex-1">Cancel</button>
@@ -390,6 +375,11 @@
         <b class="text-leaf-deep">{name}</b> becomes the customer's first name.<br>
         <b class="text-leaf-deep">{business}</b> becomes <span id="msgBizName" class="font-semibold">your business name</span>.
       </div>
+      <div class="flex items-center gap-3 mb-5">
+        <label class="label !mb-0 whitespace-nowrap" for="langSelect">Message language</label>
+        <select id="langSelect" class="field" onchange="changeLanguage(this.value)"></select>
+      </div>
+      <button onclick="openBroadcast()" class="btn btn-amber w-full mb-5"><i class="fa-solid fa-bullhorn"></i> Send one message to a whole group</button>
       <div id="templateList" class="space-y-4"></div>
     </section>
 
@@ -397,18 +387,35 @@
     <section id="screen-stats" class="screen hidden">
       <h2 class="font-extrabold text-[22px] mb-1">How business is going</h2>
       <p id="statsMonth" class="text-stone text-[16px] mb-5">This month</p>
-      <div class="grid grid-cols-3 gap-3 mb-5">
+      <div class="grid grid-cols-3 gap-3 mb-3">
         <div class="card p-4 text-center"><p id="statMonth" class="text-[30px] font-extrabold leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Customers this month</p></div>
         <div class="card p-4 text-center"><p id="statBack" class="text-[30px] font-extrabold text-leaf leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Came back</p></div>
         <div class="card p-4 text-center"><p id="statSlip" class="text-[30px] font-extrabold text-amber leading-none mb-2">0</p><p class="text-[14px] text-stone leading-snug">Slipping away</p></div>
       </div>
-      <div class="card p-5">
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="card p-4 text-center"><p id="statOwed" class="text-[26px] font-extrabold text-rose leading-none mb-2">₦0</p><p class="text-[14px] text-stone leading-snug">Customers still owe you</p></div>
+        <div class="card p-4 text-center"><p id="statAvg" class="text-[26px] font-extrabold leading-none mb-2">₦0</p><p class="text-[14px] text-stone leading-snug">Average sale size</p></div>
+      </div>
+      <div class="card p-5 mb-4">
         <div class="flex items-baseline justify-between mb-1">
           <h3 class="font-bold text-[18px]">Sales per week</h3>
           <span class="text-[14px] text-stone">Last 6 weeks</span>
         </div>
         <p id="chartTotal" class="text-[15px] text-stone mb-4">Total: ₦0</p>
         <div id="chartArea"></div>
+      </div>
+      <div class="card p-5 mb-4">
+        <h3 class="font-bold text-[18px] mb-3">Your best customers</h3>
+        <div id="topCustomers" class="space-y-2"></div>
+      </div>
+      <div class="card p-5 mb-4">
+        <h3 class="font-bold text-[18px] mb-3">What sells most</h3>
+        <div id="topItems" class="space-y-2"></div>
+      </div>
+      <div class="card p-5">
+        <h3 class="font-bold text-[18px] mb-1">Are your messages working?</h3>
+        <p class="text-[14px] text-stone mb-3">Counted when a customer buys within 7 days of a message you marked as sent.</p>
+        <div id="messageResults" class="space-y-2"></div>
       </div>
     </section>
   </main>
@@ -426,14 +433,12 @@
 </div>
 
 <!-- ===================================================== -->
-<!-- SHEETS                                                 -->
+<!-- SHEETS                                                -->
 <!-- ===================================================== -->
 <div id="sheet-customer" class="fixed inset-0 z-50 hidden">
   <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('customer')"></div>
-  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[90vh] overflow-y-auto p-5 pb-8">
-    <div class="flex justify-between items-center mb-3">
-      <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto"></div>
-    </div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="flex justify-between items-center mb-3"><div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto"></div></div>
     <button onclick="closeSheet('customer')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
     <div id="customerSheetBody"></div>
   </div>
@@ -447,12 +452,13 @@
     <h3 class="font-extrabold text-[21px] mb-4">Edit customer</h3>
     <form onsubmit="saveCustomerEdit(event)" class="space-y-4" novalidate>
       <div><label class="label" for="editName">Name</label><input class="field" id="editName" maxlength="50" required /></div>
-      <div><label class="label" for="editPhone">WhatsApp number</label><input class="field" id="editPhone" type="tel" inputmode="numeric" required /></div>
+      <div><label class="label" for="editPhone">WhatsApp number</label><input class="field" id="editPhone" type="tel" inputmode="tel" required /></div>
       <div class="grid grid-cols-2 gap-3">
         <div><label class="label" for="editBirthday">Birthday</label><input class="field" id="editBirthday" type="date" /></div>
         <div><label class="label" for="editTag">Tag</label><select class="field" id="editTag"><option>New</option><option>Regular</option><option>VIP</option></select></div>
       </div>
-      <div><label class="label" for="editNext">Next follow-up <span class="font-normal text-stone">(optional)</span></label><input class="field" id="editNext" type="date" /><p class="text-[14px] text-stone mt-1">Shows on Today when due. Open CustoPadi to see it. Leave blank to use the normal reminder.</p></div>
+      <div><label class="label">Groups</label><div id="editGroups" class="flex flex-wrap gap-2"></div></div>
+      <div><label class="label" for="editNext">Next follow-up <span class="font-normal text-stone">(optional)</span></label><input class="field" id="editNext" type="date" /><p class="text-[14px] text-stone mt-1">Leave blank to use the automatic reminder.</p></div>
       <div><label class="label" for="editNotes">Notes</label><textarea class="field resize-none" id="editNotes" rows="3" maxlength="300"></textarea></div>
       <p id="editError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
       <button type="submit" class="btn btn-primary w-full">Save changes</button>
@@ -482,6 +488,49 @@
   </div>
 </div>
 
+<div id="sheet-broadcast" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('broadcast')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <button onclick="closeSheet('broadcast')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="broadcastBody"></div>
+  </div>
+</div>
+
+<div id="sheet-import" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('import')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <button onclick="closeSheet('import')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark"></i></button>
+    <h3 class="font-extrabold text-[21px] mb-1">Import customers</h3>
+    <p class="text-stone text-[15px] mb-4">Paste one customer per line as <b>Name, Phone</b> or <b>Name, Phone, Tag</b>. Or choose a CSV file with those columns.</p>
+    <textarea id="importText" class="field resize-none" rows="7" placeholder="Chiamaka Okafor, 08031234567, VIP&#10;Emeka Nwosu, +234 805 987 6543&#10;Aisha Bello, +233 24 123 4567"></textarea>
+    <div class="flex gap-3 my-3">
+      <label class="btn btn-ghost flex-1 cursor-pointer"><i class="fa-solid fa-file-csv text-leaf"></i> Choose CSV file
+        <input type="file" accept=".csv,text/csv,text/plain" class="hidden" onchange="pickImportFile(event)" />
+      </label>
+    </div>
+    <p id="importError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3 mb-3"></p>
+    <p id="importInfo" class="hidden text-leaf-deep text-[16px] font-medium bg-leaf-light rounded-xl px-4 py-3 mb-3"></p>
+    <button onclick="runImport()" class="btn btn-primary w-full">Add these customers</button>
+  </div>
+</div>
+
+<div id="sheet-payment" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('payment')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <button onclick="closeSheet('payment')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark"></i></button>
+    <h3 class="font-extrabold text-[21px] mb-1">Record a payment</h3>
+    <p id="payCustomerName" class="text-stone text-[16px] mb-4"></p>
+    <form onsubmit="recordPayment(event)" class="space-y-4" novalidate>
+      <div><label class="label" for="payAmount">Amount paid</label><input id="payAmount" class="field" type="number" inputmode="numeric" min="1" placeholder="5000" /></div>
+      <p id="payError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+      <button type="submit" class="btn btn-primary w-full">Save payment</button>
+    </form>
+  </div>
+</div>
+
 <div id="sheet-business" class="fixed inset-0 z-50 hidden">
   <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('business')"></div>
   <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
@@ -497,8 +546,8 @@
     </div>
 
     <div class="bg-leaf-light/70 rounded-2xl p-4 mb-5 text-[15px] leading-snug flex gap-3">
-      <i class="fa-solid fa-mobile-screen text-leaf text-lg mt-0.5"></i>
-      <div id="accountModeText"><b>Saved online.</b> Your customers are backed up to your account.</div>
+      <i class="fa-solid fa-cloud text-leaf text-lg mt-0.5"></i>
+      <div id="accountModeText"><b>Saved online.</b></div>
     </div>
 
     <form onsubmit="saveBusiness(event)" class="space-y-4 mb-6" novalidate>
@@ -510,18 +559,60 @@
           <option>Fashion &amp; clothing</option><option>Food &amp; drinks</option><option>Hair &amp; beauty</option><option>Phones &amp; gadgets</option><option>Provisions &amp; groceries</option><option>Shoes &amp; bags</option><option>Services</option><option>Other</option>
         </select>
       </div>
-      <div><label class="label" for="bizPhone">WhatsApp number</label><input id="bizPhone" class="field" type="tel" inputmode="numeric" /></div>
+      <div><label class="label" for="bizPhone">WhatsApp number</label><input id="bizPhone" class="field" type="tel" inputmode="tel" /></div>
+      <div><label class="label" for="bizLang">Message language</label><select id="bizLang" class="field" onchange="changeLanguage(this.value)"></select></div>
       <div><label class="label">Sign-in method</label><div id="bizEmail" class="field !bg-cream text-stone flex items-center"></div></div>
       <p id="bizError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
       <button type="submit" class="btn btn-primary w-full">Save changes</button>
     </form>
 
-    <form id="upgradeBox" onsubmit="upgradeToSync(event)" class="hidden border-t border-black/5 pt-5 mb-6 space-y-3" novalidate>
+    <div class="border-t border-black/5 pt-5 mb-6">
+      <h4 class="font-bold text-[17px] mb-2">Customer groups</h4>
+      <p class="text-[15px] text-stone mb-3">Groups help you message the right people, like Wholesale, Aso-ebi or Lekki delivery.</p>
+      <div id="groupManager" class="flex flex-wrap gap-2 mb-3"></div>
+      <form onsubmit="addGroup(event)" class="flex gap-2">
+        <input id="newGroup" class="field" maxlength="24" placeholder="New group name" />
+        <button type="submit" class="btn btn-ghost shrink-0">Add</button>
+      </form>
+    </div>
+
+    <div class="border-t border-black/5 pt-5 mb-6">
+      <h4 class="font-bold text-[17px] mb-2">Daily reminder</h4>
+      <p class="text-[15px] text-stone mb-3">Get a phone notification each morning with who to message. Works while the app is installed and open on this phone.</p>
+      <button id="remindBtn" type="button" onclick="toggleReminder()" class="btn btn-outline w-full">Turn on daily reminder</button>
+    </div>
+
+    <div class="border-t border-black/5 pt-5 mb-6">
+      <h4 class="font-bold text-[17px] mb-2">Invite other business owners</h4>
+      <p class="text-[15px] text-stone mb-3">You have shared CustoPadi <b id="refCount">0</b> times.</p>
+      <button type="button" onclick="referral()" class="btn btn-ghost w-full"><i class="fa-brands fa-whatsapp text-leaf"></i> Share CustoPadi on WhatsApp</button>
+    </div>
+
+    <div class="border-t border-black/5 pt-5 mb-6">
+      <h4 class="font-bold text-[17px] mb-2">Staff &amp; roles</h4>
+      <p class="text-[15px] text-stone mb-3">Add a staff member with their own WhatsApp number and password. They can add customers and sales, but cannot see stats or settings.</p>
+      <div id="staffList" class="space-y-2 mb-3"></div>
+      <form onsubmit="addStaff(event)" class="space-y-3" novalidate>
+        <div><label class="label" for="staffPhone">Staff WhatsApp number</label><input id="staffPhone" class="field" type="tel" inputmode="tel" placeholder="+234 803 123 4567" /></div>
+        <p id="staffError" class="hidden text-rose text-[15px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+        <button type="submit" class="btn btn-ghost w-full"><i class="fa-solid fa-user-plus"></i> Add staff member</button>
+      </form>
+    </div>
+
+    <form id="upgradeBox" onsubmit="upgradeToSync(event)" class="hidden space-y-3 mb-6 border-t border-black/5 pt-5" novalidate>
       <h4 class="font-bold text-[17px]">Turn on sync for this business</h4>
       <p class="text-[15px] text-stone">Right now this business only opens in this browser. Choose a password, then log in with your WhatsApp number and that password on any phone or browser.</p>
       <div><label class="label" for="upPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="upPw" class="field" type="password" autocomplete="new-password" /></div>
       <p id="upError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
       <button type="submit" class="btn btn-primary w-full"><i class="fa-solid fa-arrows-rotate"></i> Turn on sync</button>
+    </form>
+
+    <form id="recoveryBox" onsubmit="createRecoveryCode(event)" class="hidden space-y-3 mb-6 border-t border-black/5 pt-5" novalidate>
+      <h4 class="font-bold text-[17px]">Password recovery code</h4>
+      <p id="recoveryStatus" class="text-[15px] text-stone"></p>
+      <div><label class="label" for="rcPw">Your current password</label><input id="rcPw" class="field" type="password" autocomplete="current-password" /></div>
+      <p id="rcError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
+      <button type="submit" class="btn btn-outline w-full"><i class="fa-solid fa-key"></i> <span id="rcBtnText">Create recovery code</span></button>
     </form>
 
     <div id="linkGoogleBox" class="hidden border-t border-black/5 pt-5 mb-6">
@@ -559,12 +650,11 @@
         </label>
       </div>
       <button type="button" onclick="exportCustomersCsv()" class="btn btn-outline w-full !text-[15px]"><i class="fa-solid fa-file-csv"></i> Download customers as CSV</button>
-      <button type="button" onclick="shareAppWhatsApp()" class="btn btn-ghost w-full !text-[15px]"><i class="fa-brands fa-whatsapp text-leaf"></i> Share CustoPadi on WhatsApp</button>
     </div>
 
     <div class="border-t border-black/5 pt-5 space-y-3">
       <button id="logoutBtn" onclick="logout()" class="btn btn-outline w-full"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
-      <button onclick="deleteBusiness()" class="btn btn-danger w-full"><i class="fa-solid fa-trash"></i> Delete this business</button>
+      <button id="deleteBtn" onclick="deleteBusiness()" class="btn btn-danger w-full"><i class="fa-solid fa-trash"></i> Delete this business</button>
     </div>
 
     <div class="pt-6 flex flex-col items-center gap-1 opacity-90">
@@ -574,7 +664,30 @@
   </div>
 </div>
 
-<!-- Install popup: after login and again during long visits -->
+<!-- Recovery code sheet -->
+<div id="sheet-recovery" class="fixed inset-0 z-[58] hidden">
+  <div class="absolute inset-0 bg-ink/50"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <h3 class="font-extrabold text-[21px] mb-1">Save your recovery code</h3>
+    <p id="recoveryIntro" class="text-stone text-[15px] mb-3"></p>
+    <div class="bg-leaf-light rounded-2xl p-4 text-center mb-4">
+      <p id="recoveryCodeText" class="font-mono font-extrabold text-[24px] tracking-wider break-all select-all">XXXX-XXXX-XXXX-XXXX</p>
+    </div>
+    <p class="text-[15px] text-stone mb-4 leading-relaxed">If you forget your password, tap <b>Forgot password?</b> on the login screen and type this code. We cannot show it again. Take a screenshot or write it down. Anyone with this code and your number can reset your password, so keep it private.</p>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <button type="button" onclick="copyRecoveryCode()" class="btn btn-ghost"><i class="fa-regular fa-copy"></i> Copy</button>
+      <button type="button" onclick="downloadRecoveryCode()" class="btn btn-ghost"><i class="fa-solid fa-download"></i> Save file</button>
+    </div>
+    <label class="flex items-start gap-3 min-h-[48px] mb-3 cursor-pointer">
+      <input id="recoverySaved" type="checkbox" class="mt-1 w-5 h-5 accent-leaf shrink-0" onchange="document.getElementById('recoveryDone').disabled = !this.checked" />
+      <span class="text-[16px] leading-snug">I have saved my recovery code</span>
+    </label>
+    <button id="recoveryDone" type="button" disabled onclick="closeSheet('recovery')" class="btn btn-primary w-full">Done</button>
+  </div>
+</div>
+
+<!-- Install popup -->
 <div id="installPrompt" class="fixed inset-x-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[45] hidden px-4">
   <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-black/10 p-3 flex items-center gap-3">
     <div class="w-11 h-11 rounded-xl bg-leaf text-white font-extrabold flex items-center justify-center shrink-0">C</div>
@@ -588,7 +701,7 @@
 </div>
 
 <!-- Toast -->
-<div id="toast" class="fixed left-4 right-4 bottom-28 z-[60] max-w-md mx-auto hidden">
+<div id="toast" class="fixed left-4 right-4 bottom-28 z-[90] max-w-md mx-auto hidden">
   <div class="bg-ink text-white px-5 py-4 rounded-2xl shadow-xl text-[16px] font-medium flex items-center gap-3">
     <i class="fa-solid fa-circle-check text-[#F5A623]"></i><span id="toastText">Done</span>
   </div>
@@ -596,7 +709,7 @@
 
 <script>
 /* =========================================================
-   LOCAL STORAGE (localStorage with in-memory fallback)
+   STORAGE
    ========================================================= */
 const Store = (() => {
   const mem = {};
@@ -624,7 +737,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-SYNC-5';
+const APP_BUILD = 'CP-V2';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -634,6 +747,7 @@ const todayStr = () => toDateStr(new Date());
 function startOfToday() { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
 function parseDate(s) { if (!s) return null; const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); }
 function daysAgoStr(n) { const d = startOfToday(); d.setDate(d.getDate() - n); return toDateStr(d); }
+function addDaysStr(s, n) { const d = parseDate(s); if (!d) return ''; d.setDate(d.getDate() + n); return toDateStr(d); }
 function daysSince(s) { const d = parseDate(s); return d ? Math.round((startOfToday() - d) / 86400000) : 0; }
 function fmtMoney(n) { return '₦' + Math.round(Number(n) || 0).toLocaleString('en-US'); }
 function fmtShortMoney(n) {
@@ -648,11 +762,8 @@ function firstName(name) { return String(name || '').trim().split(/\s+/)[0] || '
 function plural(n, one, many) { return n === 1 ? one : many; }
 const validEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
-/* International phone numbers. Every number is stored as plain digits with its
-   country code (e.g. 2348031234567, 233241234567, 12025550143, 447700900123),
-   which is exactly what https://wa.me/ needs. Nigerian numbers can still be
-   typed the short way (08031234567); numbers from other countries must include
-   + and the country code (pick it from the list beside each phone box). */
+/* International phone numbers: stored as digits with country code, e.g. 2348031234567,
+   which is exactly what https://wa.me/ needs. */
 function normalizePhone(raw) {
   let s = String(raw || '').trim();
   if (!s) return '';
@@ -665,17 +776,14 @@ function normalizePhone(raw) {
   if (d.length === 10 && /^[789]/.test(d)) return '234' + d;
   return d;
 }
-/* E.164 range: 7 to 15 digits, never starting with 0. */
 const validPhone = p => /^[1-9]\d{6,14}$/.test(p || '');
-const PHONE_HINT = 'Include the country code, e.g. +234 803 123 4567, +233 24 123 4567, +1 202 555 0143 or +44 7700 900123.';
 function prettyPhone(p) {
   p = String(p || '');
   if (/^234\d{10}$/.test(p)) return '+234 ' + p.slice(3, 6) + ' ' + p.slice(6, 9) + ' ' + p.slice(9);
   if (!p) return p;
   return '+' + p.replace(/(\d{3})(?=\d)/g, '$1 ').trim();
 }
-/* Country codes: Nigeria first, then the rest of the world. */
-const COUNTRY_CODES = [["234","Nigeria"],["233","Ghana"],["254","Kenya"],["27","South Africa"],["255","Tanzania"],["256","Uganda"],["250","Rwanda"],["251","Ethiopia"],["231","Liberia"],["232","Sierra Leone"],["224","Guinea"],["245","Guinea-Bissau"],["223","Mali"],["226","Burkina Faso"],["227","Niger"],["228","Togo"],["229","Benin"],["225","Ivory Coast"],["221","Senegal"],["220","Gambia"],["222","Mauritania"],["212","Morocco"],["213","Algeria"],["216","Tunisia"],["218","Libya"],["20","Egypt"],["249","Sudan"],["211","South Sudan"],["252","Somalia"],["253","Djibouti"],["291","Eritrea"],["230","Mauritius"],["248","Seychelles"],["261","Madagascar"],["265","Malawi"],["260","Zambia"],["263","Zimbabwe"],["267","Botswana"],["264","Namibia"],["266","Lesotho"],["268","Eswatini"],["258","Mozambique"],["244","Angola"],["235","Chad"],["236","Central African Republic"],["237","Cameroon"],["241","Gabon"],["242","Congo"],["243","DR Congo"],["240","Equatorial Guinea"],["269","Comoros"],["44","United Kingdom"],["353","Ireland"],["33","France"],["49","Germany"],["31","Netherlands"],["32","Belgium"],["41","Switzerland"],["43","Austria"],["34","Spain"],["351","Portugal"],["39","Italy"],["30","Greece"],["90","Turkey"],["971","UAE"],["966","Saudi Arabia"],["974","Qatar"],["965","Kuwait"],["973","Bahrain"],["968","Oman"],["962","Jordan"],["961","Lebanon"],["972","Israel"],["964","Iraq"],["98","Iran"],["92","Pakistan"],["91","India"],["880","Bangladesh"],["94","Sri Lanka"],["977","Nepal"],["975","Bhutan"],["960","Maldives"],["95","Myanmar"],["66","Thailand"],["856","Laos"],["855","Cambodia"],["84","Vietnam"],["60","Malaysia"],["65","Singapore"],["62","Indonesia"],["63","Philippines"],["86","China"],["81","Japan"],["82","South Korea"],["886","Taiwan"],["1","USA & Canada"],["52","Mexico"],["55","Brazil"],["54","Argentina"],["56","Chile"],["57","Colombia"],["51","Peru"],["58","Venezuela"],["593","Ecuador"],["591","Bolivia"],["595","Paraguay"],["598","Uruguay"],["502","Guatemala"],["503","El Salvador"],["504","Honduras"],["505","Nicaragua"],["506","Costa Rica"],["507","Panama"],["509","Haiti"],["1809","Dominican Republic"],["1876","Jamaica"],["1868","Trinidad & Tobago"],["61","Australia"],["64","New Zealand"],["679","Fiji"],["7","Russia & Kazakhstan"],["380","Ukraine"],["375","Belarus"],["48","Poland"],["420","Czechia"],["421","Slovakia"],["36","Hungary"],["40","Romania"],["381","Serbia"],["385","Croatia"],["386","Slovenia"],["389","North Macedonia"],["382","Montenegro"],["387","Bosnia"],["355","Albania"],["372","Estonia"],["371","Latvia"],["370","Lithuania"],["358","Finland"],["47","Norway"],["46","Sweden"],["45","Denmark"],["354","Iceland"],["352","Luxembourg"],["356","Malta"],["357","Cyprus"],["374","Armenia"],["995","Georgia"],["994","Azerbaijan"],["993","Turkmenistan"],["992","Tajikistan"],["996","Kyrgyzstan"],["998","Uzbekistan"],["976","Mongolia"]];
+const COUNTRY_CODES = [["234","Nigeria"],["233","Ghana"],["254","Kenya"],["27","South Africa"],["255","Tanzania"],["256","Uganda"],["250","Rwanda"],["251","Ethiopia"],["231","Liberia"],["232","Sierra Leone"],["224","Guinea"],["223","Mali"],["226","Burkina Faso"],["227","Niger"],["228","Togo"],["229","Benin"],["225","Ivory Coast"],["221","Senegal"],["220","Gambia"],["222","Mauritania"],["212","Morocco"],["213","Algeria"],["216","Tunisia"],["218","Libya"],["20","Egypt"],["249","Sudan"],["252","Somalia"],["230","Mauritius"],["261","Madagascar"],["260","Zambia"],["263","Zimbabwe"],["267","Botswana"],["258","Mozambique"],["244","Angola"],["237","Cameroon"],["44","United Kingdom"],["353","Ireland"],["33","France"],["49","Germany"],["31","Netherlands"],["32","Belgium"],["41","Switzerland"],["43","Austria"],["34","Spain"],["351","Portugal"],["39","Italy"],["30","Greece"],["90","Turkey"],["971","UAE"],["966","Saudi Arabia"],["974","Qatar"],["965","Kuwait"],["973","Bahrain"],["968","Oman"],["962","Jordan"],["961","Lebanon"],["972","Israel"],["964","Iraq"],["92","Pakistan"],["91","India"],["880","Bangladesh"],["94","Sri Lanka"],["977","Nepal"],["95","Myanmar"],["66","Thailand"],["855","Cambodia"],["84","Vietnam"],["60","Malaysia"],["65","Singapore"],["62","Indonesia"],["63","Philippines"],["86","China"],["81","Japan"],["82","South Korea"],["1","USA & Canada"],["52","Mexico"],["55","Brazil"],["54","Argentina"],["56","Chile"],["57","Colombia"],["51","Peru"],["58","Venezuela"],["502","Guatemala"],["506","Costa Rica"],["61","Australia"],["64","New Zealand"],["7","Russia & Kazakhstan"],["380","Ukraine"],["48","Poland"],["420","Czechia"],["40","Romania"],["385","Croatia"],["386","Slovenia"],["358","Finland"],["47","Norway"],["46","Sweden"],["45","Denmark"],["354","Iceland"],["352","Luxembourg"],["357","Cyprus"],["372","Estonia"],["371","Latvia"],["370","Lithuania"]];
 function detectCountryCode(digits) {
   const dd = String(digits || '').replace(/\D/g, '');
   for (let len = 4; len >= 1; len--) {
@@ -696,20 +804,17 @@ function setPhoneCountry(input, code) {
   input.value = d ? '+' + code + ' ' + d : '+' + code + ' ';
   input.focus();
 }
-/* Adds a country-code list beside every phone box, so foreign WhatsApp numbers work. */
 function enhancePhoneInputs() {
-  ['regPhone', 'logPhone', 'ncPhone', 'editPhone', 'bizPhone', 'linkPhone'].forEach(id => {
+  ['regPhone', 'logPhone', 'ncPhone', 'editPhone', 'bizPhone', 'linkPhone', 'fpPhone', 'staffPhone'].forEach(id => {
     const input = $(id);
     if (!input || input.dataset.ccReady) return;
     input.dataset.ccReady = '1';
     input.placeholder = '+234 803 123 4567';
-    input.title = PHONE_HINT;
     input.inputMode = 'tel';
     const wrap = document.createElement('div');
     wrap.style.display = 'flex'; wrap.style.gap = '8px'; wrap.style.alignItems = 'stretch';
     const sel = document.createElement('select');
-    sel.className = 'field';
-    sel.style.width = '118px'; sel.style.flexShrink = '0';
+    sel.className = 'field'; sel.style.width = '118px'; sel.style.flexShrink = '0';
     sel.setAttribute('aria-label', 'Country code');
     sel.innerHTML = countryOptionsHTML(detectCountryCode(input.value) || '234');
     sel.addEventListener('change', () => setPhoneCountry(input, sel.value));
@@ -718,38 +823,10 @@ function enhancePhoneInputs() {
       if (code && sel.value !== code) sel.value = code;
     });
     input.parentNode.insertBefore(wrap, input);
-    wrap.appendChild(sel);
-    wrap.appendChild(input);
+    wrap.appendChild(sel); wrap.appendChild(input);
     input.style.flex = '1'; input.style.minWidth = '0';
   });
 }
-/* "Sync with Google" banner. Phone + password already syncs to every browser by
-   itself; linking Google adds a second way in and the recovery path. */
-function dismissSyncBanner() {
-  const b = $('syncBanner');
-  if (b) b.remove();
-  Store.set('cp_sync_banner_dismissed', true);
-}
-function maybeShowSyncBanner() {
-  try {
-    if (!USER || !ACCOUNT || !appShown) return;
-    if (!hasProvider('password') || hasProvider('google.com')) { const b = $('syncBanner'); if (b) b.remove(); return; }
-    if (Store.get('cp_sync_banner_dismissed', false) || $('syncBanner')) return;
-    const host = $('screen-today');
-    if (!host || host.classList.contains('hidden')) return;
-    const div = document.createElement('div');
-    div.id = 'syncBanner';
-    div.className = 'card p-4 mb-5 flex items-center gap-3 fade-up';
-    div.innerHTML = '<span class="w-11 h-11 rounded-2xl bg-leaf-light text-leaf flex items-center justify-center text-xl shrink-0"><i class="fa-brands fa-google"></i></span>' +
-      '<span class="flex-1 min-w-0"><b class="block text-[16px]">Sync this business with Google</b>' +
-      '<span class="block text-[14px] text-stone">One tap. Then this WhatsApp number opens the same customers on any phone or browser, even if you forget your password.</span></span>' +
-      '<span class="flex flex-col gap-1 shrink-0"><button onclick="linkGoogle()" class="btn btn-primary !min-h-[48px] !px-4 !text-[15px]">Sync</button>' +
-      '<button onclick="dismissSyncBanner()" class="text-stone text-[14px] font-semibold min-h-[44px] px-2">Later</button></span>';
-    host.insertBefore(div, host.firstChild);
-  } catch (e) {}
-}
-enhancePhoneInputs();
-new MutationObserver(() => { maybeShowSyncBanner(); }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
 
 function showError(id, msg) { const el = $(id); el.textContent = msg; el.classList.remove('hidden'); }
 function hideError(id) { $(id).classList.add('hidden'); }
@@ -760,25 +837,23 @@ function togglePw(id, btn) {
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
 }
 
-/* WhatsApp number + password accounts use Firebase Email/Password behind the scenes.
-   The number becomes an internal login name (234xxxxxxxxxx@phone.custopadi.app) that
-   people never see or type. Because the account lives on Firebase, not in one browser,
-   the same number + password opens the same business on any phone or browser.
-   Google can be linked as a second way in (and as the recovery path, since there is
-   no real inbox to send a password reset to). */
-const PHONE_EMAIL_DOMAIN = '@phone.custopadi.app';
-const phoneEmail = phone => phone + PHONE_EMAIL_DOMAIN;
-const realEmail = u => (u && u.email && !u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email : '';
-const isGuest = () => !!(USER && USER.isAnonymous);
-const hasProvider = id => !!(USER && USER.providerData && USER.providerData.some(p => p.providerId === id));
-
-let toastTimer;
-function toast(msg) {
+let toastTimer, toastUndo = null;
+function toast(msg, undoLabel, undoFn) {
   const t = $('toast');
   $('toastText').textContent = msg;
-  t.classList.remove('hidden'); t.classList.add('fade-up');
+  const old = t.querySelector('[data-undo]');
+  if (old) old.remove();
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.add('hidden'), 2800);
+  if (undoLabel && undoFn) {
+    const b = document.createElement('button');
+    b.dataset.undo = '1'; b.type = 'button';
+    b.className = 'ml-auto font-extrabold text-[#F5A623] min-h-[44px] px-2';
+    b.textContent = undoLabel;
+    b.onclick = () => { undoFn(); t.classList.add('hidden'); };
+    t.firstElementChild.appendChild(b);
+    toastTimer = setTimeout(() => t.classList.add('hidden'), 8000);
+  } else toastTimer = setTimeout(() => t.classList.add('hidden'), 2800);
+  t.classList.remove('hidden'); t.classList.add('fade-up');
 }
 
 function updateBars() {
@@ -794,66 +869,110 @@ window.addEventListener('online', updateBars);
 window.addEventListener('offline', updateBars);
 window.addEventListener('pageshow', updateBars);
 
-
+/* =========================================================
+   MESSAGE LANGUAGES
+   ========================================================= */
+const LANGUAGES = {
+  en: { label: 'English', templates: [
+    { id: 'thanks', title: 'Thank you', icon: 'fa-heart', body: "Hi {name}! Thank you so much for buying from {business}. I really appreciate you. If you need anything at all, just message me here \U0001F64F" },
+    { id: 'miss', title: 'We miss you', icon: 'fa-hand-holding-heart', body: "Hello {name}, it's been a while! I hope you and your family are doing well. We miss you at {business}. Should I send you pictures of what we have now?" },
+    { id: 'birthday', title: 'Birthday', icon: 'fa-cake-candles', body: "Happy birthday, {name}! \U0001F389 Wishing you long life, good health and plenty of joy. Thank you for always supporting {business}. Enjoy your day!" },
+    { id: 'new', title: 'New arrival', icon: 'fa-box-open', body: "Hi {name}! New goods just arrived at {business} and I thought of you. Can I send you some pictures before they finish?" },
+    { id: 'review', title: 'Ask for a review', icon: 'fa-star', body: "Hi {name}, thank you for buying from {business}. Please, how did you find it? A few words from you will really help my small business grow. Thank you!" },
+    { id: 'debt', title: 'Payment reminder', icon: 'fa-hand-holding-dollar', body: "Hi {name}, just a gentle reminder that you have {balance} outstanding with {business}. No wahala, pay whenever you can. Thank you!" }
+  ]},
+  pcm: { label: 'Pidgin', templates: [
+    { id: 'thanks', title: 'Thank you', icon: 'fa-heart', body: "Hi {name}! Thank you well well for buying from {business}. I really appreciate you. If you need anything, just message me here \U0001F64F" },
+    { id: 'miss', title: 'We miss you', icon: 'fa-hand-holding-heart', body: "Hello {name}, e don tey o! I hope say you and your family dey fine. We miss you for {business}. Make I send you pictures of wetin we get now?" },
+    { id: 'birthday', title: 'Birthday', icon: 'fa-cake-candles', body: "Happy birthday {name}! \U0001F389 Long life, good health and plenty joy. Thank you for supporting {business}. Enjoy your day!" },
+    { id: 'new', title: 'New arrival', icon: 'fa-box-open', body: "Hi {name}! New goods just land for {business} and na you I first remember. Make I send you pictures before dem finish?" },
+    { id: 'review', title: 'Ask for a review', icon: 'fa-star', body: "Hi {name}, thank you for buying from {business}. Abeg how you see am? Small word from you go really help my small business. Thank you!" },
+    { id: 'debt', title: 'Payment reminder', icon: 'fa-hand-holding-dollar', body: "Hi {name}, small reminder say you still get {balance} to pay for {business}. No wahala, pay anytime you fit. Thank you!" }
+  ]},
+  yo: { label: 'Yorùbá', templates: [
+    { id: 'thanks', title: 'Thank you', icon: 'fa-heart', body: "Báwo {name}! Ẹ ṣé gan-an fún ríjà {business} lára. Mo dúpẹ́ púpọ̀ fún ọ. Bí o bá nílò ohunkóhun, kan sí mi níbí \U0001F64F" },
+    { id: 'miss', title: 'We miss you', icon: 'fa-hand-holding-heart', body: "Ẹ n lẹ {name}, ó ti pé diẹ! Mo nírètí pé ìwà àti ẹbí rẹ dára. A ṣèbẹ̀wò rẹ ní {business}. Ṣé kí n rán àwòrán ohun tí a ní nísinsin yìí sí ọ?" },
+    { id: 'birthday', title: 'Birthday', icon: 'fa-cake-candles', body: "Ẹ kú ayọ̀ ọjọ́ ìbí, {name}! \U0001F389 Ẹmi gígùn, ìlera àti ayọ̀ púpọ̀. Ẹ ṣé fún ìrànlọ́wọ́ {business}. Ẹ jọ̀ọ́ gbádùn ọjọ́ yín!" },
+    { id: 'new', title: 'New arrival', icon: 'fa-box-open', body: "Báwo {name}! Ọjà tuntun dé ní {business} èmi sì rò ọ lọ́kùnú. Ṣé kí n rán àwòrán kí ó tó parí?" },
+    { id: 'review', title: 'Ask for a review', icon: 'fa-star', body: "{name}, Ẹ ṣé fún ríjà {business}. Jọ̀wọ́, báwo ni ó rí? ọ̀rò̀ kékeré láti ọdọ̀ rẹ yóò ràn mí lọ́wọ́. Ẹ ṣé!" },
+    { id: 'debt', title: 'Payment reminder', icon: 'fa-hand-holding-dollar', body: "{name}, ìráńlọ́wọ́ kékeré pé o sì ní {balance} láti san ní {business}. Máa bàálù, san nígbàkígbà tí o bá lè. Ẹ ṣé!" }
+  ]},
+  ig: { label: 'Igbo', templates: [
+    { id: 'thanks', title: 'Thank you', icon: 'fa-heart', body: "Ndewo {name}! Daalụ maka ịzụta ihe na {business}. Ana m ekele gị nke ukwuu. Ọ bụrụ na ịchọrọ ihe ọ bụla, degara m ebe a \U0001F64F" },
+    { id: 'miss', title: 'We miss you', icon: 'fa-hand-holding-heart', body: "Ndewo {name}, oge agabiga! Olileanya m bụ na gị na ezinụlọ gị dị mma. Anyị na-eche gị na {business}. M ga-ezitere gị foto nke ihe anyị nwere ugbu a?" },
+    { id: 'birthday', title: 'Birthday', icon: 'fa-cake-candles', body: "Ekele ji ọmụmụ gị, {name}! \U0001F389 Ndụ ogologo, ahụ ike na ọṅụ buru ibu. Daalụ maka ịkwado {business}. Ṅụrịa ọṅụ taa!" },
+    { id: 'new', title: 'New arrival', icon: 'fa-box-open', body: "Ndewo {name}! Ihe ọhụrụ batara na {business} echere m gị bu nke mbụ. M ga-ezitere gị foto tupu ha agwụ?" },
+    { id: 'review', title: 'Ask for a review', icon: 'fa-star', body: "{name}, daalụ maka ịzụta na {business}. Biko, olee otú ọ dị? Okwu nta si gị ga-enyere m aka. Daalụ!" },
+    { id: 'debt', title: 'Payment reminder', icon: 'fa-hand-holding-dollar', body: "{name}, ncheta nta na ị ka nwere {balance} ịkwụ na {business}. Enweghị nsogbu, kwụọ mgbe ị nwere ike. Daalụ!" }
+  ]}
+};
+const DEFAULT_GROUPS = ['VIP', 'Wholesale'];
 
 /* =========================================================
    DEFAULT CONTENT
    ========================================================= */
-const DEFAULT_TEMPLATES = [
-  { id: 'thanks', title: 'Thank you', icon: 'fa-heart', body: "Hi {name}! Thank you so much for buying from {business}. I really appreciate you. If you need anything at all, just message me here 🙏" },
-  { id: 'miss', title: 'We miss you', icon: 'fa-hand-holding-heart', body: "Hello {name}, it's been a while! I hope you and your family are doing well. We miss you at {business}. Should I send you pictures of what we have now?" },
-  { id: 'birthday', title: 'Birthday', icon: 'fa-cake-candles', body: "Happy birthday, {name}! 🎉 Wishing you long life, good health and plenty of joy. Thank you for always supporting {business}. Enjoy your day!" },
-  { id: 'new', title: 'New arrival', icon: 'fa-box-open', body: "Hi {name}! New goods just arrived at {business} and I thought of you. Can I send you some pictures before they finish?" },
-  { id: 'review', title: 'Ask for a review', icon: 'fa-star', body: "Hi {name}, thank you for buying from {business}. Please, how did you find it? A few words from you will really help my small business grow. Thank you!" }
-];
-
 function freshData() {
   return {
     customers: [],
-    templates: DEFAULT_TEMPLATES.map(t => ({ ...t })),
-    settings: { followUpDays: 30 },
+    templates: LANGUAGES.en.templates.map(t => ({ ...t })),
+    settings: { followUpDays: 30, language: 'en', reminders: false },
+    groups: DEFAULT_GROUPS.slice(),
     progress: { customer: false, sale: false, sent: false },
     onboardingDone: false,
-    sentCount: 0
+    sentCount: 0,
+    referralsSent: 0,
+    staff: {}
   };
 }
 
 function normalizeCustomer(id, d) {
   d = d || {};
+  const purchases = (Array.isArray(d.purchases) ? d.purchases : []).map(p => {
+    const amount = Number(p.amount) || 0;
+    return { id: p.id || uid(), date: String(p.date || '').slice(0, 10), item: String(p.item || ''), amount, paid: p.paid == null ? amount : (Number(p.paid) || 0) };
+  });
   return {
     id,
     name: String(d.name || ''),
     phone: String(d.phone || ''),
     birthday: d.birthday ? String(d.birthday).slice(0, 10) : '',
     tag: d.tag || 'New',
+    groups: Array.isArray(d.groups) ? d.groups.map(String) : [],
     notes: String(d.notes || ''),
     createdAt: d.createdAt ? String(d.createdAt).slice(0, 10) : todayStr(),
     lastContacted: d.lastContacted || null,
     nextFollowUp: d.nextFollowUp || '',
     contactHistory: Array.isArray(d.contactHistory) ? d.contactHistory : [],
-    purchases: (Array.isArray(d.purchases) ? d.purchases : []).map(p => ({ id: p.id || uid(), date: String(p.date || '').slice(0, 10), item: String(p.item || ''), amount: Number(p.amount) || 0 }))
+    purchases
   };
 }
 
 /* =========================================================
-   FIREBASE: ACCOUNTS AND ONLINE STORAGE
-   Auth: Firebase Authentication (email + password).
-   Data: Firebase Realtime Database at
-     businesses/{uid}                  (business profile, messages, settings)
-     businesses/{uid}/customers/{id}   (customers and their purchase history)
-   Realtime Database keeps a local cache and queues writes while offline.
+   FIREBASE
    ========================================================= */
 let FB = null, BOOTED = false;
 let USER = null, ACCOUNT = null, DATA = null;
 let unsubProfile = null, unsubCustomers = null, appShown = false, authAction = '';
+let STAFF_MODE = false, OWNER_UID = null;
 
-const businessRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid));
-const customersRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid) + '/customers');
-const customerRef = (id, uid) => FB.R.ref(FB.db, 'businesses/' + (uid || USER.uid) + '/customers/' + id);
+const PHONE_EMAIL_DOMAIN = '@phone.custopadi.app';
+const phoneEmail = phone => phone + PHONE_EMAIL_DOMAIN;
+const realEmail = u => (u && u.email && !u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email : '';
+const hasProvider = id => !!(USER && USER.providerData && USER.providerData.some(p => p.providerId === id));
+const passwordEmail = u => { const p = u && u.providerData && u.providerData.find(x => x.providerId === 'password'); return (p && p.email) || (u && u.email) || ''; };
+const aliasPhone = u => (u && u.email && u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email.slice(0, -PHONE_EMAIL_DOMAIN.length) : '';
+
+/* In staff mode all reads and writes go to the owner's business node. */
+const nodeUid = () => (STAFF_MODE && OWNER_UID) ? OWNER_UID : (USER ? USER.uid : '');
+const businessRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || nodeUid()));
+const customersRef = uid => FB.R.ref(FB.db, 'businesses/' + (uid || nodeUid()) + '/customers');
+const customerRef = (id, uid) => FB.R.ref(FB.db, 'businesses/' + (uid || nodeUid()) + '/customers/' + id);
+const userPhoneRef = phone => FB.R.ref(FB.db, 'usersByPhone/' + phone);
+const staffIndexRef = uid => FB.R.ref(FB.db, 'staffIndex/' + (uid || USER.uid));
+const recoveryRef = phone => FB.R.ref(FB.db, 'recovery/' + phone);
 
 window.boot = function (fb) {
   FB = fb; BOOTED = true;
-  // Firebase's own connection flag: true only while the database socket is live.
   FB.R.onValue(FB.R.ref(FB.db, '.info/connected'), snap => {
     const wasOffline = !CONNECTED;
     CONNECTED = snap.val() === true;
@@ -861,12 +980,10 @@ window.boot = function (fb) {
     if (CONNECTED && wasOffline && appShown) toast('Back online. Your changes are synced.');
   });
   FB.A.onAuthStateChanged(FB.auth, user => {
-    // An explicit register/login call drives its own transition.
     if (authAction === 'register' || authAction === 'login' || authAction === 'google') return;
     if (user) {
       if (USER && USER.uid === user.uid && unsubProfile) return;
-
-      enterApp(user);
+      openSession(user);
     } else { leaveListeners(); showAuth('login'); }
   }, err => { console.error(err); showAuth('login'); });
 };
@@ -880,7 +997,7 @@ function authMessage(err) {
   const code = (err && err.code) || '';
   if (code === 'auth/admin-restricted-operation' || code === 'auth/operation-not-allowed') {
     if (authAction === 'google') return 'Google sign-in is not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Google, then try again.';
-    return 'Number + password accounts are not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Email/Password. It runs behind the scenes, so nobody ever types an email. Then try again.';
+    return 'Number + password accounts are not enabled yet. App owner: in Firebase Authentication → Sign-in method, enable Email/Password, then try again.';
   }
   if (code === 'auth/credential-already-in-use') return 'That Google account is already linked to another CustoPadi account. Sign in with Google instead.';
   if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') return 'Your browser blocked the Google window. Allow pop-ups for this site, then try again.';
@@ -898,7 +1015,6 @@ function authMessage(err) {
     'auth/network-request-failed': 'Could not reach the sign-in service. Check your internet, VPN or private DNS, then try again.',
     'auth/user-disabled': 'This account has been turned off.',
     'auth/requires-recent-login': 'For safety, please log out, log in again, then try this.',
-    'auth/operation-not-allowed': 'This sign-in method is not enabled yet. App owner: enable it in Firebase Authentication → Sign-in method.',
     'auth/unauthorized-domain': 'This website address is not authorized yet. App owner: add ' + location.hostname + ' under Firebase Authentication → Settings → Authorized domains.',
     'auth/api-key-not-valid': 'The app key was rejected. App owner: check the Firebase web app configuration.',
     'auth/invalid-api-key': 'The app key was rejected. App owner: check the Firebase web app configuration.',
@@ -916,18 +1032,7 @@ function dataError(err) {
   else toast('Problem saving' + (code ? ' (' + code + ')' : ''));
 }
 
-function profilePayload() {
-  return clean({
-    businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone,
-    businessType: ACCOUNT.businessType, email: realEmail(USER), createdAt: ACCOUNT.createdAt || todayStr(),
-    authProvider: isGuest() ? 'anonymous' : (hasProvider('password') ? 'phone-password' : 'google'),
-    pinHash: null, pinSalt: null, pinAlgo: null, // clears any old PIN hash left by earlier versions
-    templates: DATA.templates, settings: DATA.settings, progress: DATA.progress,
-    onboardingDone: DATA.onboardingDone, sentCount: DATA.sentCount, updatedAt: Date.now()
-  });
-}
-/* Auto-sync status. Every edit writes to Firebase straight away; this tracks
-   whether those writes have reached the server so the header can say so. */
+/* Auto-sync status */
 let PENDING_WRITES = 0, CONNECTED = true, SYNC_FAILED = false;
 function renderSync() {
   const icon = $('syncIcon'), text = $('syncText');
@@ -949,14 +1054,24 @@ function track(promise) {
 window.addEventListener('online', renderSync);
 window.addEventListener('offline', renderSync);
 
+function profilePayload() {
+  return clean({
+    businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone,
+    businessType: ACCOUNT.businessType, email: realEmail(USER), createdAt: ACCOUNT.createdAt || todayStr(),
+    authProvider: isGuest() ? 'anonymous' : (hasProvider('password') ? 'phone-password' : 'google'),
+    pinHash: null, pinSalt: null, pinAlgo: null,
+    templates: DATA.templates, settings: DATA.settings, groups: DATA.groups,
+    progress: DATA.progress, onboardingDone: DATA.onboardingDone, sentCount: DATA.sentCount,
+    referralsSent: DATA.referralsSent, staff: DATA.staff, updatedAt: Date.now()
+  });
+}
 function saveProfile() {
   if (!FB || !USER || !DATA || !ACCOUNT) return;
   track(FB.R.update(businessRef(), profilePayload()));
 }
-/* Per-customer sync. Only customers that actually changed are written, and only removed
-   ones are deleted. Rewriting the whole list on every save would let a browser with an
-   out-of-date list wipe out customers added from another phone or browser. */
-let SYNCED = {}; // customer id -> JSON of what the database currently holds
+
+/* Per-customer sync: only changed customers are written, only deleted ones removed. */
+let SYNCED = {};
 function syncCustomers() {
   if (!FB || !USER || !DATA) return;
   const updates = {};
@@ -975,7 +1090,8 @@ function syncCustomers() {
 function saveData() { saveProfile(); syncCustomers(); }
 function removeCustomer(id) { delete SYNCED[id]; if (FB && USER) track(FB.R.remove(customerRef(id))); }
 
-// Save any message still being typed before the app is hidden or closed.
+/* Save any message still being typed before the app is hidden or closed. */
+let saveTimers = {};
 function flushPendingSaves() {
   const ids = Object.keys(saveTimers);
   if (!ids.length) return;
@@ -988,28 +1104,31 @@ window.addEventListener('pagehide', flushPendingSaves);
 
 function applyProfile(p) {
   const base = freshData();
-  const ownPhone = USER.email && USER.email.endsWith(PHONE_EMAIL_DOMAIN) ? USER.email.slice(0, -PHONE_EMAIL_DOMAIN.length) : '';
-  ACCOUNT = { uid: USER.uid, email: realEmail(USER) || p.email || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || ownPhone, businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr() };
+  ACCOUNT = { uid: nodeUid(), email: realEmail(USER) || p.email || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || '', businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr() };
   DATA.templates = Array.isArray(p.templates) && p.templates.length ? p.templates.map(t => ({ ...t })) : base.templates;
   DATA.settings = Object.assign(base.settings, p.settings || {});
+  DATA.groups = Array.isArray(p.groups) && p.groups.length ? p.groups.slice() : base.groups.slice();
   DATA.progress = Object.assign(base.progress, p.progress || {});
   DATA.onboardingDone = !!p.onboardingDone;
   DATA.sentCount = p.sentCount || 0;
-  if (appShown) renderHeader();
+  DATA.referralsSent = p.referralsSent || 0;
+  DATA.staff = p.staff && typeof p.staff === 'object' ? p.staff : {};
+  if (appShown) { renderHeader(); renderGroupPickers(); }
 }
 
-function enterApp(user) {
+function openSession(user) {
   USER = user;
   leaveListeners(false);
+  // Staff? Their own account may hold nothing useful; the owner's business is theirs to work in.
+  if (!user.isAnonymous && !hasProvider('password') && !hasProvider('google.com')) { showAuth('login'); return; }
   appShown = false;
-  DATA = freshData(); ACCOUNT = null;
+  DATA = freshData(); ACCOUNT = null; STAFF_MODE = false; OWNER_UID = null;
   let gotP = false, gotC = false;
   const ready = () => { if (gotP && gotC) { if (!appShown) showApp(); else if (!document.activeElement?.closest('form')) rerender(); } };
   let creatingProfile = false;
   unsubProfile = FB.R.onValue(businessRef(), snap => {
     const value = snap.val();
     if (!value || !value.businessName) {
-      // Covers a login whose profile was never saved (e.g. an earlier failed sign-up).
       if (!creatingProfile) {
         creatingProfile = true;
         const base = freshData();
@@ -1019,8 +1138,8 @@ function enterApp(user) {
           phone: (user.email || '').endsWith(PHONE_EMAIL_DOMAIN) ? user.email.slice(0, -PHONE_EMAIL_DOMAIN.length) : '',
           businessType: 'Other', email: realEmail(user), createdAt: todayStr(),
           authProvider: user.isAnonymous ? 'anonymous' : (user.providerData.some(p => p.providerId === 'password') ? 'phone-password' : 'google'),
-          templates: base.templates, settings: base.settings, progress: base.progress,
-          onboardingDone: false, sentCount: 0
+          templates: base.templates, settings: base.settings, groups: base.groups,
+          progress: base.progress, onboardingDone: false, sentCount: 0, referralsSent: 0, staff: {}
         })).catch(dataError);
       }
       return;
@@ -1031,41 +1150,50 @@ function enterApp(user) {
   unsubCustomers = FB.R.onValue(customersRef(), snap => {
     const value = snap.val() || {};
     DATA.customers = Object.keys(value).map(id => normalizeCustomer(id, value[id]));
-    // Remember what the database holds, so only real edits are written back.
     SYNCED = {};
     DATA.customers.forEach(c => { SYNCED[c.id] = JSON.stringify(clean(c)); });
     gotC = true; ready();
   }, dataError);
+  // If this account is on a business's staff list, open that business in staff mode.
+  staffIndexRef().once('value').then(snap => {
+    const link = snap.val();
+    if (!link || !link.ownerUid || link.role !== 'staff') { checkRecovery(); return; }
+    if (unsubProfile) unsubProfile(); if (unsubCustomers) unsubCustomers();
+    unsubProfile = unsubCustomers = null;
+    STAFF_MODE = true; OWNER_UID = link.ownerUid;
+    let p2 = false, c2 = false;
+    const ready2 = () => { if (p2 && c2) { if (!appShown) showApp(); else rerender(); } };
+    unsubProfile = FB.R.onValue(businessRef(), s => {
+      const v = s.val();
+      if (v && v.businessName) { applyProfile(v); p2 = true; ready2(); }
+    }, dataError);
+    unsubCustomers = FB.R.onValue(customersRef(), s => {
+      const v = s.val() || {};
+      DATA.customers = Object.keys(v).map(id => normalizeCustomer(id, v[id]));
+      SYNCED = {};
+      DATA.customers.forEach(c => { SYNCED[c.id] = JSON.stringify(clean(c)); });
+      c2 = true; ready2();
+    }, dataError);
+  }).catch(() => { checkRecovery(); });
 }
+
+function enterApp(user) { openSession(user); }
 
 function leaveListeners(resetState = true) {
   if (unsubProfile) unsubProfile(); if (unsubCustomers) unsubCustomers();
   unsubProfile = unsubCustomers = null;
   SYNCED = {};
-  if (resetState) { USER = null; ACCOUNT = null; DATA = null; appShown = false; }
+  if (resetState) { USER = null; ACCOUNT = null; DATA = null; appShown = false; STAFF_MODE = false; OWNER_UID = null; }
 }
 
 /* ---------- Register / log in / log out ---------- */
 function setAuthMode(mode) {
   $('registerForm').classList.toggle('hidden', mode !== 'register');
   $('loginForm').classList.toggle('hidden', mode !== 'login');
+  $('forgotForm').classList.toggle('hidden', mode !== 'forgot');
   $('segRegister').classList.toggle('active', mode === 'register');
-  $('segLogin').classList.toggle('active', mode === 'login');
-  hideError('regError'); hideError('logError');
-  $('forgotForm').classList.add('hidden');
-  $('loginForm').classList.remove('hidden');
-}
-
-function showForgot(show = true) {
-  hideError('logError');
-  $('loginForm').classList.toggle('hidden', show);
-  $('forgotForm').classList.toggle('hidden', !show);
-  $('segRegister').classList.remove('active');
-  $('segLogin').classList.toggle('active', !show);
-  // If this device still holds a live session, changing the password is the real fix.
-  const stillIn = !!(FB && FB.auth.currentUser);
-  $('fpSignedIn').classList.toggle('hidden', !(show && stillIn));
-  window.scrollTo(0, 0);
+  $('segLogin').classList.toggle('active', mode === 'login' || mode === 'forgot');
+  hideError('regError'); hideError('logError'); hideError('fpError'); $('logInfo').classList.add('hidden');
 }
 
 function showAuth(mode) {
@@ -1083,10 +1211,15 @@ function showApp() {
   appShown = true;
   $('authView').classList.add('hidden');
   $('appView').classList.remove('hidden');
+  $('staffBanner').classList.toggle('hidden', !STAFF_MODE);
+  $('settingsBtn').classList.toggle('hidden', STAFF_MODE);
   renderHeader();
-  switchTab('today');
+  renderGroupPickers();
+  renderLanguagePickers();
+  switchTab(STAFF_MODE ? 'customers' : 'today');
   updateBars();
   startInstallPrompts();
+  maybeShowReminder();
   try {
     const pending = JSON.parse(sessionStorage.getItem('cp_pending_message') || 'null');
     if (pending && pending.accountId === USER.uid && getCustomer(pending.customerId)) {
@@ -1115,25 +1248,26 @@ async function register(e) {
   authAction = 'register';
   let created = null;
   try {
-    // The WhatsApp number is the login name, so the same number + password works in any browser.
     const cred = await FB.A.createUserWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
     created = cred.user;
     const base = freshData();
     await FB.R.set(businessRef(cred.user.uid), clean({
       businessName, ownerName, phone, businessType, email: '', createdAt: todayStr(),
       authProvider: 'phone-password',
-      templates: base.templates, settings: base.settings, progress: base.progress,
-      onboardingDone: false, sentCount: 0
+      templates: base.templates, settings: base.settings, groups: base.groups,
+      progress: base.progress, onboardingDone: false, sentCount: 0, referralsSent: 0, staff: {}
     }));
+    // Public map so an owner can add this person as staff later.
+    FB.R.update(userPhoneRef(phone), { uid: cred.user.uid }).catch(() => {});
     Store.set('cp_last_phone', phone);
     $('registerForm').reset();
     enterApp(cred.user);
     toast('Welcome to CustoPadi, ' + firstName(ownerName) + '!');
+    issueRecovery(pw, 'Your account is ready. Save this recovery code now. It is the only way to reset your password if you forget it.');
   } catch (err) {
     console.error('Sign-up failed:', err);
     if (created) {
-      // The login exists but the database refused the profile. Sign out cleanly so Log in can finish it.
-      try { await FB.A.signOut(FB.auth); } catch (e) {}
+      try { await FB.A.signOut(FB.auth); } catch (e2) {}
       showError('regError', 'Your account was created, but the database refused to save your business. App owner: publish the Realtime Database rules. Then tap Log in with the same number and password.');
     } else showError('regError', authMessage(err));
   } finally {
@@ -1173,11 +1307,7 @@ const googleProvider = () => {
   provider.setCustomParameters({ prompt: 'select_account' });
   return provider;
 };
-// Google always uses a popup window. signInWithRedirect breaks in storage-partitioned
-// browsers (Chrome mobile, in-app browsers) with "missing initial state", so it is never used.
-function popupHint() {
-  return 'Your browser blocked the Google window. Allow pop-ups for this site, then tap Continue with Google again.';
-}
+function popupHint() { return 'Your browser blocked the Google window. Allow pop-ups for this site, then tap Continue with Google again.'; }
 
 async function googleSignIn(mode) {
   const errorId = mode === 'login' ? 'logError' : 'regError';
@@ -1211,14 +1341,12 @@ async function linkGoogle() {
     const code = err && err.code;
     console.error('Google link failed:', err);
     if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') toast(popupHint());
-    else if (code === 'auth/popup-closed-by-user') { /* cancelled, say nothing */ }
+    else if (code === 'auth/popup-closed-by-user') { /* cancelled */ }
     else if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') toast('That Google account already belongs to another CustoPadi account. Choose a different Google account.');
     else toast(authMessage(err));
   }
 }
 
-// Upgrades a browser-only (anonymous) business so it can be opened from any browser.
-// The business keeps its id, so every customer and sale stays attached to it.
 async function upgradeToSync(e) {
   e.preventDefault();
   hideError('upError');
@@ -1232,10 +1360,12 @@ async function upgradeToSync(e) {
     USER = res.user;
     ACCOUNT.authProvider = 'phone-password';
     saveProfile();
+    FB.R.update(userPhoneRef(phone), { uid: USER.uid }).catch(() => {});
     Store.set('cp_last_phone', phone);
     $('upPw').value = '';
     closeSheet('business');
     toast('Sync is on. Log in with your WhatsApp number and password on any phone or browser.');
+    issueRecovery(pw, 'Sync is on. Save this recovery code. It is the only way to reset your password if you forget it.');
   } catch (err) {
     console.error('Sync upgrade failed:', err);
     showError('upError', err && err.code === 'auth/email-already-in-use'
@@ -1243,6 +1373,8 @@ async function upgradeToSync(e) {
       : authMessage(err));
   }
 }
+
+function isGuest() { return !!(USER && USER.isAnonymous); }
 
 function logout() {
   closeAllSheets();
@@ -1252,8 +1384,26 @@ function logout() {
   toast('You are logged out');
 }
 
-/* Google-only businesses have no CustoPadi password of their own. This links a
-   WhatsApp number + password to their account so they can manage it in the app. */
+async function changePassword(e) {
+  e.preventDefault();
+  hideError('pwError');
+  if (!hasProvider('password')) return;
+  const oldPw = $('pwOld').value, newPw = $('pwNew').value;
+  if (!oldPw) return showError('pwError', 'Type your current password.');
+  if (newPw.length < 6) return showError('pwError', 'Your new password must be at least 6 characters.');
+  try {
+    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(passwordEmail(USER), oldPw));
+    await FB.A.updatePassword(USER, newPw);
+    $('pwOld').value = ''; $('pwNew').value = '';
+    toast('Password updated');
+    issueRecovery(newPw, 'Your password is changed. This is your NEW recovery code. Your old code no longer works.');
+  } catch (err) {
+    const code = err && err.code;
+    showError('pwError', ['auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(code)
+      ? 'Your current password is not correct.' : authMessage(err));
+  }
+}
+
 async function linkPhoneLogin(e) {
   e.preventDefault();
   hideError('linkError');
@@ -1268,6 +1418,7 @@ async function linkPhoneLogin(e) {
     ACCOUNT.authProvider = 'phone-password';
     if (!ACCOUNT.phone) ACCOUNT.phone = phone;
     saveProfile();
+    FB.R.update(userPhoneRef(phone), { uid: USER.uid }).catch(() => {});
     Store.set('cp_last_phone', phone);
     $('linkPw').value = '';
     toast('Linked. You can now change this password here in CustoPadi.');
@@ -1280,25 +1431,6 @@ async function linkPhoneLogin(e) {
   }
 }
 
-async function changePassword(e) {
-  e.preventDefault();
-  hideError('pwError');
-  if (!hasProvider('password')) return;
-  const oldPw = $('pwOld').value, newPw = $('pwNew').value;
-  if (!oldPw) return showError('pwError', 'Type your current password.');
-  if (newPw.length < 6) return showError('pwError', 'Your new password must be at least 6 characters.');
-  try {
-    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(USER.email, oldPw));
-    await FB.A.updatePassword(USER, newPw);
-    $('pwOld').value = ''; $('pwNew').value = '';
-    toast('Password updated');
-  } catch (err) {
-    const code = err && err.code;
-    showError('pwError', ['auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(code)
-      ? 'Your current password is not correct.' : authMessage(err));
-  }
-}
-
 async function deleteBusiness() {
   if (!navigator.onLine) return toast('You need internet to delete your business.');
   if (!confirm('Delete "' + ACCOUNT.businessName + '" and ALL its customers and sales? This cannot be undone.')) return;
@@ -1307,25 +1439,144 @@ async function deleteBusiness() {
     if (hasProvider('password')) {
       const pw = prompt('Type your password to confirm:');
       if (!pw) return;
-      await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(USER.email, pw));
+      await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(passwordEmail(USER), pw));
     } else if (hasProvider('google.com')) {
       await FB.A.reauthenticateWithPopup(USER, googleProvider());
     }
     const user = USER;
+    const recPhone = aliasPhone(user);
+    const ownerUid = nodeUid();
     leaveListeners(false);
-    await FB.R.remove(businessRef(user.uid));
+    await FB.R.remove(businessRef(ownerUid));
+    if (recPhone) { try { await FB.R.remove(recoveryRef(recPhone)); } catch (e2) { console.warn('Recovery copy not removed'); } }
     closeAllSheets();
     await FB.A.deleteUser(user);
     toast('Business deleted');
   } catch (err) {
     toast(authMessage(err));
-    if (USER) enterApp(USER);
+    if (USER) openSession(USER);
   }
 }
 
-/* =========================================================
-   BUSINESS SHEET
-   ========================================================= */
+/* ---------- Staff ---------- */
+async function addStaff(e) {
+  e.preventDefault();
+  hideError('staffError');
+  if (!FB || !USER) return;
+  const phone = normalizePhone($('staffPhone').value);
+  if (!validPhone(phone)) return showError('staffError', 'Type the full number with country code, e.g. +234 803 123 4567.');
+  if (phone === normalizePhone(ACCOUNT.phone)) return showError('staffError', 'That is your own number.');
+  try {
+    const snap = await FB.R.get(userPhoneRef(phone));
+    if (!snap.exists() || !snap.val().uid) return showError('staffError', 'No CustoPadi account with this number yet. The staff member must create their own account first.');
+    const staffUid = snap.val().uid;
+    await FB.R.set(staffIndexRef(staffUid), clean({ ownerUid: nodeUid(), phone, role: 'staff', name: '', addedAt: Date.now() }));
+    DATA.staff[staffUid] = { phone, role: 'staff', addedAt: Date.now() };
+    saveProfile();
+    $('staffPhone').value = '';
+    toast('Staff member added. They can now log in with their own number and password.');
+    renderStaffList();
+  } catch (err) {
+    console.error('Add staff failed:', err);
+    showError('staffError', /permission/i.test(((err && err.code) || '') + ' ' + ((err && err.message) || ''))
+      ? 'Staff could not be added. App owner: publish the updated Realtime Database rules.'
+      : authMessage(err));
+  }
+}
+async function removeStaff(staffUid) {
+  if (!confirm('Remove this staff member? They will lose access to your business.')) return;
+  try {
+    await FB.R.remove(staffIndexRef(staffUid));
+    delete DATA.staff[staffUid];
+    saveProfile();
+    renderStaffList();
+    toast('Staff member removed');
+  } catch (err) { dataError(err); }
+}
+function renderStaffList() {
+  const el = $('staffList');
+  const entries = Object.entries(DATA.staff || {});
+  if (!entries.length) { el.innerHTML = '<p class="text-[15px] text-stone">No staff members yet.</p>'; return; }
+  el.innerHTML = entries.map(([uid, s]) => `
+    <div class="flex items-center gap-3 bg-cream rounded-xl p-3">
+      <span class="w-9 h-9 rounded-xl bg-leaf-light text-leaf flex items-center justify-center shrink-0"><i class="fa-solid fa-user-shield"></i></span>
+      <span class="flex-1 min-w-0"><span class="block font-semibold text-[15px]">${esc(prettyPhone(s.phone))}</span><span class="block text-[13px] text-stone">Staff</span></span>
+      <button onclick="removeStaff('${uid}')" class="w-12 h-12 flex items-center justify-center text-rose"><i class="fa-regular fa-trash-can"></i></button>
+    </div>`).join('');
+}
+
+/* ---------- Groups ---------- */
+function renderGroupPickers() {
+  ['ncGroups', 'editGroups'].forEach(id => {
+    const box = $(id);
+    if (!box) return;
+    const selected = id === 'ncGroups' ? newCustomerGroups : (editGroups || []);
+    box.innerHTML = (DATA.groups || []).map(g => {
+      const on = selected.includes(g);
+      return `<button type="button" onclick="toggleGroup('${id}','${esc(g)}')" class="chip !min-h-[44px] !py-2 !text-[14px] ${on ? 'active' : ''}">${esc(g)}</button>`;
+    }).join('') || '<p class="text-[14px] text-stone">No groups yet. Add them in Business settings.</p>';
+  });
+}
+let newCustomerGroups = [], editGroups = null;
+function toggleGroup(boxId, group) {
+  const list = boxId === 'ncGroups' ? newCustomerGroups : editGroups;
+  if (!list) return;
+  const i = list.indexOf(group);
+  if (i < 0) list.push(group); else list.splice(i, 1);
+  renderGroupPickers();
+}
+function addGroup(e) {
+  e.preventDefault();
+  const name = $('newGroup').value.trim().replace(/\s+/g, ' ');
+  if (name.length < 2 || name.length > 24) return toast('Group name should be 2 to 24 characters.');
+  if ((DATA.groups || []).some(g => g.toLowerCase() === name.toLowerCase())) return toast('That group already exists.');
+  DATA.groups.push(name);
+  saveProfile();
+  $('newGroup').value = '';
+  renderGroupManager();
+  renderGroupPickers();
+  renderCustomers();
+  toast('Group added');
+}
+function removeGroup(name) {
+  if (!confirm('Remove the group "' + name + '"? Customers keep their other groups.')) return;
+  DATA.groups = DATA.groups.filter(g => g !== name);
+  DATA.customers.forEach(c => { c.groups = (c.groups || []).filter(g => g !== name); });
+  saveProfile(); syncCustomers();
+  renderGroupManager(); renderGroupPickers(); renderCustomers();
+  toast('Group removed');
+}
+function renderGroupManager() {
+  const el = $('groupManager');
+  if (!el) return;
+  el.innerHTML = (DATA.groups || []).map(g => `
+    <span class="chip !min-h-[44px] !py-2 !text-[14px] active">${esc(g)}
+      <button type="button" onclick="removeGroup('${esc(g)}')" aria-label="Remove ${esc(g)}" class="ml-1 w-8 h-8 inline-flex items-center justify-center"><i class="fa-solid fa-xmark text-[12px]"></i></button>
+    </span>`).join('') || '<p class="text-[15px] text-stone">No groups yet.</p>';
+}
+
+/* ---------- Languages ---------- */
+function renderLanguagePickers() {
+  const opts = Object.keys(LANGUAGES).map(k => `<option value="${k}"${(DATA.settings.language || 'en') === k ? ' selected' : ''}>${LANGUAGES[k].label}</option>`).join('');
+  ['langSelect', 'bizLang'].forEach(id => { const el = $(id); if (el) el.innerHTML = opts; });
+}
+function changeLanguage(code) {
+  if (!LANGUAGES[code]) return;
+  if ((DATA.settings.language || 'en') === code) return;
+  const custom = DATA.templates.some((t, i) => t.body !== (LANGUAGES[DATA.settings.language || 'en'].templates[i] || {}).body);
+  const msg = custom
+    ? 'Replace your messages with the ' + LANGUAGES[code].label + ' versions? Your own wording will be lost.'
+    : 'Switch your messages to ' + LANGUAGES[code].label + '?';
+  if (!confirm(msg)) { renderLanguagePickers(); return; }
+  DATA.settings.language = code;
+  DATA.templates = LANGUAGES[code].templates.map(t => ({ ...t }));
+  saveProfile();
+  renderLanguagePickers();
+  renderTemplates();
+  toast('Messages are now in ' + LANGUAGES[code].label);
+}
+
+/* ---------- Business sheet ---------- */
 function renderHeader() {
   if (!ACCOUNT) return;
   $('hdrAvatar').textContent = initials(ACCOUNT.businessName);
@@ -1343,7 +1594,8 @@ function openBusinessSheet() {
   $('bizName').value = ACCOUNT.businessName;
   $('bizOwner').value = ACCOUNT.ownerName;
   $('bizType').value = ACCOUNT.businessType;
-  $('bizPhone').value = ACCOUNT.phone;
+  $('bizPhone').value = ACCOUNT.phone ? '+' + ACCOUNT.phone : '';
+  renderLanguagePickers();
   const methods = [];
   if (hasProvider('password')) methods.push('WhatsApp number + password');
   if (hasProvider('google.com')) methods.push('Google' + (realEmail(USER) ? ' (' + realEmail(USER) + ')' : ''));
@@ -1355,12 +1607,18 @@ function openBusinessSheet() {
   $('pwChangeForm').classList.toggle('hidden', !hasProvider('password'));
   $('linkGoogleBox').classList.toggle('hidden', hasProvider('google.com'));
   $('linkLoginBox').classList.toggle('hidden', isGuest() || hasProvider('password'));
-  hideError('upError');
-  $('logoutBtn').innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Log out';
+  $('deleteBtn').classList.toggle('hidden', STAFF_MODE);
+  $('refCount').textContent = DATA.referralsSent || 0;
+  $('remindBtn').innerHTML = DATA.settings.reminders
+    ? '<i class="fa-solid fa-bell-slash"></i> Turn off daily reminder'
+    : '<i class="fa-solid fa-bell"></i> Turn on daily reminder';
+  renderRecoveryBox();
+  renderGroupManager();
+  renderStaffList();
+  hideError('bizError'); hideError('pwError'); hideError('linkError'); hideError('staffError'); hideError('upError');
   $('pwOld').value = ''; $('pwNew').value = '';
   $('linkPhone').value = ACCOUNT.phone ? '+' + ACCOUNT.phone : '';
-  $('linkPw').value = '';
-  hideError('bizError'); hideError('pwError'); hideError('linkError');
+  $('linkPw').value = ''; $('upPw').value = ''; $('rcPw').value = ''; $('staffPhone').value = '';
   openSheet('business');
 }
 
@@ -1374,152 +1632,334 @@ function saveBusiness(e) {
   Object.assign(ACCOUNT, { businessName: name, ownerName: owner, businessType: $('bizType').value, phone });
   saveProfile();
   renderHeader();
+  renderGroupManager();
   closeSheet('business');
   rerender();
   toast('Business details saved');
 }
 
-/* =========================================================
-   BACKUP FILE & CSV
-   ========================================================= */
-function exportBackup() {
-  if (!ACCOUNT || !DATA) return;
-  const payload = { app: 'CustoPadi', localBackup: 1, exportedAt: todayStr(), business: { businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone, businessType: ACCOUNT.businessType, email: ACCOUNT.email }, data: DATA };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  const safeName = ACCOUNT.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'business';
-  a.href = URL.createObjectURL(blob);
-  a.download = 'custopadi-' + safeName + '-backup-' + todayStr() + '.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
-  toast('Backup saved to your phone');
-}
-
-function importBackup(e) {
-  const file = e.target.files && e.target.files[0];
-  e.target.value = '';
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      const incoming = parsed && parsed.data && Array.isArray(parsed.data.customers) ? parsed.data : (Array.isArray(parsed.customers) ? parsed : null);
-      if (!incoming) return toast('This file is not a CustoPadi backup.');
-      if (!confirm('Replace your current customers and sales with the backup file (' + incoming.customers.length + ' customers)? This replaces the records saved online for this business.')) return;
-      DATA.customers = incoming.customers.map(c => normalizeCustomer(c.id || uid(), c));
-      if (Array.isArray(incoming.templates) && incoming.templates.length) DATA.templates = incoming.templates;
-      if (incoming.settings) DATA.settings = Object.assign({}, DATA.settings, incoming.settings);
-      saveData();
-      closeSheet('business');
-      rerender();
-      toast('Backup restored (' + DATA.customers.length + ' customers)');
-    } catch (err) { toast('Could not read that backup file.'); }
-  };
-  reader.readAsText(file);
-}
-
-function exportCustomersCsv() {
-  if (!DATA || !ACCOUNT) return;
-  // Quoting handles commas and quotes; formula-like cells are prefixed so spreadsheets do not run them.
-  const quote = value => {
-    let text = String(value ?? '').replace(/\r?\n/g, ' ');
-    if (/^[\s]*[=+@-]/.test(text) && !/^-?\d+(\.\d+)?$/.test(text)) text = "'" + text;
-    return '"' + text.replace(/"/g, '""') + '"';
-  };
-  const columns = ['Name', 'Phone', 'Birthday', 'Tag', 'Notes', 'Next follow-up', 'Last messaged', 'Last purchase', 'Total spent (NGN)', 'Number of sales'];
-  const rows = DATA.customers.map(c => [c.name, c.phone, c.birthday, c.tag, c.notes, c.nextFollowUp, c.lastContacted, c.purchases.length ? lastDate(c) : '', totalSpent(c), c.purchases.length]);
-  const csv = '\uFEFF' + [columns, ...rows].map(row => row.map(quote).join(',')).join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'custopadi-customers-' + todayStr() + '.csv';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
-  toast(DATA.customers.length + ' customers downloaded');
-}
-
-/* =========================================================
-   INSTALL & SHARE
-   ========================================================= */
-let deferredInstallPrompt = null;
-let installPromptLastShown = 0;
-const INSTALL_REPROMPT_MS = 20 * 60 * 1000;
-let workerRegistration = null;
-
-if ('serviceWorker' in navigator && window.isSecureContext && /^https?:/.test(location.protocol)) {
-  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(registration => {
-    workerRegistration = registration;
-    if (navigator.onLine !== false) registration.update().catch(() => {});
-  }).catch(() => {});
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data?.type === 'CUSTOPADI_UPDATED' && event.data.version !== APP_BUILD) {
-      $('updateNotice').classList.remove('hidden');
-      updateBars();
-    }
-  });
-}
-
-function isInstalled() {
-  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-}
-
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  maybeShowInstallPrompt(false);
-});
-window.addEventListener('appinstalled', () => {
-  deferredInstallPrompt = null;
-  hideInstallPrompt();
-  toast('CustoPadi is now on your home screen');
-});
-
-function maybeShowInstallPrompt(force) {
-  if (!ACCOUNT || isInstalled() || document.visibilityState !== 'visible' ||
-      document.activeElement?.closest('form') || document.querySelector('[id^="sheet-"]:not(.hidden)')) return;
-  const now = Date.now();
-  if (!force && now - installPromptLastShown < INSTALL_REPROMPT_MS) return;
-  if (!deferredInstallPrompt) return;
-  installPromptLastShown = now;
-  $('installPromptText').textContent = 'Add it to your home screen and open it like an app.';
-  $('installPromptBtn').classList.remove('hidden');
-  const box = $('installPrompt');
-  box.classList.remove('hidden', 'fade-up');
-  void box.offsetWidth;
-  box.classList.add('fade-up');
-}
-function hideInstallPrompt() { $('installPrompt').classList.add('hidden'); }
-function dismissInstallPrompt() { hideInstallPrompt(); installPromptLastShown = Date.now(); }
-async function triggerInstall() {
-  if (!deferredInstallPrompt) return hideInstallPrompt();
-  const prompt = deferredInstallPrompt;
-  deferredInstallPrompt = null;
-  hideInstallPrompt();
-  try {
-    await prompt.prompt();
-    const res = await prompt.userChoice;
-    if (res?.outcome === 'accepted') toast('Installation requested');
-  } catch (err) { /* browser may cancel */ }
-}
-
-let installPromptsStarted = false;
-function startInstallPrompts() {
-  if (installPromptsStarted) return;
-  installPromptsStarted = true;
-  setTimeout(() => maybeShowInstallPrompt(true), 1200);
-  setInterval(() => { if (document.visibilityState === 'visible') maybeShowInstallPrompt(false); }, INSTALL_REPROMPT_MS);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') maybeShowInstallPrompt(false);
-  });
-}
-
-function shareAppWhatsApp() {
+/* ---------- Referral ---------- */
+function referral() {
   const link = /^https?:/.test(window.location.href) ? window.location.href.split('#')[0] : '';
-  const msg = "Hi! I use *CustoPadi* to remember my customers and follow up with them on WhatsApp. You can register your business free here" + (link ? ': ' + link : '.');
+  const msg = "Hi! I use *CustoPadi* to remember my customers, know who owes me and follow up on WhatsApp. Register your business free here" + (link ? ': ' + link : '.');
+  DATA.referralsSent = (DATA.referralsSent || 0) + 1;
+  saveProfile();
+  $('refCount').textContent = DATA.referralsSent;
   const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
   const w = window.open(url, '_blank');
   if (!w) window.location.href = url;
 }
+
+/* ---------- Daily reminder (local notification) ---------- */
+let reminderTimer = null;
+async function toggleReminder() {
+  if (!DATA.settings.reminders) {
+    if (!('Notification' in window)) return toast('This phone browser cannot show notifications.');
+    let permission = Notification.permission;
+    if (permission === 'default') permission = await Notification.requestPermission();
+    if (permission !== 'granted') return toast('Notifications are blocked. Allow them in your browser settings, then try again.');
+    DATA.settings.reminders = true;
+    saveProfile();
+    $('remindBtn').innerHTML = '<i class="fa-solid fa-bell-slash"></i> Turn off daily reminder';
+    startReminderChecks();
+    maybeShowReminder(true);
+    toast('Daily reminder is on. You will get one each morning while the app is open.');
+  } else {
+    DATA.settings.reminders = false;
+    saveProfile();
+    clearInterval(reminderTimer); reminderTimer = null;
+    $('remindBtn').innerHTML = '<i class="fa-solid fa-bell"></i> Turn on daily reminder';
+    toast('Daily reminder is off.');
+  }
+}
+function startReminderChecks() {
+  clearInterval(reminderTimer);
+  reminderTimer = setInterval(() => { if (DATA.settings.reminders) maybeShowReminder(); }, 30 * 60 * 1000);
+}
+function dueCountToday() {
+  const days = DATA.settings.followUpDays;
+  return DATA.customers.filter(c => followUpDue(c, days)).length;
+}
+function maybeShowReminder(force) {
+  try {
+    if (!DATA.settings.reminders || !appShown || !('Notification' in window) || Notification.permission !== 'granted') return;
+    const hour = new Date().getHours();
+    if (!force && (hour < 7 || hour > 11)) return;
+    const key = 'cp_reminded_' + todayStr();
+    if (!force && Store.get(key, false)) return;
+    const n = dueCountToday();
+    if (!n) return;
+    Store.set(key, true);
+    const text = n === 1 ? '1 customer to follow up today.' : n + ' customers to follow up today.';
+    new Notification('CustoPadi', { body: text, icon: 'icon-192.png', tag: 'custopadi-daily' });
+  } catch (e) {}
+}
+
+/* ---------- Customer helpers ---------- */
+function lastDate(c) {
+  if (c.purchases && c.purchases.length) return c.purchases.reduce((m, p) => p.date > m ? p.date : m, c.purchases[0].date);
+  return c.createdAt;
+}
+function lastPurchase(c) {
+  if (!c.purchases || !c.purchases.length) return null;
+  return c.purchases.reduce((m, p) => p.date > m.date ? p : m, c.purchases[0]);
+}
+function totalSpent(c) { return (c.purchases || []).reduce((s, p) => s + (Number(p.amount) || 0), 0); }
+function totalPaid(c) { return (c.purchases || []).reduce((s, p) => s + (Number(p.paid) || 0), 0); }
+function balance(c) { return Math.max(0, totalSpent(c) - totalPaid(c)); }
+function statusOf(days) {
+  if (days <= 30) return { key: 'active', label: 'Active', dot: 'bg-leaf', text: 'text-leaf' };
+  if (days <= 60) return { key: 'slipping', label: 'Slipping', dot: 'bg-amber', text: 'text-amber' };
+  return { key: 'lost', label: 'Lost', dot: 'bg-rose', text: 'text-rose' };
+}
+function getCustomer(id) { return DATA.customers.find(c => c.id === id); }
+function daysText(d, c) {
+  if (!c.purchases.length) return 'No purchase yet';
+  if (d === 0) return 'Bought today';
+  if (d === 1) return 'Bought yesterday';
+  return d + ' days since last buy';
+}
+/* Smarter follow-ups: learn how often each customer buys. */
+function avgGapDays(c) {
+  if (!c.purchases || c.purchases.length < 2) return 0;
+  const dates = c.purchases.map(p => p.date).sort();
+  let sum = 0, n = 0;
+  for (let i = 1; i < dates.length; i++) { sum += daysSince(dates[i - 1]) - daysSince(dates[i]); n++; }
+  return n ? Math.round(sum / n) : 0;
+}
+function nextExpected(c) {
+  const gap = avgGapDays(c);
+  if (!gap || gap < 7) return '';
+  return addDaysStr(lastDate(c), gap);
+}
+function followUpDue(c, days) {
+  if (c.nextFollowUp) return c.nextFollowUp <= todayStr();
+  const expected = nextExpected(c);
+  if (expected && expected <= todayStr()) return true;
+  const lastActivity = c.lastContacted && c.lastContacted > lastDate(c) ? c.lastContacted : lastDate(c);
+  return daysSince(lastActivity) >= days;
+}
+function followUpReason(c, days) {
+  if (c.nextFollowUp && c.nextFollowUp <= todayStr()) return 'Follow-up you planned';
+  const expected = nextExpected(c);
+  if (expected && expected <= todayStr()) return 'Usually buys every ' + avgGapDays(c) + ' days';
+  return null;
+}
+function favouriteItem(c) {
+  if (!c.purchases.length) return '';
+  const counts = {};
+  c.purchases.forEach(p => { const k = p.item || 'Item'; counts[k] = (counts[k] || 0) + 1; });
+  return Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+}
+
+/* =========================================================
+   RECOVERY CODE
+   ========================================================= */
+let RECOVERY_STATE = 'unknown', RECOVERY_BANNER_DISMISSED = false;
+const RC_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const toB64 = buf => { let s = ''; new Uint8Array(buf).forEach(b => { s += String.fromCharCode(b); }); return btoa(s); };
+const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const hasCrypto = () => !!(window.crypto && crypto.subtle && crypto.getRandomValues);
+function newRecoveryCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  let s = '';
+  bytes.forEach(b => { s += RC_ALPHABET[b % 32]; });
+  return s.match(/.{4}/g).join('-');
+}
+async function rcKey(code, salt) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(normCode(code)), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function buildRecovery(phone, password) {
+  const code = newRecoveryCode();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await rcKey(code, salt);
+  const locked = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: new TextEncoder().encode(phone) }, key, new TextEncoder().encode(JSON.stringify({ p: password })));
+  return { code, record: { v: 1, s: toB64(salt), i: toB64(iv), b: toB64(locked), t: Date.now() } };
+}
+async function openRecovery(phone, code, record) {
+  const key = await rcKey(code, fromB64(record.s));
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(record.i), additionalData: new TextEncoder().encode(phone) }, key, fromB64(record.b));
+  return JSON.parse(new TextDecoder().decode(plain)).p;
+}
+function showRecoveryCode(code, intro) {
+  $('recoveryCodeText').textContent = code;
+  $('recoveryIntro').textContent = intro || '';
+  $('recoverySaved').checked = false;
+  $('recoveryDone').disabled = true;
+  openSheet('recovery');
+}
+function copyRecoveryCode() {
+  const text = $('recoveryCodeText').textContent;
+  const done = () => toast('Recovery code copied');
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  else fallbackCopy(text, done);
+}
+function downloadRecoveryCode() {
+  const lines = ['CustoPadi recovery code', '', 'Business: ' + (ACCOUNT ? ACCOUNT.businessName : ''), 'WhatsApp number: +' + aliasPhone(USER), 'Recovery code: ' + $('recoveryCodeText').textContent, '', 'Keep this private. Anyone with this code and your number can reset your password.'];
+  const url = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'custopadi-recovery-code.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+async function issueRecovery(password, intro) {
+  const phone = aliasPhone(USER);
+  if (!FB || !USER || !phone || !password) return false;
+  if (!hasCrypto()) { toast('This browser cannot create a recovery code. Open CustoPadi in Chrome or Safari.'); return false; }
+  try {
+    await USER.getIdToken(true);
+    const { code, record } = await buildRecovery(phone, password);
+    await FB.R.set(recoveryRef(phone), record);
+    RECOVERY_STATE = 'set';
+    const old = $('recoveryBanner'); if (old) old.remove();
+    showRecoveryCode(code, intro);
+    return true;
+  } catch (err) {
+    console.error('Recovery code failed:', err && err.code);
+    const denied = /permission/i.test(((err && err.code) || '') + ' ' + ((err && err.message) || ''));
+    toast(denied ? 'Recovery code could not be saved. App owner: publish the updated Realtime Database rules.' : 'Recovery code could not be saved. Create it later in Business settings.');
+    return false;
+  }
+}
+function openForgot() {
+  setAuthMode('forgot');
+  $('fpPhone').value = $('logPhone').value || '';
+  $('fpCode').value = ''; $('fpNewPw').value = '';
+  setTimeout(() => ($('fpPhone').value ? $('fpCode') : $('fpPhone')).focus(), 50);
+}
+async function resetWithCode(e) {
+  e.preventDefault();
+  hideError('fpError');
+  const phone = normalizePhone($('fpPhone').value);
+  const code = normCode($('fpCode').value);
+  const newPw = $('fpNewPw').value;
+  if (!validPhone(phone)) return showError('fpError', 'Type the full WhatsApp number with country code, e.g. +234 803 123 4567.');
+  if (code.length !== 16) return showError('fpError', 'Type the 16-character recovery code, like ABCD-EFGH-JKLM-NPQR.');
+  if (newPw.length < 6) return showError('fpError', 'Your new password must be at least 6 characters.');
+  if (!FB) return showError('fpError', 'Still loading. Please wait a moment and try again.');
+  if (!hasCrypto()) return showError('fpError', 'This browser cannot check recovery codes. Open CustoPadi in Chrome or Safari.');
+  const btn = $('fpSubmit'); btn.disabled = true;
+  authAction = 'login';
+  try {
+    let snap;
+    try { snap = await FB.R.get(recoveryRef(phone)); }
+    catch (err) { throw (/permission/i.test(((err && err.code) || '') + ' ' + ((err && err.message) || '')) ? { code: 'cp/rules' } : err); }
+    if (!snap.exists()) throw { code: 'cp/no-recovery' };
+    let oldPw;
+    try { oldPw = await openRecovery(phone, code, snap.val()); } catch (err2) { throw { code: 'cp/bad-code' }; }
+    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), oldPw);
+    await FB.A.updatePassword(cred.user, newPw);
+    Store.set('cp_last_phone', phone);
+    $('fpCode').value = ''; $('fpNewPw').value = '';
+    enterApp(cred.user);
+    toast('Password reset. Welcome back!');
+    issueRecovery(newPw, 'Your password is reset. This is your NEW recovery code. The old code no longer works.');
+  } catch (err) {
+    const c = err && err.code;
+    console.error('Password reset failed:', c);
+    const stale = ['auth/invalid-credential', 'auth/wrong-password', 'auth/invalid-login-credentials', 'auth/user-not-found'].includes(c);
+    showError('fpError',
+      c === 'cp/no-recovery' ? 'No recovery code was ever created for this number, so the password cannot be reset here. If you linked Google, go back and tap Continue with Google.'
+      : c === 'cp/bad-code' ? 'That recovery code is not correct. Check each letter and try again.'
+      : c === 'cp/rules' ? 'Password reset is not switched on yet. App owner: publish the updated Realtime Database rules.'
+      : stale ? 'This recovery code is out of date because the password was changed after it was made. If you linked Google, use Continue with Google.'
+      : authMessage(err));
+  } finally {
+    authAction = '';
+    btn.disabled = false;
+  }
+}
+function renderRecoveryBox() {
+  const box = $('recoveryBox'); if (!box) return;
+  const eligible = !!(USER && !isGuest() && hasProvider('password') && aliasPhone(USER));
+  box.classList.toggle('hidden', !eligible);
+  if (!eligible) return;
+  $('recoveryStatus').textContent = RECOVERY_STATE === 'set'
+    ? 'A recovery code is set. If you forget your password, use it on the login screen. Creating a new code replaces the old one.'
+    : 'You have no recovery code yet. Create one now so you can reset your password if you forget it.';
+  $('rcBtnText').textContent = RECOVERY_STATE === 'set' ? 'Create a new recovery code' : 'Create recovery code';
+  $('rcPw').value = ''; hideError('rcError');
+}
+async function createRecoveryCode(e) {
+  e.preventDefault();
+  hideError('rcError');
+  if (!FB || !USER || !aliasPhone(USER)) return;
+  const pw = $('rcPw').value;
+  if (!pw) return showError('rcError', 'Type your current password.');
+  try {
+    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(passwordEmail(USER), pw));
+  } catch (err) {
+    return showError('rcError', ['auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(err && err.code)
+      ? 'That password is not correct.' : authMessage(err));
+  }
+  $('rcPw').value = '';
+  const ok = await issueRecovery(pw, 'Save this code. Any older recovery code no longer works.');
+  if (ok) renderRecoveryBox();
+}
+async function checkRecovery() {
+  const old = $('recoveryBanner'); if (old) old.remove();
+  RECOVERY_STATE = 'unknown';
+  const phone = aliasPhone(USER);
+  if (!FB || !USER || !phone || !hasProvider('password')) { RECOVERY_STATE = 'n/a'; return; }
+  let result = 'unknown';
+  try { const snap = await FB.R.get(recoveryRef(phone)); result = snap.exists() ? 'set' : 'missing'; } catch (err) { /* offline or rules not published */ }
+  if (RECOVERY_STATE !== 'set') RECOVERY_STATE = result;
+  maybeShowRecoveryBanner();
+  if (DATA.settings.reminders) startReminderChecks();
+}
+function dismissRecoveryBanner() {
+  RECOVERY_BANNER_DISMISSED = true;
+  const b = $('recoveryBanner'); if (b) b.remove();
+}
+function openRecoverySettings() {
+  openBusinessSheet();
+  setTimeout(() => { const b = $('recoveryBox'); if (b && !b.classList.contains('hidden')) b.scrollIntoView({ block: 'center' }); }, 200);
+}
+function maybeShowRecoveryBanner() {
+  try {
+    const existing = $('recoveryBanner');
+    if (RECOVERY_STATE !== 'missing' || !USER || !appShown) { if (existing && RECOVERY_STATE !== 'missing') existing.remove(); return; }
+    if (RECOVERY_BANNER_DISMISSED || existing) return;
+    const host = $('screen-today');
+    if (!host || host.classList.contains('hidden')) return;
+    const div = document.createElement('div');
+    div.id = 'recoveryBanner';
+    div.className = 'card p-4 mb-5 flex items-center gap-3 fade-up';
+    div.innerHTML = '<span class="w-11 h-11 rounded-2xl bg-amber/20 ico-sun flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-key"></i></span>' +
+      '<span class="flex-1 min-w-0"><b class="block text-[16px]">Create your recovery code</b>' +
+      '<span class="block text-[14px] text-stone">Without it, a forgotten password cannot be reset. It takes 10 seconds.</span></span>' +
+      '<span class="flex flex-col gap-1 shrink-0"><button onclick="openRecoverySettings()" class="btn btn-primary !min-h-[48px] !px-4 !text-[15px]">Create</button>' +
+      '<button onclick="dismissRecoveryBanner()" class="text-stone text-[14px] font-semibold min-h-[44px] px-2">Later</button></span>';
+    host.insertBefore(div, host.firstChild);
+  } catch (e) {}
+}
+function dismissSyncBanner() {
+  const b = $('syncBanner');
+  if (b) b.remove();
+  Store.set('cp_sync_banner_dismissed', true);
+}
+function maybeShowSyncBanner() {
+  try {
+    if (!USER || !ACCOUNT || !appShown) return;
+    if (!hasProvider('password') || hasProvider('google.com')) { const b = $('syncBanner'); if (b) b.remove(); return; }
+    if (Store.get('cp_sync_banner_dismissed', false) || $('syncBanner')) return;
+    const host = $('screen-today');
+    if (!host || host.classList.contains('hidden')) return;
+    const div = document.createElement('div');
+    div.id = 'syncBanner';
+    div.className = 'card p-4 mb-5 flex items-center gap-3 fade-up';
+    div.innerHTML = '<span class="w-11 h-11 rounded-2xl bg-leaf-light text-leaf flex items-center justify-center text-xl shrink-0"><i class="fa-brands fa-google"></i></span>' +
+      '<span class="flex-1 min-w-0"><b class="block text-[16px]">Sync this business with Google</b>' +
+      '<span class="block text-[14px] text-stone">One tap. Then this WhatsApp number opens the same customers on any phone or browser, even if you forget your password.</span></span>' +
+      '<span class="flex flex-col gap-1 shrink-0"><button onclick="linkGoogle()" class="btn btn-primary !min-h-[48px] !px-4 !text-[15px]">Sync</button>' +
+      '<button onclick="dismissSyncBanner()" class="text-stone text-[14px] font-semibold min-h-[44px] px-2">Later</button></span>';
+    host.insertBefore(div, host.firstChild);
+  } catch (e) {}
+}
+new MutationObserver(() => { maybeShowSyncBanner(); maybeShowRecoveryBanner(); }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
 
 /* =========================================================
    SHEETS & NAV
@@ -1531,12 +1971,14 @@ function closeSheet(name) {
     PENDING_MESSAGE = null;
     try { sessionStorage.removeItem('cp_pending_message'); } catch (e) {}
   }
+  if (name === 'broadcast') { BROADCAST = null; }
   if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
 }
-function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business'].forEach(closeSheet); }
+function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business', 'recovery', 'broadcast', 'import', 'payment', 'receipt'].forEach(closeSheet); }
 
 let CURRENT_TAB = 'today';
 function switchTab(name) {
+  if (STAFF_MODE && (name === 'stats' || name === 'messages')) name = 'customers';
   CURRENT_TAB = name;
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   const el = $('screen-' + name);
@@ -1555,39 +1997,9 @@ function rerender() {
 }
 
 /* =========================================================
-   CUSTOMER HELPERS
-   ========================================================= */
-function lastDate(c) {
-  if (c.purchases && c.purchases.length) return c.purchases.reduce((m, p) => p.date > m ? p.date : m, c.purchases[0].date);
-  return c.createdAt;
-}
-function lastPurchase(c) {
-  if (!c.purchases || !c.purchases.length) return null;
-  return c.purchases.reduce((m, p) => p.date > m.date ? p : m, c.purchases[0]);
-}
-function totalSpent(c) { return (c.purchases || []).reduce((s, p) => s + (Number(p.amount) || 0), 0); }
-function statusOf(days) {
-  if (days <= 30) return { key: 'active', label: 'Active', dot: 'bg-leaf', text: 'text-leaf' };
-  if (days <= 60) return { key: 'slipping', label: 'Slipping', dot: 'bg-amber', text: 'text-amber' };
-  return { key: 'lost', label: 'Lost', dot: 'bg-rose', text: 'text-rose' };
-}
-function getCustomer(id) { return DATA.customers.find(c => c.id === id); }
-function daysText(d, c) {
-  if (!c.purchases.length) return 'No purchase yet';
-  if (d === 0) return 'Bought today';
-  if (d === 1) return 'Bought yesterday';
-  return d + ' days since last buy';
-}
-function followUpDue(c, days) {
-  if (c.nextFollowUp) return c.nextFollowUp <= todayStr();
-  const lastActivity = c.lastContacted && c.lastContacted > lastDate(c) ? c.lastContacted : lastDate(c);
-  return daysSince(lastActivity) >= days;
-}
-
-/* =========================================================
    TODAY
    ========================================================= */
-function setDays(v) { DATA.settings.followUpDays = parseInt(v, 10) || 30; saveData(); renderToday(); }
+function setDays(v) { DATA.settings.followUpDays = parseInt(v, 10) || 30; saveProfile(); renderToday(); }
 
 function renderOnboarding() {
   const el = $('onboarding');
@@ -1624,7 +2036,7 @@ function renderOnboarding() {
       </div>
     </div>`;
 }
-function hideOnboarding() { DATA.onboardingDone = true; saveData(); renderOnboarding(); }
+function hideOnboarding() { DATA.onboardingDone = true; saveProfile(); renderOnboarding(); }
 function goAdd(kind, preId) {
   switchTab('add');
   if (kind === 'customer') showNewForm(); else showSaleForm(preId);
@@ -1640,7 +2052,9 @@ function renderToday() {
   renderOnboarding();
   $('daysSelect').value = String(DATA.settings.followUpDays);
   const days = DATA.settings.followUpDays;
-  const due = DATA.customers.map(c => ({ c, d: daysSince(lastDate(c)) })).filter(x => followUpDue(x.c, days)).sort((a, b) => (a.c.nextFollowUp || '9999').localeCompare(b.c.nextFollowUp || '9999') || b.d - a.d);
+  const due = DATA.customers.map(c => ({ c, d: daysSince(lastDate(c)) }))
+    .filter(x => followUpDue(x.c, days))
+    .sort((a, b) => (a.c.nextFollowUp || '9999').localeCompare(b.c.nextFollowUp || '9999') || b.d - a.d);
 
   $('todayCount').textContent = due.length;
   $('todayCountLabel').textContent = due.length === 1 ? 'person to follow up today' : 'people to follow up today';
@@ -1655,6 +2069,7 @@ function renderToday() {
       const lp = lastPurchase(c);
       const messaged = c.lastContacted === todayStr();
       const s = statusOf(d);
+      const reason = followUpReason(c, days);
       return `
         <div class="card p-4 flex items-center gap-3">
           <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
@@ -1665,9 +2080,11 @@ function renderToday() {
             <span class="min-w-0">
               <span class="block font-bold text-[17px] truncate">${esc(c.name)}</span>
               <span class="block text-[15px] ${s.text} font-semibold">${c.nextFollowUp ? 'Follow-up planned for ' + esc(fmtDate(c.nextFollowUp)) : esc(daysText(d, c))}</span>
+              ${reason && !c.nextFollowUp ? `<span class="block text-[14px] text-stone">${esc(reason)}</span>` : ''}
               ${lp ? `<span class="block text-[14px] text-stone truncate">Last: ${esc(lp.item)}</span>` : ''}
             </span>
           </button>
+          <button onclick="quickSale('${c.id}')" aria-label="Quick sale for ${esc(c.name)}" class="w-12 h-12 rounded-xl bg-amber/20 ico-sun flex items-center justify-center shrink-0"><i class="fa-solid fa-plus"></i></button>
           <button onclick="openPicker('${c.id}','miss')" class="wa-btn ${messaged ? 'done' : ''}">
             ${messaged ? '<i class="fa-solid fa-check"></i> Sent' : '<i class="fa-brands fa-whatsapp text-[18px]"></i> WhatsApp'}
           </button>
@@ -1726,14 +2143,24 @@ function renderCustomers() {
   const all = DATA.customers.map(c => ({ c, d: daysSince(lastDate(c)) })).map(x => ({ ...x, s: statusOf(x.d) }));
   const counts = { all: all.length, active: 0, slipping: 0, lost: 0 };
   all.forEach(x => counts[x.s.key]++);
-  $('chips').innerHTML = [['all', 'All'], ['active', 'Active'], ['slipping', 'Slipping'], ['lost', 'Lost']]
-    .map(([k, l]) => `<button onclick="setFilter('${k}')" class="chip ${FILTER === k ? 'active' : ''}">${l} (${counts[k]})</button>`).join('');
+  const owes = all.filter(x => balance(x.c) > 0).length;
+  const chips = [['all', 'All'], ['active', 'Active'], ['slipping', 'Slipping'], ['lost', 'Lost'], ['owes', 'Owes money']]
+    .map(([k, l]) => `<button onclick="setFilter('${k}')" class="chip ${FILTER === k ? 'active' : ''}">${l} (${k === 'owes' ? owes : counts[k] || 0})</button>`);
+  (DATA.groups || []).forEach(g => {
+    const n = all.filter(x => (x.c.groups || []).includes(g)).length;
+    chips.push(`<button onclick="setFilter('g:${esc(g)}')" class="chip ${FILTER === 'g:' + g ? 'active' : ''}">${esc(g)} (${n})</button>`);
+  });
+  $('chips').innerHTML = chips.join('');
 
   const q = $('customerSearch').value.toLowerCase().trim();
   const qDigits = q.replace(/\D/g, '');
-  let list = all.filter(x => FILTER === 'all' || x.s.key === FILTER);
+  let list = all;
+  if (FILTER === 'owes') list = list.filter(x => balance(x.c) > 0);
+  else if (FILTER.startsWith('g:')) { const g = FILTER.slice(2); list = list.filter(x => (x.c.groups || []).includes(g)); }
+  else if (FILTER !== 'all') list = list.filter(x => x.s.key === FILTER);
   if (q) list = list.filter(({ c }) =>
     c.name.toLowerCase().includes(q) || (c.tag || '').toLowerCase().includes(q) ||
+    (c.groups || []).some(g => g.toLowerCase().includes(q)) ||
     (qDigits.length >= 3 && (c.phone.includes(qDigits) || c.phone.includes(normalizePhone(qDigits)))));
   list.sort((a, b) => a.c.name.localeCompare(b.c.name));
 
@@ -1743,25 +2170,32 @@ function renderCustomers() {
     return;
   }
   if (!list.length) {
-    el.innerHTML = emptyState('fa-magnifying-glass', 'No one found', q ? 'No customer matches "' + esc(q) + '". Check the spelling or try another filter.' : 'No customers in this group right now. That can be good news!', 'Show everyone', "clearCustomerSearch()");
+    el.innerHTML = emptyState('fa-magnifying-glass', 'No one found', q ? 'No customer matches "' + esc(q) + '". Check the spelling or try another filter.' : 'No customers in this group right now.', 'Show everyone', "clearCustomerSearch()");
     return;
   }
   const tagStyle = { VIP: 'bg-amber/20 text-amber', Regular: 'bg-leaf-light text-leaf-deep', New: 'bg-sky-100 text-sky-700' };
-  el.innerHTML = list.map(({ c, d, s }) => `
-    <button onclick="openCustomer('${c.id}')" class="card w-full p-4 flex items-center gap-3 text-left active:scale-[.99] transition">
-      <span class="relative shrink-0">
-        <span class="w-12 h-12 rounded-full bg-leaf-light text-leaf font-extrabold flex items-center justify-center">${esc(initials(c.name))}</span>
-        <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${s.dot}" title="${s.label}"></span>
-      </span>
-      <span class="flex-1 min-w-0">
-        <span class="flex items-center gap-2">
-          <span class="font-bold text-[17px] truncate">${esc(c.name)}</span>
-          <span class="text-[12px] font-bold px-2 py-0.5 rounded-full shrink-0 ${tagStyle[c.tag] || tagStyle.New}">${esc(c.tag || 'New')}</span>
+  el.innerHTML = list.map(({ c, d, s }) => {
+    const owed = balance(c);
+    return `
+    <div class="card p-4 flex items-center gap-3">
+      <button onclick="openCustomer('${c.id}')" class="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[48px]">
+        <span class="relative shrink-0">
+          <span class="w-12 h-12 rounded-full bg-leaf-light text-leaf font-extrabold flex items-center justify-center">${esc(initials(c.name))}</span>
+          <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${s.dot}" title="${s.label}"></span>
         </span>
-        <span class="block text-[15px] text-stone">${c.nextFollowUp ? 'Follow up ' + esc(fmtDate(c.nextFollowUp)) + ' · ' : esc(daysText(d, c)) + ' · '}${fmtMoney(totalSpent(c))}</span>
-      </span>
-      <i class="fa-solid fa-chevron-right text-stone/40"></i>
-    </button>`).join('');
+        <span class="flex-1 min-w-0">
+          <span class="flex items-center gap-2">
+            <span class="font-bold text-[17px] truncate">${esc(c.name)}</span>
+            <span class="text-[12px] font-bold px-2 py-0.5 rounded-full shrink-0 ${tagStyle[c.tag] || tagStyle.New}">${esc(c.tag || 'New')}</span>
+          </span>
+          <span class="block text-[15px] text-stone">${c.nextFollowUp ? 'Follow up ' + esc(fmtDate(c.nextFollowUp)) + ' · ' : esc(daysText(d, c)) + ' · '}${fmtMoney(totalSpent(c))}</span>
+          ${owed > 0 ? `<span class="block text-[14px] font-bold text-rose">Owes ${fmtMoney(owed)}</span>` : ''}
+          ${(c.groups || []).length ? `<span class="block text-[13px] text-stone truncate">${esc(c.groups.join(' · '))}</span>` : ''}
+        </span>
+      </button>
+      <button onclick="quickSale('${c.id}')" aria-label="Quick sale for ${esc(c.name)}" class="w-12 h-12 rounded-xl bg-amber/20 ico-sun flex items-center justify-center shrink-0"><i class="fa-solid fa-plus"></i></button>
+    </div>`;
+  }).join('');
 }
 function clearCustomerSearch() { $('customerSearch').value = ''; FILTER = 'all'; renderCustomers(); }
 
@@ -1771,6 +2205,10 @@ function openCustomer(id) {
   const d = daysSince(lastDate(c));
   const s = statusOf(d);
   const purchases = [...c.purchases].sort((a, b) => b.date.localeCompare(a.date));
+  const owed = balance(c);
+  const gap = avgGapDays(c);
+  const expected = nextExpected(c);
+  const visits = c.purchases.length;
   $('customerSheetBody').innerHTML = `
     <div class="flex items-center gap-3 mb-5 pr-10">
       <span class="w-16 h-16 rounded-2xl bg-leaf-light text-leaf font-extrabold text-[22px] flex items-center justify-center shrink-0">${esc(initials(c.name))}</span>
@@ -1785,15 +2223,33 @@ function openCustomer(id) {
       <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Birthday</p><p class="font-bold text-[15px]">${c.birthday ? esc(fmtDayMonth(c.birthday)) : '<span class="text-stone font-normal">Not added</span>'}</p></div>
       <div class="bg-cream rounded-2xl p-3"><p class="text-[13px] text-stone font-semibold">Tag</p><p class="font-bold text-[15px]">${esc(c.tag || 'New')}</p></div>
     </div>
+    ${owed > 0 ? `
+      <div class="bg-rose/10 rounded-2xl p-4 mb-4 flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl bg-rose/15 text-rose flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <div class="flex-1 min-w-0"><p class="text-[13px] font-bold text-rose">STILL OWES</p><p class="font-extrabold text-[22px]">${fmtMoney(owed)}</p></div>
+        <div class="flex flex-col gap-1 shrink-0">
+          <button onclick="openPayment('${c.id}')" class="btn btn-primary !min-h-[48px] !px-3 !text-[14px]">Record payment</button>
+          <button onclick="sendTemplate('${c.id}','debt')" class="btn btn-ghost !min-h-[48px] !px-3 !text-[14px]">Remind</button>
+        </div>
+      </div>` : ''}
+    <div class="bg-leaf-light/70 rounded-2xl p-4 mb-4">
+      <p class="text-[13px] font-bold text-leaf mb-1">CUSTOMER HISTORY</p>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div><p class="font-extrabold text-[18px]">${visits}</p><p class="text-[13px] text-stone">Visits</p></div>
+        <div><p class="font-extrabold text-[18px]">${esc(c.createdAt ? fmtDate(c.createdAt) : '—')}</p><p class="text-[13px] text-stone">First seen</p></div>
+        <div><p class="font-extrabold text-[15px] truncate">${esc(favouriteItem(c) || '—')}</p><p class="text-[13px] text-stone">Favourite</p></div>
+      </div>
+      ${gap >= 7 ? `<p class="text-[14px] text-stone mt-3 text-center">Buys about every ${gap} days${expected ? ' · next expected ' + esc(fmtDate(expected)) : ''}</p>` : ''}
+    </div>
+    ${(c.groups || []).length ? `<div class="flex flex-wrap gap-2 mb-4">${c.groups.map(g => `<span class="chip !min-h-[44px] !py-2 !text-[14px] active">${esc(g)}</span>`).join('')}</div>` : ''}
     <div class="bg-amber/15 rounded-2xl p-4 mb-5">
       <p class="text-[13px] font-bold text-amber mb-1">NOTES</p>
       <p class="text-[16px] leading-relaxed">${c.notes ? esc(c.notes) : '<span class="text-stone">No notes yet.</span>'}</p>
     </div>
-    <div class="bg-leaf-light/70 rounded-2xl p-4 mb-4">
-      <p class="text-[13px] font-bold text-leaf mb-1">NEXT FOLLOW-UP</p>
-      <p class="text-[16px]">${c.nextFollowUp ? esc(fmtDate(c.nextFollowUp)) : 'Uses your normal reminder'}</p>
+    <div class="bg-cream rounded-2xl p-4 mb-4">
+      <p class="text-[13px] font-bold text-stone mb-1">NEXT FOLLOW-UP</p>
+      <p class="text-[16px]">${c.nextFollowUp ? esc(fmtDate(c.nextFollowUp)) : 'Automatic' + (gap >= 7 ? ' (about every ' + gap + ' days)' : ' (every ' + DATA.settings.followUpDays + ' days)')}</p>
     </div>
-    <button onclick="openEditCustomer('${c.id}')" class="btn btn-ghost w-full mb-3"><i class="fa-solid fa-pen"></i> Edit details &amp; follow-up date</button>
     <div class="grid grid-cols-2 gap-3 mb-6">
       <button onclick="closeSheet('customer'); goAdd('sale','${c.id}')" class="btn btn-outline"><i class="fa-solid fa-plus"></i> Add purchase</button>
       <button onclick="openPicker('${c.id}')" class="btn btn-primary"><i class="fa-brands fa-whatsapp text-[18px]"></i> Message</button>
@@ -1802,7 +2258,7 @@ function openCustomer(id) {
     <div class="space-y-2 mb-6">
       ${purchases.length ? purchases.map(p => `
         <div class="bg-cream rounded-2xl pl-4 pr-1 py-2 flex items-center gap-3">
-          <div class="flex-1 min-w-0"><p class="font-semibold text-[16px] truncate">${esc(p.item)}</p><p class="text-[14px] text-stone">${esc(fmtDate(p.date))}</p></div>
+          <div class="flex-1 min-w-0"><p class="font-semibold text-[16px] truncate">${esc(p.item)}</p><p class="text-[14px] text-stone">${esc(fmtDate(p.date))}${p.paid < p.amount ? ' · paid ' + fmtMoney(p.paid) : ''}</p></div>
           <p class="font-bold text-[16px]">${fmtMoney(p.amount)}</p>
           <button onclick="deletePurchase('${c.id}','${p.id}')" aria-label="Remove this sale" class="w-12 h-12 flex items-center justify-center text-stone/60 hover:text-rose"><i class="fa-regular fa-trash-can"></i></button>
         </div>`).join('') : `<div class="bg-cream rounded-2xl p-4 text-center text-stone text-[15px]">No purchases yet. Tap "Add purchase" when they buy.</div>`}
@@ -1812,7 +2268,9 @@ function openCustomer(id) {
       ${(c.contactHistory || []).length ? [...c.contactHistory].reverse().slice(0, 8).map(h => `
         <div class="bg-cream rounded-xl px-4 py-3 flex justify-between gap-3 text-[15px]"><span>${esc(h.template || 'Follow-up')}</span><span class="text-stone">${esc(fmtDate(h.date))}</span></div>`).join('') : '<p class="text-stone text-[15px]">None confirmed yet. You decide when a message is marked sent.</p>'}
     </div>
-    <button onclick="deleteCustomer('${c.id}')" class="w-full min-h-[48px] text-rose font-semibold text-[15px]"><i class="fa-regular fa-trash-can mr-1"></i> Delete this customer</button>`;
+    <button onclick="openEditCustomer('${c.id}')" class="btn btn-ghost w-full mb-3"><i class="fa-solid fa-pen"></i> Edit details &amp; groups</button>
+    ${STAFF_MODE ? '' : `<button onclick="deleteCustomer('${c.id}')" class="w-full min-h-[48px] text-rose font-semibold text-[15px]"><i class="fa-regular fa-trash-can mr-1"></i> Delete this customer</button>`}
+  `;
   openSheet('customer');
 }
 
@@ -1821,13 +2279,15 @@ function openEditCustomer(id) {
   const c = getCustomer(id);
   if (!c) return;
   EDIT_ID = id;
+  editGroups = (c.groups || []).slice();
   $('editName').value = c.name;
-  $('editPhone').value = c.phone;
+  $('editPhone').value = '+' + c.phone;
   $('editBirthday').value = c.birthday || '';
   $('editBirthday').max = todayStr();
   $('editTag').value = c.tag || 'New';
   $('editNext').value = c.nextFollowUp || '';
   $('editNotes').value = c.notes || '';
+  renderGroupPickers();
   hideError('editError');
   closeSheet('customer');
   openSheet('edit');
@@ -1840,9 +2300,9 @@ function saveCustomerEdit(e) {
   const phone = normalizePhone($('editPhone').value);
   if (name.length < 2) return showError('editError', 'Please type a name.');
   if (!validPhone(phone)) return showError('editError', 'Type the full number with country code, e.g. +234 803 123 4567.');
-  if (DATA.customers.some(other => other.id !== c.id && other.phone === phone)) return showError('editError', 'That number belongs to another customer.');
+  if (DATA.customers.some(o => o.id !== c.id && o.phone === phone)) return showError('editError', 'That number belongs to another customer.');
   if ($('editBirthday').value > todayStr()) return showError('editError', 'Birthday cannot be in the future.');
-  Object.assign(c, { name, phone, birthday: $('editBirthday').value, tag: $('editTag').value, notes: $('editNotes').value.trim(), nextFollowUp: $('editNext').value });
+  Object.assign(c, { name, phone, birthday: $('editBirthday').value, tag: $('editTag').value, notes: $('editNotes').value.trim(), nextFollowUp: $('editNext').value, groups: (editGroups || []).slice() });
   saveData();
   closeSheet('edit');
   openCustomer(c.id);
@@ -1860,10 +2320,51 @@ function deletePurchase(cid, pid) {
 function deleteCustomer(cid) {
   const c = getCustomer(cid);
   if (!c || !confirm('Delete ' + c.name + ' and all their sales?')) return;
+  const backup = clean(c);
   DATA.customers = DATA.customers.filter(x => x.id !== cid);
-  removeCustomer(cid);
   saveData(); closeSheet('customer'); rerender();
-  toast(firstName(c.name) + ' deleted');
+  toast(firstName(c.name) + ' deleted', 'Undo', () => {
+    DATA.customers.push(backup);
+    saveData(); rerender();
+    toast(firstName(backup.name) + ' restored');
+  });
+}
+
+/* ---------- Debt: record a payment ---------- */
+let PAY_ID = null;
+function openPayment(cid) {
+  const c = getCustomer(cid);
+  if (!c) return;
+  PAY_ID = cid;
+  $('payCustomerName').textContent = c.name + ' · owes ' + fmtMoney(balance(c));
+  $('payAmount').value = String(balance(c));
+  hideError('payError');
+  closeSheet('customer');
+  openSheet('payment');
+}
+function recordPayment(e) {
+  e.preventDefault();
+  const c = getCustomer(PAY_ID);
+  if (!c) return;
+  const amount = Math.round(parseFloat($('payAmount').value));
+  if (!amount || amount <= 0) return showError('payError', 'Type the amount paid.');
+  let left = amount;
+  const oldest = c.purchases.filter(p => p.paid < p.amount).sort((a, b) => a.date.localeCompare(b.date));
+  oldest.forEach(p => {
+    const due = p.amount - p.paid;
+    const take = Math.min(due, left);
+    p.paid = p.paid + take;
+    left -= take;
+  });
+  if (left > 0) {
+    // Paying more than owed is kept as a credit against the next purchase.
+    c.purchases.push({ id: uid(), date: todayStr(), item: 'Advance payment', amount: 0, paid: -left });
+  }
+  saveData();
+  closeSheet('payment');
+  openCustomer(c.id);
+  rerender();
+  toast(fmtMoney(amount) + ' payment recorded for ' + firstName(c.name));
 }
 
 /* =========================================================
@@ -1876,11 +2377,23 @@ function hideForms() {
 }
 function showNewForm() {
   $('newForm').reset(); hideError('ncError');
+  newCustomerGroups = [];
+  renderGroupPickers();
   $('ncBirthday').max = todayStr();
   $('saleForm').classList.add('hidden');
   $('newForm').classList.remove('hidden');
   $('addChoices').classList.add('hidden');
   setTimeout(() => $('ncName').focus(), 50);
+}
+function quickSale(cid) {
+  switchTab('add');
+  const c = getCustomer(cid);
+  showSaleForm(cid);
+  if (c && c.purchases.length) {
+    const lp = lastPurchase(c);
+    $('saleItem').value = lp.item;
+    $('saleAmount').value = String(lp.amount);
+  }
 }
 function showSaleForm(preId) {
   hideError('saleError');
@@ -1894,7 +2407,7 @@ function showSaleForm(preId) {
   const sorted = [...DATA.customers].sort((a, b) => a.name.localeCompare(b.name));
   $('saleCustomer').innerHTML = (preId ? '' : '<option value="">Choose a customer</option>') +
     sorted.map(c => `<option value="${c.id}" ${c.id === preId ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
-  $('saleItem').value = ''; $('saleAmount').value = '';
+  $('saleItem').value = ''; $('saleAmount').value = ''; $('salePaid').value = '';
   $('saleDate').value = todayStr(); $('saleDate').max = todayStr();
   setTimeout(() => (preId ? $('saleItem') : $('saleCustomer')).focus(), 50);
 }
@@ -1908,7 +2421,7 @@ function addCustomer(e) {
   if (!validPhone(phone)) return showError('ncError', 'Type the full number with country code, e.g. +234 803 123 4567.');
   const dup = DATA.customers.find(c => c.phone === phone);
   if (dup) return showError('ncError', 'This number is already saved for ' + dup.name + '.');
-  const c = { id: uid(), name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, nextFollowUp: '', contactHistory: [], purchases: [] };
+  const c = { id: uid(), name, phone, birthday: $('ncBirthday').value || '', tag: $('ncTag').value, groups: newCustomerGroups.slice(), notes: $('ncNotes').value.trim(), createdAt: todayStr(), lastContacted: null, nextFollowUp: '', contactHistory: [], purchases: [] };
   DATA.customers.push(c);
   DATA.progress.customer = true;
   saveData();
@@ -1923,27 +2436,70 @@ function addSale(e) {
   const c = getCustomer($('saleCustomer').value);
   const item = $('saleItem').value.trim();
   const amount = Math.round(parseFloat($('saleAmount').value));
+  const paidRaw = $('salePaid').value.trim();
+  const paid = paidRaw === '' ? amount : Math.round(parseFloat(paidRaw));
   const date = $('saleDate').value || todayStr();
   if (!c) return showError('saleError', 'Please choose the customer.');
   if (!item) return showError('saleError', 'Please type what they bought.');
   if (!amount || amount <= 0) return showError('saleError', 'Please type the amount in naira.');
+  if (isNaN(paid) || paid < 0) return showError('saleError', 'Amount paid must be zero or more.');
+  if (paid > amount) return showError('saleError', 'Amount paid cannot be more than the amount.');
   if (date > todayStr()) return showError('saleError', 'The date cannot be in the future.');
-  c.purchases.push({ id: uid(), date, item, amount });
+  c.purchases.push({ id: uid(), date, item, amount, paid });
   if (c.purchases.length > 3 && c.tag === 'New') c.tag = 'Regular';
   DATA.progress.sale = true;
   saveData();
   hideForms();
-  toast(fmtMoney(amount) + ' sale saved for ' + firstName(c.name));
+  const owes = balance(c);
+  toast(fmtMoney(amount) + ' sale saved for ' + firstName(c.name) + (owes > 0 ? ' · owes ' + fmtMoney(owes) : ''));
+  if (owes > 0 || paid < amount) {
+    setTimeout(() => offerReceipt(c.id), 400);
+  }
+}
+
+/* ---------- Receipt on WhatsApp ---------- */
+function offerReceipt(cid) {
+  const c = getCustomer(cid);
+  if (!c) return;
+  const lp = lastPurchase(c);
+  const owed = balance(c);
+  $('receiptCustomer').textContent = c.name;
+  $('receiptPreview').textContent = receiptText(c, lp, owed);
+  $('receiptSheet').dataset.cid = cid;
+  openSheet('receipt');
+}
+function receiptText(c, lp, owed) {
+  const cur = '₦';
+  const lines = [
+    ACCOUNT.businessName,
+    'Receipt for ' + firstName(c.name),
+    '',
+    (lp ? lp.item : 'Purchase') + ' — ' + fmtMoney(lp ? lp.amount : 0),
+    'Paid: ' + fmtMoney(lp ? lp.paid : 0)
+  ];
+  if (owed > 0) lines.push('Balance: ' + fmtMoney(owed));
+  lines.push('', 'Thank you for your patronage!');
+  return lines.join('\n');
+}
+function sendReceipt() {
+  const cid = $('receiptSheet').dataset.cid;
+  const c = getCustomer(cid);
+  if (!c) return closeSheet('receipt');
+  const lp = lastPurchase(c);
+  const url = 'https://wa.me/' + c.phone + '?text=' + encodeURIComponent(receiptText(c, lp, balance(c)));
+  closeSheet('receipt');
+  const w = window.open(url, '_blank');
+  if (!w) window.location.href = url;
+  toast('WhatsApp opened. Press Send when ready.');
 }
 
 /* =========================================================
    MESSAGES
    ========================================================= */
-let saveTimers = {};
 function renderTemplates() {
   $('msgBizName').textContent = ACCOUNT.businessName;
   const ae = document.activeElement;
-  if (ae && ae.id && ae.id.startsWith('tpl-')) return; // don't interrupt typing
+  if (ae && ae.id && ae.id.startsWith('tpl-')) return;
   $('templateList').innerHTML = DATA.templates.map(t => `
     <div class="card p-4">
       <div class="flex items-center gap-3 mb-3">
@@ -1964,7 +2520,7 @@ function updateTemplate(id, val) {
   if (!t) return;
   t.body = val;
   clearTimeout(saveTimers[id]);
-  PENDING_WRITES || renderSyncTyping();
+  renderSyncTyping();
   saveTimers[id] = setTimeout(() => {
     delete saveTimers[id];
     saveData();
@@ -1979,7 +2535,8 @@ function renderSyncTyping() {
   }
 }
 function resetTemplate(id) {
-  const def = DEFAULT_TEMPLATES.find(x => x.id === id);
+  const lang = LANGUAGES[DATA.settings.language || 'en'] || LANGUAGES.en;
+  const def = lang.templates.find(x => x.id === id);
   const t = DATA.templates.find(x => x.id === id);
   if (!def || !t) return;
   if (t.body !== def.body && !confirm('Go back to the original message?')) return;
@@ -1988,7 +2545,7 @@ function resetTemplate(id) {
 }
 function copyTemplate(id) {
   const t = DATA.templates.find(x => x.id === id);
-  const text = t.body.replace(/\{business\}/gi, ACCOUNT.businessName);
+  const text = fillTemplate(t.body, { name: '{name}' });
   const done = () => toast('Message copied');
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
   else fallbackCopy(text, done);
@@ -2007,7 +2564,11 @@ function fallbackCopy(text, done) {
 let PICK_ID = null;
 let PENDING_MESSAGE = null;
 function fillTemplate(body, c) {
-  return body.replace(/\{name\}/gi, firstName(c.name)).replace(/\{business\}/gi, ACCOUNT.businessName);
+  const owed = c && c.id ? balance(c) : 0;
+  return String(body || '')
+    .replace(/\{name\}/gi, c && c.name ? firstName(c.name) : '')
+    .replace(/\{business\}/gi, ACCOUNT ? ACCOUNT.businessName : '')
+    .replace(/\{balance\}/gi, fmtMoney(owed));
 }
 function openPicker(customerId, suggested) {
   const c = getCustomer(customerId);
@@ -2017,7 +2578,7 @@ function openPicker(customerId, suggested) {
   let tpls = [...DATA.templates];
   if (suggested) tpls.sort((a, b) => (b.id === suggested) - (a.id === suggested));
   $('pickerList').innerHTML = tpls.map(t => `
-    <button onclick="sendTemplate('${t.id}')" class="w-full text-left rounded-2xl p-4 border-2 ${t.id === suggested ? 'border-leaf bg-leaf-light/50' : 'border-black/5 bg-white'} active:scale-[.99] transition">
+    <button onclick="sendTemplate('${c.id}','${t.id}')" class="w-full text-left rounded-2xl p-4 border-2 ${t.id === suggested ? 'border-leaf bg-leaf-light/50' : 'border-black/5 bg-white'} active:scale-[.99] transition">
       <span class="flex items-center gap-2 mb-2">
         <i class="fa-solid ${t.icon || 'fa-comment'} text-leaf"></i>
         <span class="font-bold text-[17px]">${esc(t.title)}</span>
@@ -2028,8 +2589,8 @@ function openPicker(customerId, suggested) {
     </button>`).join('');
   openSheet('picker');
 }
-function sendTemplate(tid) {
-  const c = getCustomer(PICK_ID);
+function sendTemplate(cid, tid) {
+  const c = getCustomer(cid || PICK_ID);
   const t = DATA.templates.find(x => x.id === tid);
   if (!c || !t) return;
   const url = 'https://wa.me/' + c.phone + '?text=' + encodeURIComponent(fillTemplate(t.body, c));
@@ -2042,7 +2603,7 @@ function sendTemplate(tid) {
   openSheet('confirm');
 }
 function confirmMessageSent() {
-  if (!PENDING_MESSAGE || PENDING_MESSAGE.accountId !== USER?.uid) return closeSheet('confirm');
+  if (!PENDING_MESSAGE || PENDING_MESSAGE.accountId !== USER.uid) return closeSheet('confirm');
   const c = getCustomer(PENDING_MESSAGE.customerId);
   if (c) {
     c.lastContacted = todayStr();
@@ -2061,11 +2622,191 @@ function confirmMessageSent() {
 }
 
 /* =========================================================
+   BROADCAST: message a group one by one
+   ========================================================= */
+let BROADCAST = null;
+function openBroadcast() {
+  BROADCAST = { step: 'pick', group: 'all', templateId: (DATA.templates[0] || {}).id, index: 0, sent: 0, opened: false };
+  renderBroadcast();
+  openSheet('broadcast');
+}
+function broadcastAudience() {
+  const days = DATA.settings.followUpDays;
+  let list = DATA.customers.slice();
+  if (BROADCAST.group === 'active') list = list.filter(c => statusOf(daysSince(lastDate(c))).key === 'active');
+  else if (BROADCAST.group === 'slipping') list = list.filter(c => statusOf(daysSince(lastDate(c))).key === 'slipping');
+  else if (BROADCAST.group === 'lost') list = list.filter(c => statusOf(daysSince(lastDate(c))).key === 'lost');
+  else if (BROADCAST.group === 'owes') list = list.filter(c => balance(c) > 0);
+  else if (BROADCAST.group.startsWith('g:')) { const g = BROADCAST.group.slice(2); list = list.filter(c => (c.groups || []).includes(g)); }
+  return list.sort((a, b) => a.name.localeCompare(b.name));
+}
+function renderBroadcast() {
+  const b = BROADCAST;
+  if (!b) return;
+  const groupOpts = [['all', 'Everyone'], ['active', 'Active'], ['slipping', 'Slipping'], ['lost', 'Lost'], ['owes', 'Owes money']]
+    .concat((DATA.groups || []).map(g => ['g:' + g, g]))
+    .map(([k, l]) => `<option value="${k}"${b.group === k ? ' selected' : ''}>${esc(l)}</option>`).join('');
+  if (b.step === 'pick') {
+    $('broadcastBody').innerHTML = `
+      <h3 class="font-extrabold text-[21px] mb-1">Message a group</h3>
+      <p class="text-stone text-[15px] mb-4">WhatsApp cannot send to a list from a link, so CustoPadi opens each chat for you. You press Send every time.</p>
+      <div class="space-y-4">
+        <div><label class="label" for="bGroup">Who to message</label><select id="bGroup" class="field" onchange="BROADCAST.group=this.value;renderBroadcast()">${groupOpts}</select></div>
+        <div><label class="label" for="bTemplate">Message</label><select id="bTemplate" class="field" onchange="BROADCAST.templateId=this.value">${DATA.templates.map(t => `<option value="${t.id}"${b.templateId === t.id ? ' selected' : ''}>${esc(t.title)}</option>`).join('')}</select></div>
+      </div>
+      <div class="bg-cream rounded-2xl p-4 my-4 text-[15px] leading-relaxed" id="bPreview"></div>
+      <button onclick="startBroadcast()" class="btn btn-amber w-full"><i class="fa-solid fa-bullhorn"></i> Start messaging <span id="bCount"></span></button>`;
+    const preview = document.createElement('div');
+    const t = DATA.templates.find(x => x.id === b.templateId) || DATA.templates[0];
+    $('bPreview').textContent = t ? fillTemplate(t.body, { name: '{name}' }) : '';
+    const list = broadcastAudience();
+    $('bCount').textContent = list.length ? '(' + list.length + ')' : '';
+  } else {
+    const list = broadcastAudience();
+    const c = list[b.index];
+    const t = DATA.templates.find(x => x.id === b.templateId);
+    if (!c) {
+      $('broadcastBody').innerHTML = `
+        <h3 class="font-extrabold text-[21px] mb-2">All done</h3>
+        <p class="text-stone text-[16px] mb-5">You marked ${b.sent} of ${list.length} as sent.</p>
+        <button onclick="closeSheet('broadcast')" class="btn btn-primary w-full">Close</button>`;
+      return;
+    }
+    const pct = Math.round((b.index / list.length) * 100);
+    $('broadcastBody').innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <p class="font-bold text-[17px]">${b.index + 1} of ${list.length}</p>
+        <p class="text-[14px] text-stone">${b.sent} sent</p>
+      </div>
+      <div class="h-2 bg-cream rounded-full overflow-hidden mb-5"><div class="h-full bg-leaf" style="width:${pct}%"></div></div>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-12 h-12 rounded-full bg-leaf-light text-leaf font-extrabold flex items-center justify-center">${esc(initials(c.name))}</span>
+        <div class="min-w-0"><p class="font-bold text-[17px] truncate">${esc(c.name)}</p><p class="text-[14px] text-stone">${esc(prettyPhone(c.phone))}</p></div>
+      </div>
+      <div class="bg-cream rounded-2xl p-4 mb-5 text-[15px] leading-relaxed">${esc(t ? fillTemplate(t.body, c) : '')}</div>
+      <div class="grid gap-3">
+        <button onclick="broadcastOpen()" class="btn btn-primary w-full"><i class="fa-brands fa-whatsapp"></i> Open WhatsApp</button>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="broadcastNext(true)" class="btn btn-ghost">Mark sent &amp; next</button>
+          <button onclick="broadcastNext(false)" class="btn btn-ghost">Skip</button>
+        </div>
+        <button onclick="closeSheet('broadcast')" class="btn btn-outline w-full">Stop here</button>
+      </div>`;
+  }
+}
+function startBroadcast() {
+  const list = broadcastAudience();
+  if (!list.length) return toast('No customers in this group.');
+  BROADCAST.step = 'run';
+  BROADCAST.index = 0;
+  BROADCAST.sent = 0;
+  renderBroadcast();
+}
+function broadcastOpen() {
+  const list = broadcastAudience();
+  const c = list[BROADCAST.index];
+  const t = DATA.templates.find(x => x.id === BROADCAST.templateId);
+  if (!c || !t) return;
+  const url = 'https://wa.me/' + c.phone + '?text=' + encodeURIComponent(fillTemplate(t.body, c));
+  const w = window.open(url, '_blank');
+  if (!w) window.location.href = url;
+  BROADCAST.opened = true;
+}
+function broadcastNext(sent) {
+  const list = broadcastAudience();
+  const c = list[BROADCAST.index];
+  if (sent && c) {
+    c.lastContacted = todayStr();
+    c.contactHistory = Array.isArray(c.contactHistory) ? c.contactHistory : [];
+    const t = DATA.templates.find(x => x.id === BROADCAST.templateId);
+    c.contactHistory.push({ id: uid(), date: todayStr(), template: t ? t.title : 'Broadcast' });
+    c.nextFollowUp = '';
+    DATA.progress.sent = true;
+    DATA.sentCount++;
+    BROADCAST.sent++;
+    saveData();
+  }
+  BROADCAST.index++;
+  BROADCAST.opened = false;
+  renderBroadcast();
+  rerender();
+}
+
+/* =========================================================
+   IMPORT CUSTOMERS
+   ========================================================= */
+let importRows = [];
+function openImport() {
+  $('importText').value = '';
+  hideError('importError'); $('importInfo').classList.add('hidden');
+  openSheet('import');
+}
+function pickImportFile(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    $('importText').value = String(reader.result || '').replace(/\r/g, '');
+    previewImport();
+  };
+  reader.readAsText(file);
+}
+function splitCsvLine(line) {
+  const out = [];
+  let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (q) {
+      if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') q = false;
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',' || ch === ';') { out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(s => s.trim());
+}
+function previewImport() {
+  const lines = $('importText').value.split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) { hideError('importError'); $('importInfo').classList.add('hidden'); return; }
+  importRows = lines.map(l => splitCsvLine(l));
+  const first = (importRows[0] || []).map(s => s.toLowerCase());
+  if (first.includes('name') || first.includes('phone')) importRows = importRows.slice(1);
+  const ok = importRows.filter(r => r[0] && normalizePhone(r[1]) && validPhone(normalizePhone(r[1]))).length;
+  const info = $('importInfo');
+  info.textContent = ok + ' of ' + importRows.length + ' lines look good. Lines without a name and a valid number are skipped.';
+  info.classList.remove('hidden');
+}
+$('importText').addEventListener('input', previewImport);
+function runImport() {
+  const have = new Set(DATA.customers.map(c => c.phone));
+  let added = 0, skipped = 0;
+  importRows.forEach(r => {
+    const name = String(r[0] || '').trim().replace(/\s+/g, ' ');
+    const phone = normalizePhone(r[1] || '');
+    if (name.length < 2 || !validPhone(phone) || have.has(phone)) { skipped++; return; }
+    have.add(phone);
+    DATA.customers.push({ id: uid(), name, phone, birthday: '', tag: (r[2] && ['New', 'Regular', 'VIP'].includes(r[2]) ? r[2] : 'New'), groups: (r[3] ? r[3].split('|').map(s => s.trim()).filter(Boolean) : []), notes: '', createdAt: todayStr(), lastContacted: null, nextFollowUp: '', contactHistory: [], purchases: [] });
+    added++;
+  });
+  if (!added) return toast(skipped ? 'Nothing added. Those numbers are already saved.' : 'Nothing to add.');
+  DATA.progress.customer = true;
+  saveData();
+  closeSheet('import');
+  rerender();
+  toast(added + ' customers added' + (skipped ? ' · ' + skipped + ' skipped' : ''));
+}
+
+/* =========================================================
    STATS
    ========================================================= */
 function renderStats() {
   const t = startOfToday();
   const monthStart = toDateStr(new Date(t.getFullYear(), t.getMonth(), 1));
+  const lastMonthStart = toDateStr(new Date(t.getFullYear(), t.getMonth() - 1, 1));
+  const lastMonthEnd = toDateStr(new Date(t.getFullYear(), t.getMonth(), 0));
   $('statsMonth').textContent = t.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
   let thisMonth = 0, cameBack = 0, slipping = 0;
@@ -2080,19 +2821,29 @@ function renderStats() {
   $('statBack').textContent = cameBack;
   $('statSlip').textContent = slipping;
 
+  const owed = DATA.customers.reduce((s, c) => s + balance(c), 0);
+  $('statOwed').textContent = fmtMoney(owed);
+
+  const allSales = [];
+  DATA.customers.forEach(c => c.purchases.forEach(p => allSales.push(p)));
+  const thisMonthSales = allSales.filter(p => p.date >= monthStart).reduce((s, p) => s + p.amount, 0);
+  const lastMonthSales = allSales.filter(p => p.date >= lastMonthStart && p.date <= lastMonthEnd).reduce((s, p) => s + p.amount, 0);
+  const avg = allSales.length ? Math.round(allSales.reduce((s, p) => s + p.amount, 0) / allSales.length) : 0;
+  $('statAvg').textContent = fmtMoney(avg);
+  const delta = lastMonthSales ? Math.round(((thisMonthSales - lastMonthSales) / lastMonthSales) * 100) : null;
+  $('chartTotal').textContent = 'Total: ' + fmtMoney(thisMonthSales) + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + '% vs last month');
+
   const weeks = [];
   for (let i = 5; i >= 0; i--) {
     const end = new Date(t); end.setDate(end.getDate() - i * 7);
     const start = new Date(end); start.setDate(start.getDate() - 6);
     weeks.push({ start: toDateStr(start), end: toDateStr(end), label: i === 0 ? 'This week' : start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), total: 0 });
   }
-  DATA.customers.forEach(c => c.purchases.forEach(p => {
+  allSales.forEach(p => {
     const w = weeks.find(w => p.date >= w.start && p.date <= w.end);
-    if (w) w.total += Number(p.amount) || 0;
-  }));
+    if (w) w.total += p.amount;
+  });
   const grand = weeks.reduce((s, w) => s + w.total, 0);
-  $('chartTotal').textContent = 'Total: ' + fmtMoney(grand);
-
   if (!grand) {
     $('chartArea').innerHTML = `
       <div class="text-center py-6">
@@ -2101,29 +2852,194 @@ function renderStats() {
         <p class="text-stone text-[15px] mb-4">Log your sales and your chart will grow here.</p>
         <button onclick="goAdd('sale')" class="btn btn-primary">Log a sale</button>
       </div>`;
-    return;
+  } else {
+    const max = Math.max(...weeks.map(w => w.total));
+    const H = 170;
+    $('chartArea').innerHTML = `
+      <div class="flex items-end gap-2 border-b-2 border-black/5" style="height:${H + 26}px">
+        ${weeks.map((w, i) => {
+          const h = w.total ? Math.max(8, Math.round(w.total / max * H)) : 3;
+          const last = i === weeks.length - 1;
+          return `<div class="flex-1 flex flex-col items-center justify-end h-full">
+            <span class="text-[12px] font-bold mb-1 ${w.total ? 'text-ink' : 'text-stone/50'}">${w.total ? fmtShortMoney(w.total) : '₦0'}</span>
+            <div class="w-full max-w-[44px] rounded-t-lg ${last ? 'bg-amber' : 'bg-leaf'}" style="height:${h}px" title="${fmtMoney(w.total)}"></div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="flex gap-2 mt-2">
+        ${weeks.map((w, i) => `<span class="flex-1 text-center text-[12px] leading-tight ${i === weeks.length - 1 ? 'text-amber font-bold' : 'text-stone'}">${esc(w.label)}</span>`).join('')}
+      </div>
+      <p class="text-[14px] text-stone mt-3">Each bar is 7 days. The orange bar is the last 7 days.</p>`;
   }
-  const max = Math.max(...weeks.map(w => w.total));
-  const H = 170;
-  $('chartArea').innerHTML = `
-    <div class="flex items-end gap-2 border-b-2 border-black/5" style="height:${H + 26}px">
-      ${weeks.map((w, i) => {
-        const h = w.total ? Math.max(8, Math.round(w.total / max * H)) : 3;
-        const last = i === weeks.length - 1;
-        return `<div class="flex-1 flex flex-col items-center justify-end h-full">
-          <span class="text-[12px] font-bold mb-1 ${w.total ? 'text-ink' : 'text-stone/50'}">${w.total ? fmtShortMoney(w.total) : '₦0'}</span>
-          <div class="w-full max-w-[44px] rounded-t-lg ${last ? 'bg-amber' : 'bg-leaf'}" style="height:${h}px" title="${fmtMoney(w.total)}"></div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="flex gap-2 mt-2">
-      ${weeks.map((w, i) => `<span class="flex-1 text-center text-[12px] leading-tight ${i === weeks.length - 1 ? 'text-amber font-bold' : 'text-stone'}">${esc(w.label)}</span>`).join('')}
-    </div>
-    <p class="text-[14px] text-stone mt-3">Each bar is 7 days. The orange bar is the last 7 days.</p>`;
+
+  const top = DATA.customers.map(c => ({ c, spent: totalSpent(c) })).filter(x => x.spent > 0).sort((a, b) => b.spent - a.spent).slice(0, 5);
+  $('topCustomers').innerHTML = top.length ? top.map((x, i) => `
+    <div class="flex items-center gap-3 bg-cream rounded-xl p-3">
+      <span class="w-8 h-8 rounded-full bg-leaf text-white font-extrabold flex items-center justify-center shrink-0 text-[14px]">${i + 1}</span>
+      <span class="flex-1 min-w-0"><span class="block font-bold text-[15px] truncate">${esc(x.c.name)}</span><span class="block text-[13px] text-stone">${x.c.purchases.length} purchases</span></span>
+      <span class="font-bold text-[15px]">${fmtMoney(x.spent)}</span>
+    </div>`).join('') : '<p class="text-[15px] text-stone">No sales yet.</p>';
+
+  const itemStats = {};
+  allSales.forEach(p => {
+    const k = p.item || 'Item';
+    if (!itemStats[k]) itemStats[k] = { n: 0, total: 0 };
+    itemStats[k].n++; itemStats[k].total += p.amount;
+  });
+  const items = Object.keys(itemStats).map(k => ({ k, ...itemStats[k] })).sort((a, b) => b.total - a.total).slice(0, 5);
+  $('topItems').innerHTML = items.length ? items.map(x => `
+    <div class="flex items-center gap-3 bg-cream rounded-xl p-3">
+      <span class="flex-1 min-w-0"><span class="block font-bold text-[15px] truncate">${esc(x.k)}</span><span class="block text-[13px] text-stone">${x.n} times</span></span>
+      <span class="font-bold text-[15px]">${fmtMoney(x.total)}</span>
+    </div>`).join('') : '<p class="text-[15px] text-stone">No sales yet.</p>';
+
+  /* Message results: did a purchase follow within 7 days of a message you marked sent? */
+  const results = {};
+  DATA.templates.forEach(t => { results[t.id] = { title: t.title, sent: 0, won: 0 }; });
+  DATA.customers.forEach(c => (c.contactHistory || []).forEach(h => {
+    if (!results[h.template] && !DATA.templates.some(t => t.title === h.template)) return;
+    const key = DATA.templates.find(t => t.title === h.template);
+    if (!key) return;
+    const won = c.purchases.some(p => p.date >= h.date && p.date <= addDaysStr(h.date, 7));
+    results[key.id].sent++;
+    if (won) results[key.id].won++;
+  }));
+  const rows = Object.values(results).filter(r => r.sent > 0);
+  $('messageResults').innerHTML = rows.length ? rows.map(r => `
+    <div class="flex items-center gap-3 bg-cream rounded-xl p-3">
+      <span class="flex-1 min-w-0"><span class="block font-bold text-[15px]">${esc(r.title)}</span><span class="block text-[13px] text-stone">${r.sent} sent · ${r.won} led to a sale</span></span>
+      <span class="font-extrabold text-[17px] ${r.won ? 'text-leaf' : 'text-stone'}">${Math.round((r.won / r.sent) * 100)}%</span>
+    </div>`).join('') : '<p class="text-[15px] text-stone">Mark messages as sent and this will show which ones bring customers back.</p>';
 }
 
 /* =========================================================
-   LOGO: use the real logo file if it sits next to index.html
+   BACKUP & CSV
+   ========================================================= */
+function exportBackup() {
+  if (!ACCOUNT || !DATA) return;
+  const payload = { app: 'CustoPadi', keepBackup: 1, exportedAt: todayStr(), business: { businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone, businessType: ACCOUNT.businessType, email: ACCOUNT.email }, data: DATA };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  const safeName = ACCOUNT.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'business';
+  a.href = URL.createObjectURL(blob);
+  a.download = 'custopadi-' + safeName + '-backup-' + todayStr() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  toast('Backup saved to your phone');
+}
+function importBackup(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const incoming = parsed && parsed.data && Array.isArray(parsed.data.customers) ? parsed.data : (Array.isArray(parsed.customers) ? parsed : null);
+      if (!incoming) return toast('This file is not a CustoPadi backup.');
+      if (!confirm('Replace your current customers and sales with the backup file (' + incoming.customers.length + ' customers)? This replaces the records saved online for this business.')) return;
+      DATA.customers = incoming.customers.map(c => normalizeCustomer(c.id || uid(), c));
+      if (Array.isArray(incoming.templates) && incoming.templates.length) DATA.templates = incoming.templates;
+      if (incoming.settings) DATA.settings = Object.assign(DATA.settings, incoming.settings);
+      if (Array.isArray(incoming.groups)) DATA.groups = incoming.groups;
+      saveData();
+      closeSheet('business');
+      rerender();
+      toast('Backup restored (' + DATA.customers.length + ' customers)');
+    } catch (err) { toast('Could not read that backup file.'); }
+  };
+  reader.readAsText(file);
+}
+function exportCustomersCsv() {
+  if (!DATA || !ACCOUNT) return;
+  const quote = value => {
+    let text = String(value ?? '').replace(/\r?\n/g, ' ');
+    if (/^[\s]*[=+@-]/.test(text) && !/^-?\d+(\.\d+)?$/.test(text)) text = "'" + text;
+    return '"' + text.replace(/"/g, '""') + '"';
+  };
+  const columns = ['Name', 'Phone', 'Birthday', 'Tag', 'Groups', 'Notes', 'Next follow-up', 'Last messaged', 'Last purchase', 'Total spent (NGN)', 'Total paid (NGN)', 'Balance (NGN)', 'Number of sales'];
+  const rows = DATA.customers.map(c => [c.name, c.phone, c.birthday, c.tag, (c.groups || []).join(' | '), c.notes, c.nextFollowUp, c.lastContacted, c.purchases.length ? lastDate(c) : '', totalSpent(c), totalPaid(c), balance(c), c.purchases.length]);
+  const csv = '\uFEFF' + [columns, ...rows].map(row => row.map(quote).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'custopadi-customers-' + todayStr() + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  toast(DATA.customers.length + ' customers downloaded');
+}
+
+/* =========================================================
+   INSTALL & SHARE
+   ========================================================= */
+let deferredInstallPrompt = null;
+let installPromptLastShown = 0;
+const INSTALL_REPROMPT_MS = 20 * 60 * 1000;
+let workerRegistration = null;
+
+if ('serviceWorker' in navigator && window.isSecureContext && /^https?:/.test(location.protocol)) {
+  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(registration => {
+    workerRegistration = registration;
+    if (navigator.onLine !== false) registration.update().catch(() => {});
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data?.type === 'CUSTOPADI_UPDATED' && event.data.version !== APP_BUILD) {
+      $('updateNotice').classList.remove('hidden');
+      updateBars();
+    }
+  });
+}
+function isInstalled() { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; }
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  maybeShowInstallPrompt(false);
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  hideInstallPrompt();
+  toast('CustoPadi is now on your home screen');
+});
+function maybeShowInstallPrompt(force) {
+  if (!appShown || isInstalled() || document.visibilityState !== 'visible' ||
+      document.activeElement?.closest('form') || document.querySelector('[id^="sheet-"]:not(.hidden)')) return;
+  const now = Date.now();
+  if (!force && now - installPromptLastShown < INSTALL_REPROMPT_MS) return;
+  if (!deferredInstallPrompt) return;
+  installPromptLastShown = now;
+  $('installPromptText').textContent = 'Add it to your home screen and open it like an app.';
+  $('installPromptBtn').classList.remove('hidden');
+  const box = $('installPrompt');
+  box.classList.remove('hidden', 'fade-up');
+  void box.offsetWidth;
+  box.classList.add('fade-up');
+}
+function hideInstallPrompt() { $('installPrompt').classList.add('hidden'); }
+function dismissInstallPrompt() { hideInstallPrompt(); installPromptLastShown = Date.now(); }
+async function triggerInstall() {
+  if (!deferredInstallPrompt) return hideInstallPrompt();
+  const prompt = deferredInstallPrompt;
+  deferredInstallPrompt = null;
+  hideInstallPrompt();
+  try {
+    await prompt.prompt();
+    const res = await prompt.userChoice;
+    if (res?.outcome === 'accepted') toast('Installation requested');
+  } catch (err) { /* browser may cancel */ }
+}
+let installPromptsStarted = false;
+function startInstallPrompts() {
+  if (installPromptsStarted) return;
+  installPromptsStarted = true;
+  setTimeout(() => maybeShowInstallPrompt(true), 1200);
+  setInterval(() => { if (document.visibilityState === 'visible') maybeShowInstallPrompt(false); }, INSTALL_REPROMPT_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') maybeShowInstallPrompt(false);
+  });
+}
+
+/* =========================================================
+   LOGO + INIT
    ========================================================= */
 (function useRealLogo() {
   const names = ['logo.png', 'logo.svg', 'logo.webp', 'logo.jpg', 'logo.jpeg'];
@@ -2142,12 +3058,26 @@ function renderStats() {
   })(0);
 })();
 
+enhancePhoneInputs();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllSheets(); });
-
 updateBars();
 </script>
 
-<!-- Firebase: accounts, online storage and analytics (keys from the custopadi project) -->
+<!-- Receipt sheet -->
+<div id="sheet-receipt" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/40" onclick="closeSheet('receipt')"></div>
+  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] p-5 pb-8">
+    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
+    <button onclick="closeSheet('receipt')" aria-label="Close" class="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center text-stone"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <h3 class="font-extrabold text-[21px] mb-1">Send a receipt?</h3>
+    <p id="receiptCustomer" class="text-stone text-[15px] mb-4"></p>
+    <pre id="receiptPreview" class="bg-cream rounded-2xl p-4 text-[15px] leading-relaxed whitespace-pre-wrap font-sans mb-5"></pre>
+    <button onclick="sendReceipt()" class="btn btn-primary w-full mb-2"><i class="fa-brands fa-whatsapp"></i> Send on WhatsApp</button>
+    <button onclick="closeSheet('receipt')" class="btn btn-ghost w-full">No, thanks</button>
+  </div>
+</div>
+
+<!-- Firebase: accounts, online storage and analytics -->
 <script type="module">
   const firebaseConfig = {
     apiKey: "AIzaSyDaDEC-5VrCaTA4J81EOwtKN0TeBsNLFIc",
@@ -2169,8 +3099,7 @@ updateBars();
       ]);
       const app = appMod.initializeApp(firebaseConfig);
       const auth = A.getAuth(app);
-      const db = R.getDatabase(app); // uses databaseURL from firebaseConfig
-      // Safely absorb any redirect left over from an older version of the app.
+      const db = R.getDatabase(app);
       try { await A.getRedirectResult(auth); } catch (err) { console.warn('Ignoring old redirect result:', err && err.code); }
       import(base + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if (ok) G.getAnalytics(app); })).catch(() => {});
       window.boot({ app, auth, db, A, R });

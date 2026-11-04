@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-GROW-1" />
+  <meta name="application-version" content="CP-TEAM-2" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -273,7 +273,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-GROW-1</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-TEAM-2</span></p>
   </div>
 </div>
 
@@ -720,7 +720,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-GROW-1';
+const APP_BUILD = 'CP-TEAM-2';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1171,6 +1171,7 @@ let unsubProfile = null, unsubCustomers = null, appShown = false, authAction = '
 let WORKSPACE_UID = null, WORKSPACE_ROLE = 'owner', SALES = {}, MESSAGE_LISTS = {}, TEAM = {}, WORKSPACES = {};
 let extraListeners = [], activeCustomerId = null, PROFILE_SNAPSHOT = {}, WORK_KIND = '';
 let SESSION_VERSION = 0;
+let SERVER_TIME_OFFSET = 0;
 const businessId = () => WORKSPACE_UID || USER?.uid;
 const ownerMode = () => !!USER && WORKSPACE_ROLE === 'owner' && businessId() === USER.uid;
 const dbRef = path => FB.R.ref(FB.db, path);
@@ -1184,6 +1185,10 @@ const customerRef = (id, uid) => FB.R.ref(FB.db, 'businesses/' + (uid || busines
 
 window.boot = function (fb) {
   FB = fb; BOOTED = true;
+  FB.R.onValue(FB.R.ref(FB.db, '.info/serverTimeOffset'), snap => {
+    const offset = Number(snap.val());
+    if (Number.isFinite(offset)) SERVER_TIME_OFFSET = offset;
+  });
   // Firebase's own connection flag: true only while the database socket is live.
   FB.R.onValue(FB.R.ref(FB.db, '.info/connected'), snap => {
     const wasOffline = !CONNECTED;
@@ -1271,12 +1276,12 @@ function renderSync() {
   icon.className = cls;
   text.textContent = label;
 }
-function track(promise) {
+function track(promise, { report = true } = {}) {
   const session = SESSION_VERSION;
   PENDING_WRITES++; renderSync();
   return promise
     .then(result => result)
-    .catch(err => { if (session === SESSION_VERSION) { SYNC_FAILED = true; dataError(err); } throw err; })
+    .catch(err => { if (session === SESSION_VERSION) { SYNC_FAILED = true; if (report) dataError(err); } throw err; })
     .finally(() => { if (session === SESSION_VERSION) { PENDING_WRITES = Math.max(0, PENDING_WRITES - 1); renderSync(); } });
 }
 window.addEventListener('online', renderSync);
@@ -1601,6 +1606,7 @@ async function upgradeToSync(e) {
 }
 
 function logout() {
+  if (TEAM_ACTION) return toast('Please wait for the team request to finish before logging out.');
   if (PENDING_WRITES || Object.keys(TEMPLATE_DRAFTS).length) {
     flushPendingSaves();
     toast('Wait for your changes to finish saving before logging out.'); return;
@@ -1665,6 +1671,7 @@ async function changePassword(e) {
 
 async function deleteBusiness() {
   if (!requireOwner()) return;
+  if (TEAM_ACTION) return toast('Please wait for the team request to finish first.');
   if (PENDING_WRITES) return toast('Wait for your pending saves to finish first.');
   if (!navigator.onLine) return toast('You need internet to delete your business.');
   if (!confirm('Delete "' + ACCOUNT.businessName + '" and ALL its customers and sales? This cannot be undone.')) return;
@@ -3275,13 +3282,8 @@ function renderStaffPanel() {
 }
 async function publishStaffInfo() {
   if (!ownerMode()) return;
-  await FB.R.set(dbRef('staffInfo/' + businessId()), { businessName: ACCOUNT.businessName, currency: DATA.settings.currency || 'NGN' });
-}
-async function publishStaffDirectory() {
-  const patch = {};
-  DATA.customers.forEach(c => { patch[c.id] = { name: c.name, phone: c.phone }; });
-  if (Object.keys(patch).length) await FB.R.update(dbRef('staffDirectory/' + businessId()), patch);
-  await publishStaffInfo();
+  const info = validatedStaffInfo(ACCOUNT.businessName, DATA.settings.currency || 'NGN');
+  await FB.R.set(dbRef('staffInfo/' + businessId()), info);
 }
 function openTeam() {
   if (!USER) return;
@@ -3290,65 +3292,257 @@ function openTeam() {
     <button class="btn btn-ghost" onclick="changeWorkspace(USER.uid)">My own business</button>
     ${list.map(([id, w]) => `<button class="btn btn-outline" onclick="changeWorkspace('${id}')">${esc(w.name || 'Team business')} / Sales staff</button>`).join('')}
     <form class="stack plain-section" onsubmit="joinTeam(event)"><h3>Join a business</h3><label class="label" for="teamCode">Invitation code or link</label><input id="teamCode" class="field" maxlength="1000" value="${esc(Store.get('cp_team_invite', ''))}" placeholder="Paste the code the owner sent" required /><button class="btn btn-primary" type="submit">Review invitation</button></form>
-    ${ownerMode() ? `<form class="stack plain-section" onsubmit="createTeamInvite(event)"><h3>Invite a staff member</h3><p class="muted">Sales staff can add sales, not change or delete earlier sales. They cannot read business totals or the owner's customer records. Invitations work once and expire after 24 hours.</p><label class="label" for="staffName">Staff name</label><input id="staffName" class="field" maxlength="50" required /><button class="btn btn-primary" type="submit">Create invitation</button></form>
+    ${ownerMode() ? `<form class="stack plain-section" onsubmit="createTeamInvite(event)"><h3>Invite a staff member</h3><p class="muted">Sales staff can add sales, not change or delete earlier sales. They cannot read business totals or the owner's customer records. Invitations work once and expire after 24 hours.</p><label class="label" for="staffName">Staff name</label><input id="staffName" class="field" maxlength="50" required /><button id="teamCreateButton" class="btn btn-primary" type="submit" ${TEAM_ACTION ? 'disabled' : ''}>${TEAM_ACTION ? 'Working...' : 'Create invitation'}</button><p id="teamProgress" role="status" class="muted">${TEAM_ACTION ? 'A team request is already running. Please wait.' : ''}</p></form>
     <div class="plain-section"><h3>Your team</h3>${Object.keys(TEAM).length ? Object.entries(TEAM).filter(([id]) => safeKey(id)).map(([id, person]) => `<div class="record-line split"><span>${esc(person.name || 'Staff member')}<span class="mini-label">Sales only</span></span><button class="btn btn-danger" onclick="revokeStaff('${id}')">Remove access</button></div>`).join('') : '<p class="muted">No staff have joined yet.</p>'}</div>` : '<button class="btn btn-ghost" onclick="logout()">Log out of my account</button>'}
-    <p id="workError" class="error-text" role="alert"></p></div>`, 'team');
+    <p id="workError" class="error-text" role="alert"></p>
+    ${ownerMode() ? '<button type="button" class="btn btn-ghost" onclick="openDatabaseRules()">View / copy Realtime Database rules</button>' : ''}</div>`, 'team');
 }
-function secureToken() { return [...crypto.getRandomValues(new Uint8Array(24))].map(n => n.toString(16).padStart(2, '0')).join(''); }
+function secureToken() {
+  if (!globalThis.crypto?.getRandomValues) throw teamError('team/secure-browser');
+  return [...crypto.getRandomValues(new Uint8Array(24))].map(n => n.toString(16).padStart(2, '0')).join('');
+}
 function changeWorkspace(id) {
+  if (TEAM_ACTION) return toast('Wait for the team request to finish before switching.');
   if (PENDING_WRITES || Object.keys(TEMPLATE_DRAFTS).length) { flushPendingSaves(); toast('Wait for your changes to finish saving before switching.'); return; }
   if (USER && safeKey(id)) enterApp(USER, id);
 }
-let NEW_INVITE = null, INVITE_REVIEW = null;
+let NEW_INVITE = null, INVITE_REVIEW = null, TEAM_ACTION = null;
+const INVITE_LIFETIME = 24 * 60 * 60 * 1000;
+function serverNow() { return Math.round(Date.now() + SERVER_TIME_OFFSET); }
+function teamError(code) { return Object.assign(new Error(code), { code }); }
+function validatedStaffInfo(name, currency) {
+  const businessName = String(name || '').trim();
+  if (!businessName || businessName.length > 100 || !/^[A-Z]{3}$/.test(currency || '')) throw teamError('team/invalid-business');
+  return { businessName, currency };
+}
+function buildStaffDirectory(customers) {
+  const directory = Object.create(null), skipped = [];
+  Object.entries(customers || {}).forEach(([id, customer]) => {
+    if (!customer || typeof customer !== 'object' || !safeKey(id)) { skipped.push(id); return; }
+    const name = String(customer.name || '').trim();
+    const raw = String(customer.phone || '').trim();
+    // Already-normalized numbers must not be reinterpreted as Nigerian local numbers.
+    const phone = /^[1-9]\d{6,14}$/.test(raw) ? raw : normalizePhone(raw);
+    if (!name || name.length > 100 || !validPhone(phone)) { skipped.push(id); return; }
+    directory[id] = { name, phone };
+  });
+  return { directory, skipped };
+}
+function buildInvitationWrite(owner, token, info, label, directory, now, createdAt) {
+  if (!safeKey(owner) || !/^[a-f0-9]{48}$/.test(token) || !label || label.length > 50) throw teamError('team/invalid-invitation');
+  return {
+    ['staffInfo/' + owner]: info,
+    ['staffDirectory/' + owner]: directory,
+    ['staffInvites/' + token]: { owner, businessName: info.businessName, label, createdAt, expiresAt: now + INVITE_LIFETIME }
+  };
+}
+function buildAcceptanceWrite(invite, member, name, joinedAt) {
+  if (!safeKey(invite.owner) || !safeKey(member) || !/^[a-f0-9]{48}$/.test(invite.token)) throw teamError('team/invalid-invitation');
+  return {
+    ['staffInvites/' + invite.token + '/claimedBy']: member,
+    ['staffMembers/' + invite.owner + '/' + member]: { role: 'sales', name, invite: invite.token, joinedAt },
+    ['workspaces/' + member + '/' + invite.owner]: { name: invite.businessName, role: 'sales', invite: invite.token }
+  };
+}
+function teamFailure(err, stage) {
+  const rawCode = String(err?.code || 'team/unknown');
+  const code = /^[a-zA-Z0-9_./-]{1,100}$/.test(rawCode) ? rawCode : 'team/unknown';
+  const messages = {
+    'team/not-ready': 'Sign-in is still loading. Wait a moment and retry.',
+    'team/wrong-session': 'This business no longer matches the signed-in account. Reopen your own workspace and retry.',
+    'team/disconnected': 'The Realtime Database is not connected yet. Reconnect and retry. No invitation has been submitted.',
+    'team/secure-browser': 'This browser cannot generate a secure invitation code. Use an up-to-date browser on the HTTPS website.',
+    'team/invalid-business': 'Check your business name and currency in Business settings, save them, then retry.',
+    'team/invalid-invitation': 'The invitation details are incomplete. Check the staff name and create a new invitation.',
+    'team/expired': 'This invitation expired. Ask the owner to create a new one.',
+    'team/used': 'This invitation was already used. Ask the owner for a new invitation.',
+    'team/self-invite': 'You are signed in as the owner. Staff must accept using their own account.',
+    'team/access-removed': 'Access for this invitation was removed. A new invitation from the owner is required.'
+  };
+  let message = messages[code];
+  if (!message && /permission.?denied/i.test(code)) {
+    message = 'Firebase denied ' + stage + '. Publish the complete updated database.rules.json in custopadi-default-rtdb > Rules, then retry. Owner-only business rules alone do not allow invitations.';
+  }
+  if (!message && /network|disconnect|unavailable|timeout/i.test(code)) message = 'The connection was interrupted during ' + stage + '. Retry when connected. This does not establish a rules problem.';
+  if (!message && /auth\//.test(code)) message = authMessage(err);
+  if (!message) message = 'Could not finish ' + stage + '. No invitation is shown as ready until Firebase confirms it.';
+  console.warn('[CustoPadi team]', { stage, code, build: APP_BUILD });
+  return message + ' Reference: ' + code + ' / ' + stage + ' / ' + APP_BUILD;
+}
+function teamProgress(text) { const el = $('teamProgress'); if (el) el.textContent = text; }
+async function verifyTeamSession(task, ownerRequired = false) {
+  if (!FB || !USER || !FB.auth.currentUser) throw teamError('team/not-ready');
+  if (USER.uid !== task.uid || FB.auth.currentUser.uid !== task.uid || SESSION_VERSION !== task.session ||
+      (ownerRequired && (!ownerMode() || businessId() !== task.uid))) throw teamError('team/wrong-session');
+  await FB.auth.currentUser.getIdToken(true);
+  if (USER?.uid !== task.uid || SESSION_VERSION !== task.session) throw teamError('team/wrong-session');
+  if (!CONNECTED) throw teamError('team/disconnected');
+}
+function finishTeamAction(task, button) {
+  clearTimeout(task.timer);
+  if (TEAM_ACTION === task) TEAM_ACTION = null;
+  if (button?.isConnected) { button.disabled = false; button.textContent = task.buttonText; }
+  const currentButton = $('teamCreateButton');
+  if (currentButton) { currentButton.disabled = false; currentButton.textContent = 'Create invitation'; }
+}
 async function createTeamInvite(e) {
-  e.preventDefault(); if (!requireOwner()) return;
-  const label = $('staffName').value.trim(); if (!label) return;
-  const button = e.target.querySelector('button'); button.disabled = true;
+  e.preventDefault(); if (!requireOwner() || TEAM_ACTION) return;
+  const label = $('staffName').value.trim();
+  if (!label || label.length > 50) return workError('Enter a staff name between 1 and 50 characters.');
+  const button = e.target.querySelector('button');
+  const task = { uid: USER.uid, session: SESSION_VERSION, stage: 'refresh-sign-in', buttonText: 'Create invitation' };
+  TEAM_ACTION = task; button.disabled = true; button.textContent = 'Creating invitation...'; workError('');
+  task.timer = setTimeout(() => {
+    if (TEAM_ACTION === task) teamProgress('Still waiting for Firebase. Keep this page open; do not create another invitation yet.');
+  }, 18000);
   try {
-    await publishStaffDirectory();
-    const token = secureToken(), invite = { owner: USER.uid, businessName: ACCOUNT.businessName, label, expiresAt: Date.now() + 86400000, createdAt: Date.now() };
-    await track(FB.R.set(dbRef('staffInvites/' + token), invite));
+    teamProgress('Checking your signed-in business...');
+    await verifyTeamSession(task, true);
+    task.stage = 'read-business';
+    const snapshot = await FB.R.get(businessRef(task.uid));
+    const profile = snapshot.val();
+    if (!profile) throw teamError('team/invalid-business');
+    task.stage = 'validate-invitation';
+    const info = validatedStaffInfo(profile.businessName, profile.settings?.currency || 'NGN');
+    const { directory, skipped } = buildStaffDirectory(profile.customers);
+    const token = secureToken();
+    if (SESSION_VERSION !== task.session || USER?.uid !== task.uid) throw teamError('team/wrong-session');
+    const patch = buildInvitationWrite(task.uid, token, info, label, directory, serverNow(), FB.R.serverTimestamp());
+    task.stage = 'save-invitation-and-directory';
+    teamProgress('Saving the staff directory and invitation together...');
+    // One atomic update avoids half-created invitations. Invalid old contacts are not exposed to staff.
+    await track(FB.R.update(dbRef('/'), patch), { report: false });
+    if (SESSION_VERSION !== task.session || USER?.uid !== task.uid) return;
     const link = new URL(location.pathname, location.origin); link.searchParams.set('team', token);
-    NEW_INVITE = { token, url: link.href, name: label };
-    openWork('Invitation ready', `<p class="muted">Share privately with ${esc(label)}. They sign in with their own account, then accept. The link expires in 24 hours.</p><label class="label mt-3" for="inviteLink">Private invitation</label><textarea id="inviteLink" class="field" rows="3" readonly>${esc(link.href)}</textarea><div class="tools"><button class="btn btn-primary" onclick="shareTeamInvite()">Share on WhatsApp</button><button class="btn btn-ghost" onclick="copyText(NEW_INVITE.url)">Copy link</button></div><button class="btn btn-danger w-full" onclick="revokeInvite()">Cancel this invitation</button>`, 'invite');
-  } catch (err) { workError('Invitation could not be created. Publish the updated Realtime Database rules, then try again.'); }
-  finally { button.disabled = false; }
+    NEW_INVITE = { token, url: link.href, name: label, owner: task.uid };
+    openWork('Invitation ready', `<p class="muted">Firebase confirmed this invitation. Share privately with ${esc(label)}. They sign in with their own account, then accept. The link expires in 24 hours.</p>
+      ${skipped.length ? `<p class="error-text mt-3">${skipped.length} customer records were left out of the staff directory because their name, number or ID needs correction. Your original customer records were not changed.</p>` : `<p class="muted mt-3">${Object.keys(directory).length} customer contacts are available to sales staff.</p>`}
+      <label class="label mt-3" for="inviteLink">Private invitation</label><textarea id="inviteLink" class="field" rows="3" readonly>${esc(link.href)}</textarea><div class="tools"><button class="btn btn-primary" onclick="shareTeamInvite()">Share on WhatsApp</button><button class="btn btn-ghost" onclick="copyText(NEW_INVITE.url)">Copy link</button></div><button class="btn btn-danger w-full" onclick="revokeInvite()">Cancel this invitation</button><p id="workError" role="alert" class="error-text mt-3"></p>`, 'invite');
+  } catch (err) {
+    if (USER?.uid === task.uid && SESSION_VERSION === task.session) { teamProgress('Invitation was not confirmed.'); workError(teamFailure(err, task.stage)); }
+  } finally { finishTeamAction(task, button); }
 }
 function shareTeamInvite() {
-  if (!NEW_INVITE) return;
+  if (!ownerMode() || !NEW_INVITE || NEW_INVITE.owner !== USER.uid) return;
   openWhatsAppShare('Please join ' + ACCOUNT.businessName + ' on CustoPadi as sales staff. Sign in with your own account: ' + NEW_INVITE.url);
 }
 async function revokeInvite() {
-  if (!requireOwner() || !NEW_INVITE) return;
-  try { await track(FB.R.remove(dbRef('staffInvites/' + NEW_INVITE.token))); NEW_INVITE = null; closeWork(); toast('Invitation cancelled'); } catch (err) {}
+  if (!requireOwner() || !NEW_INVITE || NEW_INVITE.owner !== USER.uid) return;
+  try { await track(FB.R.remove(dbRef('staffInvites/' + NEW_INVITE.token)), { report: false }); NEW_INVITE = null; closeWork(); toast('Invitation cancelled'); }
+  catch (err) { workError(teamFailure(err, 'cancel-invitation')); }
 }
 async function joinTeam(e) {
   e.preventDefault();
+  if (!USER || !FB || TEAM_ACTION) return;
   let token = $('teamCode').value.trim();
   try { if (/^https?:/.test(token)) token = new URL(token).searchParams.get('team') || ''; } catch (err) {}
   if (!/^[a-f0-9]{48}$/.test(token)) return workError('Paste the complete invitation code or link.');
   try {
     const snapshot = await FB.R.get(dbRef('staffInvites/' + token)), invite = snapshot.val();
-    if (!invite || invite.expiresAt < Date.now() || invite.claimedBy) return workError('This invitation has expired or was already used. Ask for a new one.');
+    if (!invite) return workError('This invitation is missing or was cancelled. Ask for a new one.');
+    if (invite.claimedBy === USER.uid) {
+      const membership = await FB.R.get(dbRef('staffMembers/' + invite.owner + '/' + USER.uid));
+      if (membership.val()?.role === 'sales' && membership.val()?.invite === token) { enterApp(USER, invite.owner); return; }
+      return workError('Access for this invitation was removed. Ask the owner for a new invitation.');
+    }
+    if (invite.expiresAt <= serverNow() || invite.claimedBy) return workError('This invitation has expired or was already used. Ask for a new one.');
     if (invite.owner === USER.uid) return workError('This invitation is for your staff, not your own account.');
     INVITE_REVIEW = { ...invite, token };
     openWork('Join ' + invite.businessName + '?', `<p class="muted">You will join as sales staff. You can record sales and send receipts, but not view business totals, edit past sales or delete customer records.</p><p class="muted mt-4">Your own business stays separate. You can switch back at any time.</p><button class="btn btn-primary w-full mt-5" onclick="acceptTeamInvite(this)">Accept invitation</button><p id="workError" class="error-text mt-3" role="alert"></p>`, 'accept');
-  } catch (err) { workError('Could not read the invitation. Check your connection and ask the owner to check the database rules.'); }
+  } catch (err) { workError(teamFailure(err, 'read-invitation')); }
 }
 async function acceptTeamInvite(button) {
-  const i = INVITE_REVIEW; if (!i || !USER) return; button.disabled = true;
-  const me = USER.uid, name = (USER.displayName || i.label || 'Staff').slice(0, 50);
-  const patch = { ['staffInvites/' + i.token + '/claimedBy']: me,
-    ['staffMembers/' + i.owner + '/' + me]: { role: 'sales', name, invite: i.token, joinedAt: Date.now() },
-    ['workspaces/' + me + '/' + i.owner]: { name: i.businessName, role: 'sales', invite: i.token } };
+  const reviewed = INVITE_REVIEW; if (!reviewed || !USER || TEAM_ACTION) return;
+  const task = { uid: USER.uid, session: SESSION_VERSION, stage: 'refresh-sign-in', buttonText: 'Accept invitation' };
+  TEAM_ACTION = task; button.disabled = true; button.textContent = 'Accepting invitation...';
+  task.timer = setTimeout(() => {
+    if (TEAM_ACTION === task && USER?.uid === task.uid) workError('Still waiting for Firebase to confirm your access. Keep this page open; please do not accept again yet.');
+  }, 18000);
   try {
-    await track(FB.R.update(dbRef('/'), patch)); Store.remove('cp_team_invite'); INVITE_REVIEW = null;
-    enterApp(USER, i.owner); toast('You joined the sales team');
-  } catch (err) { workError('The invitation is no longer available or access was denied. Ask the owner for a new invitation.'); button.disabled = false; }
+    await verifyTeamSession(task);
+    task.stage = 'read-invitation';
+    const current = (await FB.R.get(dbRef('staffInvites/' + reviewed.token))).val();
+    if (!current || !safeKey(current.owner)) throw teamError('team/invalid-invitation');
+    if (current.owner === task.uid) throw teamError('team/self-invite');
+    if (current.claimedBy && current.claimedBy !== task.uid) throw teamError('team/used');
+    task.stage = 'read-membership';
+    const member = (await FB.R.get(dbRef('staffMembers/' + current.owner + '/' + task.uid))).val();
+    if (current.claimedBy === task.uid) {
+      if (member?.role !== 'sales' || member.invite !== reviewed.token) throw teamError('team/access-removed');
+    } else {
+      if (current.expiresAt <= serverNow()) throw teamError('team/expired');
+      if (!member) {
+        task.stage = 'accept-invitation';
+        const patch = buildAcceptanceWrite({ ...current, token: reviewed.token }, task.uid, (USER.displayName || current.label || 'Staff').trim().slice(0, 50) || 'Staff', FB.R.serverTimestamp());
+        await track(FB.R.update(dbRef('/'), patch), { report: false });
+      } else if (member.role !== 'sales') throw teamError('team/access-removed');
+    }
+    if (SESSION_VERSION !== task.session || USER?.uid !== task.uid) return;
+    Store.remove('cp_team_invite'); INVITE_REVIEW = null;
+    enterApp(USER, current.owner); toast('You joined the sales team');
+  } catch (err) { if (USER?.uid === task.uid && SESSION_VERSION === task.session) workError(teamFailure(err, task.stage)); }
+  finally { finishTeamAction(task, button); }
 }
 async function revokeStaff(id) {
-  if (!requireOwner() || !safeKey(id) || !confirm('Remove this person\'s access? Their recorded sales will stay.')) return;
-  try { await track(FB.R.update(dbRef('/'), { ['staffMembers/' + USER.uid + '/' + id]: null, ['workspaces/' + id + '/' + USER.uid]: null })); openTeam(); toast('Staff access removed'); } catch (err) {}
+  if (!requireOwner() || TEAM_ACTION || !safeKey(id) || !confirm('Remove this person\'s access? Their recorded sales will stay.')) return;
+  try { await track(FB.R.update(dbRef('/'), { ['staffMembers/' + USER.uid + '/' + id]: null, ['workspaces/' + id + '/' + USER.uid]: null }), { report: false }); openTeam(); toast('Staff access removed'); }
+  catch (err) { workError(teamFailure(err, 'remove-staff-access')); }
+}
+
+let DATABASE_RULES_TEXT = '';
+async function openDatabaseRules() {
+  if (!requireOwner()) return;
+  openWork('Realtime Database rules', `<div class="stack">
+    <p class="muted">Use the complete file, not just the invitation section. In Firebase Console, choose <b>custopadi</b>, then <b>Realtime Database > Rules</b> for <b>custopadi-default-rtdb</b>. Replace the entire editor contents and publish.</p>
+    <p class="muted">These rules keep each business private and limit sales staff to shared contacts and new sales. Publishing rules does not change your stored customer data.</p>
+    <p id="rulesLoadStatus" class="muted" role="status">Loading database.rules.json from this deployment...</p>
+    <label class="label" for="rulesText">Complete rules JSON</label>
+    <textarea id="rulesText" class="field" rows="16" readonly spellcheck="false" aria-label="Complete Realtime Database rules" style="font-family:ui-monospace,monospace;font-size:16px;white-space:pre;"></textarea>
+    <div class="tools"><button id="copyRulesBtn" class="btn btn-primary" type="button" onclick="copyDatabaseRules()" disabled>Copy all rules</button><button id="downloadRulesBtn" class="btn btn-ghost" type="button" onclick="downloadText('database.rules.json',DATABASE_RULES_TEXT,'application/json')" disabled>Download JSON</button></div>
+    <a class="btn btn-outline" href="https://console.firebase.google.com/project/custopadi/database" target="_blank" rel="noopener noreferrer">Open Realtime Database console</a>
+    <section class="plain-section"><h3>Verify before publishing</h3><p class="muted">The security tests check owner access, atomic invitation acceptance, staff limits, expiry and revocation using Firebase's local emulator. They never use the live database. The test suite is supplied, but has not been run in this coding environment.</p>
+    <div class="tools"><a class="btn btn-ghost" href="tests/database.rules.test.mjs" download>Download tests</a><a class="btn btn-ghost" href="firebase.rules-test.json" download>Download test setup</a></div>
+    <a class="btn btn-ghost" href="tests/README.md" download>Download test instructions</a></section>
+    <p id="workError" class="error-text" role="alert"></p></div>`, 'databaseRules');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const url = new URL('./database.rules.json', location.href); url.searchParams.set('build', APP_BUILD);
+    const response = await fetch(url.href, { cache: 'no-store', signal: controller.signal, credentials: 'same-origin' });
+    if (!response.ok) throw new Error('The rules file is missing from this deployment. Upload database.rules.json beside index.html.');
+    const source = await response.text();
+    let parsed;
+    try { parsed = JSON.parse(source); } catch (error) { throw new Error('The website returned a page instead of rules JSON. Include database.rules.json in the deployed folder.'); }
+    const claimRule = parsed.rules?.staffInvites?.$token?.claimedBy?.['.write'];
+    if (!parsed.rules?.staffMembers || !parsed.rules?.sales || !parsed.rules?.workspaces ||
+        typeof claimRule !== 'string' || !claimRule.includes("child('workspaces')") || source.includes('.numChildren(')) {
+      throw new Error('This deployment has an older rules file. Upload the updated database.rules.json with build ' + APP_BUILD + '.');
+    }
+    DATABASE_RULES_TEXT = JSON.stringify(parsed, null, 2) + '\n';
+    if (WORK_KIND !== 'databaseRules') return;
+    $('rulesText').value = DATABASE_RULES_TEXT;
+    $('rulesLoadStatus').textContent = 'Complete rules loaded from this deployment. Copy or download this file. The installed Firebase rules cannot be read by this web app.';
+    $('copyRulesBtn').disabled = false; $('downloadRulesBtn').disabled = false;
+  } catch (err) {
+    if (WORK_KIND === 'databaseRules') {
+      $('rulesLoadStatus').textContent = '';
+      workError(err.name === 'AbortError' ? 'The file request timed out. Reconnect and open this screen again.' : err.message);
+    }
+  } finally { clearTimeout(timer); }
+}
+async function copyDatabaseRules() {
+  if (!DATABASE_RULES_TEXT || !$('rulesText')) return;
+  try {
+    if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(DATABASE_RULES_TEXT);
+    else {
+      $('rulesText').focus(); $('rulesText').select();
+      if (!document.execCommand('copy')) throw new Error('Copy unavailable');
+    }
+    $('rulesLoadStatus').textContent = 'Copied the complete JSON. Paste it into Realtime Database > Rules, replacing the old contents, then publish.';
+  } catch (err) {
+    $('rulesText').focus(); $('rulesText').select();
+    workError('Automatic copying is unavailable. The rules are selected; choose Copy from your browser menu.');
+  }
 }
 function resumePendingInvite() {
   const token = Store.get('cp_team_invite', '');
@@ -3420,6 +3614,19 @@ window.CustoPadiChecks = {
     test('Ledger entries not copied into legacy history', () => storedCustomer({ purchases: [{ id: 'a', amount: 1, _ledger: false }, { id: 'b', amount: 2, _ledger: true }] }).purchases.length === 1);
     test('Record identifiers cannot inject markup', () => !safeKey("x');alert(1)") && safeKey('sale_123'));
     test('All new screen controls exist', () => ['staffPanel','saleCredit','salePaid','workDialog','messageLanguage','customerGroup','businessInsights'].every(id => !!$(id)));
+    test('Bad legacy contacts do not block the staff directory', () => {
+      const source = { c1: { name: 'Ada', phone: '+234 803 123 4567' }, c2: { name: 'Tunde', phone: 'bad' } };
+      const result = buildStaffDirectory(source);
+      return result.directory.c1.phone === '2348031234567' && result.skipped.length === 1 && !result.directory.c2 && source.c1.phone.startsWith('+');
+    });
+    test('Invitation setup is one three-path update', () => {
+      const patch = buildInvitationWrite('owner_a', 'a'.repeat(48), validatedStaffInfo('Ada Fabrics', 'NGN'), 'Assistant', {}, 1000, 1000);
+      return Object.keys(patch).length === 3 && patch['staffInvites/' + 'a'.repeat(48)].expiresAt === 1000 + 86400000;
+    });
+    test('Invitation acceptance targets the same member in all paths', () => {
+      const patch = buildAcceptanceWrite({ owner: 'owner_a', token: 'a'.repeat(48), businessName: 'Ada Fabrics' }, 'staff_a', 'Assistant', 1000);
+      return patch['staffInvites/' + 'a'.repeat(48) + '/claimedBy'] === 'staff_a' && patch['staffMembers/owner_a/staff_a'].role === 'sales' && patch['workspaces/staff_a/owner_a'].invite === 'a'.repeat(48);
+    });
     console.table(results);
     return { passed: results.filter(t => t.passed).length, total: results.length, results };
   }

@@ -148,6 +148,19 @@
         "$other": { ".validate": false }
       }
     },
-    "pushDeliveries": { ".read": false, ".write": false }
+    "pushDeliveries": { ".read": false, ".write": false },
+    "recovery": {
+      "$phone": {
+        ".read": true,
+        ".write": "auth !== null && $phone.matches(/^[1-9][0-9]{6,14}$/) && auth.token.email === $phone + '@phone.custopadi.app'",
+        ".validate": "newData.hasChildren(['v', 's', 'i', 'b'])",
+        "v": { ".validate": "newData.val() === 1" },
+        "s": { ".validate": "newData.isString() && newData.val().length < 60" },
+        "i": { ".validate": "newData.isString() && newData.val().length < 40" },
+        "b": { ".validate": "newData.isString() && newData.val().length < 8000" },
+        "t": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    }
   }
 }

@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="CustoPadi" />
   <meta name="description" content="CustoPadi helps small businesses in Nigeria know who to message today and follow up with customers on WhatsApp." />
-  <meta name="application-version" content="CP-GROW-2" />
+  <meta name="application-version" content="CP-VERIFY-1" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -169,9 +169,9 @@
       <!-- Register -->
       <form id="registerForm" onsubmit="register(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Register your business</h2>
-        <p class="text-stone text-[15px] mb-4">Verify your WhatsApp number, then sign in on any phone with the same number and password.</p>
-        <button id="regGoogleBtn" type="button" onclick="googleSignIn('register')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
-        <p class="text-center text-[14px] text-stone mb-4">or use your WhatsApp number and a password</p>
+        <p class="text-stone text-[15px] mb-4">Sign up with Google or your email. It's completely free.</p>
+        <button id="regGoogleBtn" type="button" onclick="googleSignIn('register')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google text-lg"></i> Continue with Google</button>
+        <p class="text-center text-[14px] text-stone mb-4">or register with email</p>
         <div class="space-y-4">
           <div>
             <label class="label" for="regBiz">Business name</label>
@@ -183,13 +183,8 @@
           </div>
           <div>
             <label class="label" for="regPhone">Your WhatsApp number</label>
-            <input id="regPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
-            <button id="regOtpSend" type="button" onclick="sendWhatsAppCode('regPhone','regOtpStatus')" class="btn btn-ghost w-full mt-2">Send WhatsApp verification code</button>
-            <p id="regOtpStatus" role="status" class="muted mt-1"></p>
-          </div>
-          <div>
-            <label class="label" for="regOtp">WhatsApp verification code</label>
-            <input id="regOtp" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from WhatsApp" />
+            <input id="regPhone" class="field" type="tel" placeholder="+234 803 123 4567" autocomplete="tel" />
+            <p class="text-[14px] text-stone mt-1">This is the number customers reply to when you follow up.</p>
           </div>
           <div>
             <label class="label" for="regType">What do you sell?</label>
@@ -205,29 +200,32 @@
             </select>
           </div>
           <div>
-            <label class="label" for="regPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label>
+            <label class="label" for="regEmail">Email address</label>
+            <input id="regEmail" class="field" type="email" inputmode="email" placeholder="you@email.com" autocomplete="email" autocapitalize="off" />
+          </div>
+          <div>
+            <label class="label" for="regPw">Password <span class="font-normal text-stone">(at least 6 characters)</span></label>
             <div class="relative">
               <input id="regPw" class="field !pr-14" type="password" placeholder="Choose a password" autocomplete="new-password" />
               <button type="button" onclick="togglePw('regPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
             </div>
-            <p class="text-[14px] text-stone mt-1">Numbers are fine, for example 482913. Do not use your bank PIN.</p>
           </div>
         </div>
         <p id="regError" role="alert" class="hidden mt-4 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
         <button id="regSubmit" type="submit" class="btn btn-primary w-full mt-5">Create my account <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-lock text-[12px] mr-1"></i>Keep your password safe. WhatsApp verification is required when you create an account or reset its password.</p>
+        <p class="text-[14px] text-stone text-center mt-4 leading-relaxed"><i class="fa-solid fa-envelope text-[13px] mr-1 text-leaf"></i>A confirmation link will be sent to your email to verify your account.</p>
       </form>
 
       <!-- Login -->
       <form id="loginForm" class="hidden" onsubmit="login(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Welcome back</h2>
-        <p class="text-stone text-[15px] mb-4">Log in on any phone or browser and your customers are there.</p>
-        <button id="logGoogleBtn" type="button" onclick="googleSignIn('login')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google"></i> Continue with Google</button>
-        <p class="text-center text-[14px] text-stone mb-4">or use your verified WhatsApp number and password</p>
+        <p class="text-stone text-[15px] mb-4">Log in with Google or your email address.</p>
+        <button id="logGoogleBtn" type="button" onclick="googleSignIn('login')" class="btn btn-outline w-full mb-3"><i class="fa-brands fa-google text-lg"></i> Continue with Google</button>
+        <p class="text-center text-[14px] text-stone mb-4">or log in with email</p>
         <div class="space-y-4">
           <div>
-            <label class="label" for="logPhone">WhatsApp number</label>
-            <input id="logPhone" class="field" type="tel" inputmode="numeric" placeholder="08031234567" autocomplete="tel" />
+            <label class="label" for="logEmail">Email address</label>
+            <input id="logEmail" class="field" type="email" inputmode="email" placeholder="you@email.com" autocomplete="email" autocapitalize="off" />
           </div>
           <div>
             <label class="label" for="logPw">Password</label>
@@ -247,32 +245,19 @@
       </form>
 
       <!-- Forgot password -->
-      <form id="forgotForm" class="hidden" onsubmit="resetWithCode(event)" novalidate>
+      <form id="forgotForm" class="hidden" onsubmit="forgotPassword(event)" novalidate>
         <h2 class="text-[20px] font-bold mb-1">Reset your password</h2>
-        <p class="text-stone text-[15px] mb-4">Verify your WhatsApp number, then choose a new password. Any linked Google sign-in will keep working.</p>
+        <p class="text-stone text-[15px] mb-4">Enter your account email. We'll send you a password reset link.</p>
         <div class="space-y-4">
           <div>
-            <label class="label" for="fpPhone">WhatsApp number</label>
-            <input id="fpPhone" class="field" type="tel" inputmode="tel" placeholder="+234 803 123 4567" autocomplete="tel" />
-            <button type="button" onclick="sendWhatsAppCode('fpPhone','fpOtpStatus')" class="btn btn-ghost w-full mt-2">Send WhatsApp reset code</button>
-            <p id="fpOtpStatus" role="status" class="muted mt-1"></p>
-          </div>
-          <div>
-            <label class="label" for="fpCode">WhatsApp verification code</label>
-            <input id="fpCode" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from WhatsApp" />
-          </div>
-          <div>
-            <label class="label" for="fpNewPw">New password <span class="font-normal text-stone">(6 or more characters)</span></label>
-            <div class="relative">
-              <input id="fpNewPw" class="field !pr-14" type="password" placeholder="Choose a new password" autocomplete="new-password" />
-              <button type="button" onclick="togglePw('fpNewPw', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-stone"><i class="fa-regular fa-eye"></i></button>
-            </div>
+            <label class="label" for="fpEmail">Email address</label>
+            <input id="fpEmail" class="field" type="email" inputmode="email" placeholder="you@email.com" autocomplete="email" autocapitalize="off" />
           </div>
         </div>
         <p id="fpError" role="alert" class="hidden mt-3 text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-        <button id="fpSubmit" type="submit" class="btn btn-primary w-full mt-4">Reset password <i class="fa-solid fa-arrow-right"></i></button>
-        <p class="text-[14px] text-stone mt-3 leading-relaxed">A code will be sent through WhatsApp. If you have not connected WhatsApp here, use Continue with Google.</p>
-        <button type="button" onclick="setAuthMode('login')" class="text-leaf font-bold min-h-[48px] w-full">Back to log in</button>
+        <p id="fpInfo" class="hidden mt-3 text-leaf-deep text-[15px] font-medium bg-leaf-light rounded-xl px-4 py-3"></p>
+        <button id="fpSubmit" type="submit" class="btn btn-primary w-full mt-4">Send reset link <i class="fa-solid fa-arrow-right"></i></button>
+        <button type="button" onclick="setAuthMode('login')" class="text-leaf font-bold min-h-[48px] w-full mt-2">Back to log in</button>
       </form>
     </div>
 
@@ -281,7 +266,7 @@
       <div class="p-3"><i class="fa-brands fa-whatsapp ico-sun text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Ready-made messages</p></div>
       <div class="p-3"><i class="fa-solid fa-cake-candles text-leaf text-xl mb-2"></i><p class="text-[14px] text-stone leading-snug">Birthday reminders</p></div>
     </div>
-    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-GROW-2</span></p>
+    <p class="text-center text-stone text-[16px] mt-4">CustoPadi / <span data-build>CP-GROW-3</span></p>
   </div>
 </div>
 
@@ -309,6 +294,18 @@
       <div class="mb-4 px-1">
         <p id="hdrHello" class="text-[15px] text-stone truncate">Hello</p>
         <p id="hdrBiz" class="font-extrabold text-[22px] leading-tight truncate">Your business</p>
+      </div>
+
+      <div id="emailVerifyBanner" class="hidden card p-4 mb-5 flex items-center gap-3 bg-amber/10 border border-amber/30">
+        <span class="w-10 h-10 rounded-xl bg-amber/20 text-amber flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-envelope"></i></span>
+        <div class="flex-1 min-w-0">
+          <b class="block text-[15px]">Verify your email address</b>
+          <span class="text-[14px] text-stone leading-snug">Check <span id="emailVerifyEmail" class="font-semibold text-ink">your inbox</span> for the confirmation link.</span>
+        </div>
+        <div class="flex flex-col gap-1 shrink-0">
+          <button type="button" onclick="resendEmailVerification()" class="btn btn-outline !min-h-[44px] !px-3 !text-[13px]">Resend link</button>
+          <button type="button" onclick="checkEmailVerification()" class="btn btn-primary !min-h-[44px] !px-3 !text-[13px]">I've verified</button>
+        </div>
       </div>
 
       <div id="onboarding" class="hidden mb-5"></div>
@@ -580,42 +577,26 @@
       </div>
       <div><label class="label" for="bizPhone">WhatsApp number</label><input id="bizPhone" class="field" type="tel" inputmode="numeric" /></div>
       <div><label class="label" for="bizCurrency">Currency for new sales</label><select id="bizCurrency" class="field"><option value="NGN">NGN - Nigerian naira</option><option value="GHS">GHS - Ghanaian cedi</option><option value="KES">KES - Kenyan shilling</option><option value="ZAR">ZAR - South African rand</option><option value="USD">USD - US dollar</option><option value="GBP">GBP - British pound</option><option value="EUR">EUR - Euro</option></select><p class="muted">Existing sales keep their original currency. No automatic conversion.</p></div>
-      <div><label class="label">Sign-in method</label><div id="bizEmail" class="field !bg-cream text-stone flex items-center"></div></div>
+      <div><label class="label">Sign-in method</label><div id="bizEmail" class="field !bg-cream text-stone flex items-center justify-between gap-2"></div></div>
+      <div class="tools">
+        <button type="button" onclick="openBackups()" class="btn btn-ghost">Daily backups</button>
+        <button type="button" onclick="openTrash()" class="btn btn-ghost">Recently deleted</button>
+        <button type="button" onclick="closeSheet('business'); openReferral()" class="btn btn-ghost">Invite a business</button>
+      </div>
       <p id="bizError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
       <button type="submit" class="btn btn-primary w-full">Save changes</button>
     </form>
 
-    <form id="upgradeBox" onsubmit="upgradeToSync(event)" class="hidden border-t border-black/5 pt-5 mb-6 space-y-3" novalidate>
-      <h4 class="font-bold text-[17px]">Turn on sync for this business</h4>
-      <p class="text-[15px] text-stone">Right now this business only opens in this browser. Choose a password, then log in with your WhatsApp number and that password on any phone or browser.</p>
-      <div><label class="label" for="upPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="upPw" class="field" type="password" autocomplete="new-password" /></div>
-      <p id="upError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-      <button type="submit" class="btn btn-primary w-full"><i class="fa-solid fa-arrows-rotate"></i> Turn on sync</button>
-    </form>
-
     <div id="linkGoogleBox" class="hidden border-t border-black/5 pt-5 mb-6">
-      <h4 class="font-bold text-[17px] mb-1">Add Google as a backup sign-in</h4>
-      <p class="text-[15px] text-stone mb-3">There is no email reset for your password. Linking Google lets you open this same business with Google if you ever forget it.</p>
-      <button type="button" onclick="linkGoogle()" class="btn btn-outline w-full"><i class="fa-brands fa-google"></i> Link Google account</button>
+      <h4 class="font-bold text-[17px] mb-1">Add Google as a sign-in method</h4>
+      <p class="text-[15px] text-stone mb-3">Link your Google account so you can also log in to this business with one tap.</p>
+      <button type="button" onclick="linkGoogle()" class="btn btn-outline w-full"><i class="fa-brands fa-google text-lg"></i> Link Google account</button>
     </div>
-
-    <form id="linkLoginBox" onsubmit="linkPhoneLogin(event)" class="hidden space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
-      <h4 class="font-bold text-[17px]">Add a WhatsApp number + password</h4>
-      <p class="text-[15px] text-stone">You sign in with Google only, so there is no password to change in CustoPadi yet. Link a WhatsApp number and password below, then change that password here anytime. Or change your Google password from Google itself.</p>
-      <div><label class="label" for="linkPhone">WhatsApp number</label><input id="linkPhone" class="field" type="tel" inputmode="tel" placeholder="+234 803 123 4567" autocomplete="tel" /></div>
-      <button type="button" onclick="sendWhatsAppCode('linkPhone','linkOtpStatus')" class="btn btn-ghost w-full">Verify number on WhatsApp</button>
-      <p id="linkOtpStatus" role="status" class="muted"></p>
-      <div><label class="label" for="linkOtp">WhatsApp verification code</label><input id="linkOtp" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from WhatsApp" /></div>
-      <div><label class="label" for="linkPw">Choose a password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="linkPw" class="field" type="password" autocomplete="new-password" /></div>
-      <p id="linkError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
-      <button type="submit" class="btn btn-primary w-full"><i class="fa-solid fa-link"></i> Link number + password</button>
-      <a href="https://myaccount.google.com/security/password" target="_blank" rel="noopener" class="min-h-[48px] flex items-center justify-center text-leaf font-bold text-[15px]">Change Google password instead (opens Google)</a>
-    </form>
 
     <form id="pwChangeForm" onsubmit="changePassword(event)" class="hidden space-y-4 mb-6 border-t border-black/5 pt-5" novalidate>
       <h4 class="font-bold text-[17px]">Change password</h4>
       <div><label class="label" for="pwOld">Current password</label><input id="pwOld" class="field" type="password" autocomplete="current-password" /></div>
-      <div><label class="label" for="pwNew">New password <span class="font-normal text-stone">(6 or more characters)</span></label><input id="pwNew" class="field" type="password" autocomplete="new-password" /></div>
+      <div><label class="label" for="pwNew">New password <span class="font-normal text-stone">(at least 6 characters)</span></label><input id="pwNew" class="field" type="password" autocomplete="new-password" /></div>
       <p id="pwError" class="hidden text-rose text-[16px] font-medium bg-rose/10 rounded-xl px-4 py-3"></p>
       <button type="submit" class="btn btn-ghost w-full">Update password</button>
     </form>
@@ -647,27 +628,6 @@
 </div>
 
 <!-- Recovery code (shown once; the backdrop does not close it) -->
-<div id="sheet-recovery" class="fixed inset-0 z-[58] hidden">
-  <div class="absolute inset-0 bg-ink/50"></div>
-  <div class="sheet-panel absolute bottom-0 inset-x-0 max-w-md mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto p-5 pb-8">
-    <div class="w-12 h-1.5 bg-black/10 rounded-full mx-auto mb-4"></div>
-    <h3 class="font-extrabold text-[21px] mb-1">Save your recovery code</h3>
-    <p id="recoveryIntro" class="text-stone text-[15px] mb-3"></p>
-    <div class="bg-leaf-light rounded-2xl p-4 text-center mb-4">
-      <p id="recoveryCodeText" class="font-mono font-extrabold text-[24px] tracking-wider break-all select-all">XXXX-XXXX-XXXX-XXXX</p>
-    </div>
-    <p class="text-[15px] text-stone mb-4 leading-relaxed">If you forget your password, tap <b>Forgot password?</b> on the login screen and type this code. We cannot show it again. Take a screenshot or write it down. Anyone with this code and your number can reset your password, so keep it private.</p>
-    <div class="grid grid-cols-2 gap-3 mb-3">
-      <button type="button" onclick="copyRecoveryCode()" class="btn btn-ghost"><i class="fa-regular fa-copy"></i> Copy</button>
-      <button type="button" onclick="downloadRecoveryCode()" class="btn btn-ghost"><i class="fa-solid fa-download"></i> Save file</button>
-    </div>
-    <label class="flex items-start gap-3 min-h-[48px] mb-3 cursor-pointer">
-      <input id="recoverySaved" type="checkbox" class="mt-1 w-5 h-5 accent-leaf shrink-0" onchange="document.getElementById('recoveryDone').disabled = !this.checked" />
-      <span class="text-[16px] leading-snug">I have saved my recovery code</span>
-    </label>
-    <button id="recoveryDone" type="button" disabled onclick="closeSheet('recovery')" class="btn btn-primary w-full">Done</button>
-  </div>
-</div>
 
 <!-- Install popup: after login and again during long visits -->
 <div id="installPrompt" class="fixed inset-x-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[45] hidden px-4">
@@ -723,7 +683,7 @@ const Store = (() => {
    HELPERS
    ========================================================= */
 const $ = id => document.getElementById(id);
-const APP_BUILD = 'CP-GROW-2';
+const APP_BUILD = 'CP-GROW-3';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pad = n => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -927,26 +887,9 @@ function downloadRecoveryCode() {
 }
 
 /* Makes a fresh code for the signed-in business and stores the locked password. Returns true on success. */
-async function issueRecovery(password, intro) {
-  const phone = aliasPhone(USER);
-  if (!FB || !USER || !phone || !password) return false; // only number-based logins can have a code
-  if (!hasCrypto()) { toast('This browser cannot create a recovery code. Open CustoPadi in Chrome or Safari.'); return false; }
-  try {
-    await USER.getIdToken(true); // make sure the sign-in token carries the number the rules check
-    const { code, record } = await buildRecovery(phone, password);
-    await FB.R.set(recoveryRef(phone), record);
-    RECOVERY_STATE = 'set';
-    const old = $('recoveryBanner'); if (old) old.remove();
-    showRecoveryCode(code, intro);
-    return true;
-  } catch (err) {
-    console.error('Recovery code failed:', err && err.code);
-    const denied = /permission/i.test(((err && err.code) || '') + ' ' + ((err && err.message) || ''));
-    toast(denied ? 'Recovery code could not be saved. App owner: publish the updated Realtime Database rules.'
-      : 'Recovery code could not be saved. Create it later in Business settings.');
-    return false;
-  }
-}
+// Password recovery now uses the WhatsApp verification code above.
+// This legacy function is intentionally inert so older callers cannot store a password on the server.
+async function issueRecovery() { return false; }
 
 function openForgot() {
   setAuthMode('forgot');
@@ -959,114 +902,41 @@ async function resetWithCode(e) {
   e.preventDefault();
   hideError('fpError');
   const phone = normalizePhone($('fpPhone').value);
-  const code = normCode($('fpCode').value);
+  const code = $('fpCode').value.trim();
   const newPw = $('fpNewPw').value;
   if (!validPhone(phone)) return showError('fpError', 'Type the full WhatsApp number with country code, e.g. +234 803 123 4567.');
-  if (code.length !== 16) return showError('fpError', 'Type the 16-character recovery code, like ABCD-EFGH-JKLM-NPQR.');
+  if (!/^\d{4,10}$/.test(code)) return showError('fpError', 'Type the code you received on WhatsApp.');
   if (newPw.length < 6) return showError('fpError', 'Your new password must be at least 6 characters.');
   if (!FB) return showError('fpError', 'Still loading. Please wait a moment and try again.');
-  if (!hasCrypto()) return showError('fpError', 'This browser cannot check recovery codes. Open CustoPadi in Chrome or Safari.');
+  if (OTP_STATUS !== 'ready') return showError('fpError', 'WhatsApp password reset is not available yet because the verification service is not configured. Use Continue with Google if it is linked to this business, or contact the app owner.');
+  if (!otpMatches('fpPhone')) return showError('fpError', 'Tap Send WhatsApp reset code first, then type the code.');
   const btn = $('fpSubmit'); btn.disabled = true;
   authAction = 'login';
   try {
-    let snap;
-    try { snap = await FB.R.get(recoveryRef(phone)); }
-    catch (err) { throw (/permission/i.test(((err && err.code) || '') + ' ' + ((err && err.message) || '')) ? { code: 'cp/rules' } : err); }
-    if (!snap.exists()) throw { code: 'cp/no-recovery' };
-    let oldPw;
-    try { oldPw = await openRecovery(phone, code, snap.val()); } catch (err) { throw { code: 'cp/bad-code' }; }
-    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), oldPw);
-    await FB.A.updatePassword(cred.user, newPw);
+    await fetchCallable('resetPhonePassword', { phone, code, newPassword: newPw });
+    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), newPw);
     Store.set('cp_last_phone', phone);
     $('fpCode').value = ''; $('fpNewPw').value = '';
     enterApp(cred.user);
     toast('Password reset. Welcome back!');
-    await issueRecovery(newPw, 'Your password is reset. This is your NEW recovery code. The old code no longer works.');
   } catch (err) {
-    const c = err && err.code;
-    console.error('Password reset failed:', c);
-    const stale = ['auth/invalid-credential', 'auth/wrong-password', 'auth/invalid-login-credentials', 'auth/user-not-found'].includes(c);
-    showError('fpError',
-      c === 'cp/no-recovery' ? 'No recovery code was ever created for this number, so the password cannot be reset here. If you linked Google, go back and tap Continue with Google.'
-      : c === 'cp/bad-code' ? 'That recovery code is not correct. Check each letter and try again.'
-      : c === 'cp/rules' ? 'Password reset is not switched on yet. App owner: publish the updated Realtime Database rules.'
-      : stale ? 'This recovery code is out of date because the password was changed after it was made. If you linked Google, use Continue with Google.'
-      : authMessage(err));
+    console.error('Password reset failed:', err && err.code);
+    showError('fpError', err.message || authMessage(err));
   } finally {
     authAction = '';
     btn.disabled = false;
   }
 }
 
-/* Settings: create or replace the code for a signed-in business. */
-function renderRecoveryBox() {
-  const box = $('recoveryBox'); if (!box) return;
-  const eligible = !!(USER && !isGuest() && hasProvider('password') && aliasPhone(USER));
-  box.classList.toggle('hidden', !eligible);
-  if (!eligible) return;
-  $('recoveryStatus').textContent = RECOVERY_STATE === 'set'
-    ? 'A recovery code is set. If you forget your password, use it on the login screen. Creating a new code replaces the old one.'
-    : 'You have no recovery code yet. Create one now so you can reset your password if you forget it.';
-  $('rcBtnText').textContent = RECOVERY_STATE === 'set' ? 'Create a new recovery code' : 'Create recovery code';
-  $('rcPw').value = ''; hideError('rcError');
-}
-async function createRecoveryCode(e) {
-  e.preventDefault();
-  hideError('rcError');
-  if (!FB || !USER || !aliasPhone(USER)) return;
-  const pw = $('rcPw').value;
-  if (!pw) return showError('rcError', 'Type your current password.');
-  try {
-    await FB.A.reauthenticateWithCredential(USER, FB.A.EmailAuthProvider.credential(passwordEmail(USER), pw));
-  } catch (err) {
-    return showError('rcError', ['auth/wrong-password', 'auth/invalid-credential', 'auth/invalid-login-credentials'].includes(err && err.code)
-      ? 'That password is not correct.' : authMessage(err));
-  }
-  $('rcPw').value = '';
-  const ok = await issueRecovery(pw, 'Save this code. Any older recovery code no longer works.');
-  if (ok) renderRecoveryBox();
-}
-
-/* After login: find out if this business has a code, and nudge if not. */
-async function checkRecovery() {
-  const old = $('recoveryBanner'); if (old) old.remove();
-  RECOVERY_STATE = 'unknown';
-  const phone = aliasPhone(USER);
-  if (!FB || !USER || !phone || !hasProvider('password')) { RECOVERY_STATE = 'n/a'; return; }
-  let result = 'unknown';
-  try { const snap = await FB.R.get(recoveryRef(phone)); result = snap.exists() ? 'set' : 'missing'; } catch (err) { /* offline or rules not published */ }
-  if (RECOVERY_STATE !== 'set') RECOVERY_STATE = result; // a code made while we were checking wins
-  maybeShowRecoveryBanner();
-}
-function dismissRecoveryBanner() {
-  RECOVERY_BANNER_DISMISSED = true;
-  const b = $('recoveryBanner'); if (b) b.remove();
-}
-function openRecoverySettings() {
-  openBusinessSheet();
-  setTimeout(() => { const b = $('recoveryBox'); if (b && !b.classList.contains('hidden')) b.scrollIntoView({ block: 'center' }); }, 200);
-}
-function maybeShowRecoveryBanner() {
-  try {
-    if (!ownerMode()) return;
-    const existing = $('recoveryBanner');
-    if (RECOVERY_STATE !== 'missing' || !USER || !appShown) { if (existing && RECOVERY_STATE !== 'missing') existing.remove(); return; }
-    if (RECOVERY_BANNER_DISMISSED || existing) return;
-    const host = $('screen-today');
-    if (!host || host.classList.contains('hidden')) return;
-    const div = document.createElement('div');
-    div.id = 'recoveryBanner';
-    div.className = 'card p-4 mb-5 flex items-center gap-3 fade-up';
-    div.innerHTML = '<span class="w-11 h-11 rounded-2xl bg-amber/20 ico-sun flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-key"></i></span>' +
-      '<span class="flex-1 min-w-0"><b class="block text-[16px]">Create your recovery code</b>' +
-      '<span class="block text-[14px] text-stone">Without it, a forgotten password cannot be reset. It takes 10 seconds.</span></span>' +
-      '<span class="flex flex-col gap-1 shrink-0"><button onclick="openRecoverySettings()" class="btn btn-primary !min-h-[48px] !px-4 !text-[15px]">Create</button>' +
-      '<button onclick="dismissRecoveryBanner()" class="text-stone text-[14px] font-semibold min-h-[44px] px-2">Later</button></span>';
-    host.insertBefore(div, host.firstChild);
-  } catch (e) {}
-}
-
-new MutationObserver(() => { maybeShowSyncBanner(); maybeShowRecoveryBanner(); }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
+/* Legacy recovery-code helpers kept inert. Password recovery is by WhatsApp code. */
+function renderRecoveryBox() {}
+function checkRecovery() {}
+function dismissRecoveryBanner() {}
+function openRecoverySettings() { openBusinessSheet(); }
+function maybeShowRecoveryBanner() {}
+function copyRecoveryCode() {}
+function downloadRecoveryCode() {}
+new MutationObserver(() => { maybeShowSyncBanner(); }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
 
 function showError(id, msg) { const el = $(id); el.textContent = msg; el.classList.remove('hidden'); }
 function hideError(id) { $(id).classList.add('hidden'); }
@@ -1088,26 +958,73 @@ const phoneEmail = phone => phone + PHONE_EMAIL_DOMAIN;
 const realEmail = u => (u && u.email && !u.email.endsWith(PHONE_EMAIL_DOMAIN)) ? u.email : '';
 const isGuest = () => !!(USER && USER.isAnonymous);
 const hasProvider = id => !!(USER && USER.providerData && USER.providerData.some(p => p.providerId === id));
+
+/* WhatsApp OTP status. WhatsApp verification needs the deployed Cloud Functions
+   and Twilio Verify secrets. Until both exist, sign-up still works, but the
+   number is clearly marked "not verified" and can be verified later. */
 const OTP_SENT = Object.create(null);
+let OTP_STATUS = 'checking';
+async function checkWhatsAppService(force = false) {
+  if (OTP_STATUS === 'ready' && !force) return OTP_STATUS;
+  if (!FB?.C?.whatsappStatus) { OTP_STATUS = 'undeployed'; }
+  else {
+    try {
+      const res = await FB.C.whatsappStatus();
+      OTP_STATUS = res.data?.configured ? 'ready' : 'unconfigured';
+    } catch (err) {
+      const code = err && err.code;
+      OTP_STATUS = (code === 'functions/not-found' || code === 'functions/internal' || code === 'functions/unavailable') ? 'undeployed' : 'error';
+      console.warn('WhatsApp verification status check failed:', code || err.message);
+    }
+  }
+  updateOtpNotice();
+  const badge = $('verifyBadge');
+  if (badge) badge.textContent = OTP_STATUS === 'ready' ? 'WhatsApp verification ready' : 'WhatsApp verification not configured';
+  return OTP_STATUS;
+}
+function updateOtpNotice() {
+  const notice = $('otpNotice');
+  if (!notice) return;
+  if (OTP_STATUS === 'ready') { notice.classList.add('hidden'); return; }
+  const messages = {
+    checking: 'Checking WhatsApp verification…',
+    undeployed: 'WhatsApp verification is not switched on for this website yet. You can still create an account; the owner can verify the number later in Business settings.',
+    unconfigured: 'WhatsApp verification is installed but its Twilio Verify secrets or WhatsApp sender are missing. You can still create an account now.',
+    error: 'WhatsApp verification could not be reached. You can still create an account; try verification again later.'
+  };
+  notice.className = 'mb-4 rounded-xl px-4 py-3 text-[15px] leading-relaxed bg-amber/15 text-[#7a4f07]';
+  notice.textContent = messages[OTP_STATUS] || messages.error;
+}
 function sendWhatsAppCode(inputId, statusId) {
   const phone = normalizePhone($(inputId).value), status = $(statusId);
   if (!validPhone(phone)) { status.textContent = 'Type the full WhatsApp number with country code first.'; status.className = 'error-text mt-1'; return; }
-  if (!FB?.C?.sendWhatsAppCode) { status.textContent = 'WhatsApp verification service is not deployed yet. Ask the app owner to deploy functions and configure Twilio Verify.'; status.className = 'error-text mt-1'; return; }
+  if (!FB?.C?.sendWhatsAppCode) {
+    OTP_STATUS = 'undeployed'; updateOtpNotice();
+    status.textContent = 'WhatsApp verification is not deployed yet. The account can still be created; the owner can verify later.';
+    status.className = 'error-text mt-1'; return;
+  }
+  status.textContent = 'Sending code to WhatsApp…'; status.className = 'muted mt-1';
   const buttonId = inputId === 'regPhone' ? 'regOtpSend' : inputId === 'fpPhone' ? 'fpOtpSend' : 'linkOtpSend';
   const button = $(buttonId); if (button) button.disabled = true;
-  status.textContent = 'Sending code to WhatsApp...'; status.className = 'muted mt-1';
-  FB.C.sendWhatsAppCode({ phone }).then(() => {
-    OTP_SENT[inputId] = { phone, sentAt: Date.now() };
-    status.textContent = 'Code sent to WhatsApp. It expires in 10 minutes.';
-    status.className = 'text-leaf text-[15px] mt-1';
-  }).catch(err => {
-    status.textContent = err.message || 'Could not send the WhatsApp code. Try again.';
-    status.className = 'error-text mt-1';
-  }).finally(() => { if (button) button.disabled = false; });
+  Promise.resolve(FB.C.sendWhatsAppCode({ phone }))
+    .then(() => {
+      OTP_SENT[inputId] = { phone, sentAt: Date.now() }; OTP_STATUS = 'ready'; updateOtpNotice();
+      status.textContent = 'Code sent to WhatsApp. It expires in 10 minutes.'; status.className = 'text-leaf text-[15px] mt-1';
+    })
+    .catch(err => {
+      const code = err && err.code;
+      if (code === 'functions/not-found' || code === 'functions/internal' || code === 'functions/unavailable' || code === 'failed-precondition') { OTP_STATUS = 'unconfigured'; updateOtpNotice(); }
+      status.textContent = err.message || 'Could not send the WhatsApp code.'; status.className = 'error-text mt-1';
+    })
+    .finally(() => { if (button) button.disabled = false; });
 }
 function otpMatches(inputId) {
   const record = OTP_SENT[inputId];
   return !!record && record.phone === normalizePhone($(inputId).value) && Date.now() - record.sentAt < 10 * 60 * 1000;
+}
+async function fetchCallable(name, data) {
+  if (!FB?.C?.[name]) throw new Error('The verification service is not deployed yet.');
+  return FB.C[name](data);
 }
 // The email of the password login (needed to re-check a password), and the WhatsApp number
 // behind it when the account was made with a number. Recovery codes need that number.
@@ -1208,6 +1125,7 @@ const customerRef = (id, uid) => FB.R.ref(FB.db, 'businesses/' + (uid || busines
 
 window.boot = function (fb) {
   FB = fb; BOOTED = true;
+  checkWhatsAppService();
   // Firebase's own connection flag: true only while the database socket is live.
   FB.R.onValue(FB.R.ref(FB.db, '.info/connected'), snap => {
     const wasOffline = !CONNECTED;
@@ -1275,6 +1193,7 @@ function profilePayload() {
   return clean({
     businessName: ACCOUNT.businessName, ownerName: ACCOUNT.ownerName, phone: ACCOUNT.phone,
     businessType: ACCOUNT.businessType, email: realEmail(USER), createdAt: ACCOUNT.createdAt || todayStr(),
+    phoneVerified: ACCOUNT.phoneVerified === true,
     authProvider: isGuest() ? 'anonymous' : (hasProvider('password') ? 'phone-password' : 'google'),
     pinHash: null, pinSalt: null, pinAlgo: null, // clears any old PIN hash left by earlier versions
     templates: DATA.templates, settings: DATA.settings, progress: DATA.progress,
@@ -1346,7 +1265,7 @@ window.addEventListener('pagehide', flushPendingSaves);
 function applyProfile(p) {
   const base = freshData();
   const ownPhone = USER.email && USER.email.endsWith(PHONE_EMAIL_DOMAIN) ? USER.email.slice(0, -PHONE_EMAIL_DOMAIN.length) : '';
-  ACCOUNT = { uid: businessId(), email: p.email || realEmail(USER) || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || ownPhone, businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr(), referralCode: p.referralCode || '' };
+  ACCOUNT = { uid: businessId(), email: p.email || realEmail(USER) || '', businessName: p.businessName || 'My business', ownerName: p.ownerName || '', phone: p.phone || ownPhone, businessType: p.businessType || 'Other', createdAt: p.createdAt || todayStr(), referralCode: p.referralCode || '', phoneVerified: p.phoneVerified === true };
   DATA.templates = valuesOf(p.templates).length ? valuesOf(p.templates).filter(t => t && safeKey(t.id)).map(t => ({ ...t, body: String(t.body || '') })) : base.templates;
   if (!DATA.templates.some(t => t.id === 'debt')) DATA.templates.push({ id: 'debt', title: 'Payment reminder', icon: 'fa-wallet', body: 'Hi {name}, a gentle reminder about your balance of {balance} with {business}. Please let me know when you can pay. Thank you!' });
   DATA.settings = Object.assign(base.settings, p.settings || {});
@@ -1486,26 +1405,32 @@ async function register(e) {
   if (ownerName.length < 2 || ownerName.length > 50) return showError('regError', 'Please type your name (2 to 50 characters).');
   if (!validPhone(phone)) return showError('regError', 'Type the full WhatsApp number with country code, e.g. +234 803 123 4567.');
   if (pw.length < 6) return showError('regError', 'Your password must be at least 6 characters.');
-  if (!otpMatches('regPhone')) return showError('regError', 'Verify this WhatsApp number first. Send a code and enter the code you receive.');
-  const code = $('regOtp').value.trim();
-  if (!/^\d{4,10}$/.test(code)) return showError('regError', 'Type the code sent to WhatsApp.');
   if (!FB) return showError('regError', 'Still loading. Please wait a moment and try again.');
+  const code = $('regOtp').value.trim();
+  const verified = OTP_STATUS === 'ready' && otpMatches('regPhone') && /^\d{4,10}$/.test(code);
+  if (OTP_STATUS === 'ready' && !verified) return showError('regError', 'Tap Send WhatsApp verification code, then type the code you receive.');
 
   const btn = $('regSubmit'); btn.disabled = true;
   authAction = 'register';
   let created = null;
   try {
-    // The server validates the OTP, creates the Firebase login, and saves the profile.
-    await FB.C.createPhoneBusiness({ phone, code, password: pw, businessName, ownerName, businessType });
-    const cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
+    let cred;
+    if (verified) {
+      // Server verifies the WhatsApp code, creates the login and saves the profile.
+      await fetchCallable('createPhoneBusiness', { phone, code, password: pw, businessName, ownerName, businessType });
+      cred = await FB.A.signInWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
+    } else {
+      // Verification is not configured yet: create the account, but mark the number unverified.
+      cred = await FB.A.createUserWithEmailAndPassword(FB.auth, phoneEmail(phone), pw);
+      const base = freshData();
+      await FB.R.set(businessRef(cred.user.uid), clean({
+        businessName, ownerName, phone, businessType, email: '', createdAt: todayStr(),
+        authProvider: 'phone-password', phoneVerified: false,
+        templates: base.templates, settings: base.settings, progress: base.progress,
+        onboardingDone: false, sentCount: 0
+      }));
+    }
     created = cred.user;
-    const base = freshData();
-    await FB.R.set(businessRef(cred.user.uid), clean({
-      businessName, ownerName, phone, businessType, email: '', createdAt: todayStr(),
-      authProvider: 'phone-password',
-      templates: base.templates, settings: base.settings, progress: base.progress,
-      onboardingDone: false, sentCount: 0
-    }));
     Store.set('cp_last_phone', phone);
     $('registerForm').reset();
     enterApp(cred.user);
@@ -1757,6 +1682,11 @@ function openBusinessSheet() {
   $('pwChangeForm').classList.toggle('hidden', !hasProvider('password'));
   $('linkGoogleBox').classList.toggle('hidden', hasProvider('google.com'));
   $('linkLoginBox').classList.toggle('hidden', isGuest() || hasProvider('password'));
+  const verifyBox = $('verifyPhoneBox');
+  if (verifyBox) {
+    verifyBox.classList.toggle('hidden', isGuest() || !hasProvider('password') || ACCOUNT.phoneVerified === true);
+    $('verifyPhoneStatus').textContent = OTP_STATUS === 'ready' ? 'Get a code on WhatsApp to confirm this number belongs to you.' : 'This number is saved, but WhatsApp verification is not configured on this website yet. Ask the app owner to finish setup.';
+  }
   renderRecoveryBox();
   hideError('upError');
   $('logoutBtn').innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Log out';
@@ -1977,9 +1907,9 @@ function closeSheet(name) {
     try { sessionStorage.removeItem('cp_pending_message'); } catch (e) {}
   }
   if (!document.querySelector('[id^="sheet-"]:not(.hidden)')) document.body.style.overflow = '';
-  if (name === 'recovery') { $('recoveryCodeText').textContent = ''; resumePendingInvite(); }
+  if (name === 'business') resumePendingInvite();
 }
-function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business', 'recovery'].forEach(closeSheet); }
+function closeAllSheets() { ['customer', 'picker', 'edit', 'confirm', 'business'].forEach(closeSheet); }
 
 let CURRENT_TAB = 'today';
 function switchTab(name) {
@@ -2322,10 +2252,41 @@ async function deletePurchase(cid, pid) {
 async function deleteCustomer(cid) {
   if (!requireOwner()) return;
   const c = getCustomer(cid);
-  if (!c || !confirm('Delete ' + c.name + ' and all their sales?')) return;
-  const updates = { ['businesses/' + businessId() + '/customers/' + cid]: null, ['staffDirectory/' + businessId() + '/' + cid]: null };
-  Object.entries(SALES).filter(([, s]) => s.customerId === cid).forEach(([id]) => { updates['sales/' + businessId() + '/' + id] = null; });
-  try { await track(FB.R.update(dbRef('/'), updates)); closeSheet('customer'); rerender(); toast(firstName(c.name) + ' deleted'); } catch (e) {}
+  if (!c || !confirm('Move ' + c.name + ' and their sales to Recently deleted?')) return;
+  const owner = businessId();
+  const ownSales = Object.fromEntries(Object.entries(SALES).filter(([, s]) => s.customerId === cid));
+  const snapshot = { customer: storedCustomer(c), sales: ownSales, deletedAt: Date.now(), deletedBy: USER.uid };
+  const updates = { ['businesses/' + owner + '/customers/' + cid]: null, ['staffDirectory/' + owner + '/' + cid]: null, ['businesses/' + owner + '/trash/' + cid]: snapshot };
+  Object.keys(ownSales).forEach(id => { updates['sales/' + owner + '/' + id] = null; });
+  try { await track(FB.R.update(dbRef('/'), updates)); closeSheet('customer'); rerender(); toast(firstName(c.name) + ' moved to Recently deleted'); } catch (e) {}
+}
+async function openTrash() {
+  if (!requireOwner()) return;
+  openWork('Recently deleted', '<p class="muted">Loading…</p><p id="workError" class="error-text" role="alert"></p>', 'trash');
+  try {
+    const snap = await FB.R.get(dbRef('businesses/' + businessId() + '/trash')), entries = snap.val() || {};
+    const list = Object.entries(entries).filter(([, v]) => v?.customer).sort((a, b) => (b[1].deletedAt || 0) - (a[1].deletedAt || 0));
+    $('workContent').innerHTML = `<p class="muted">Deleted customers are kept here so you can restore them. Each restore returns the customer and their sales.</p>` +
+      (list.length ? list.map(([id, entry]) => `<div class="record-line split"><span><b>${esc(entry.customer.name)}</b><span class="mini-label">${esc(entry.customer.phone)} · ${esc(fmtDate(toDateStr(new Date(entry.deletedAt || Date.now()))))}</span></span><span class="stack" style="gap:6px"><button class="btn btn-primary" onclick="restoreCustomer('${id}')">Restore</button><button class="btn btn-danger" onclick="purgeCustomer('${id}')">Delete forever</button></span></div>`).join('') : '<p class="muted">Nothing has been deleted. This list is empty.</p>') + '<p id="workError" class="error-text" role="alert"></p>';
+  } catch (err) { workError('Could not load Recently deleted. Check your connection and database rules.'); }
+}
+async function restoreCustomer(id) {
+  if (!requireOwner()) return;
+  try {
+    const snap = await FB.R.get(dbRef('businesses/' + businessId() + '/trash/' + id)), entry = snap.val();
+    if (!entry?.customer) return workError('That customer is no longer available to restore.');
+    const owner = businessId(), c = normalizeCustomer(id, entry.customer), updates = {};
+    updates['businesses/' + owner + '/customers/' + id] = storedCustomer(c);
+    updates['staffDirectory/' + owner + '/' + id] = { name: c.name, phone: c.phone };
+    Object.entries(entry.sales || {}).forEach(([sid, sale]) => { if (safeKey(sid)) updates['sales/' + owner + '/' + sid] = clean(sale); });
+    updates['businesses/' + owner + '/trash/' + id] = null;
+    await track(FB.R.update(dbRef('/'), updates)); closeWork(); rerender(); toast(c.name + ' restored');
+  } catch (err) { workError('Could not restore this customer.'); }
+}
+async function purgeCustomer(id) {
+  if (!requireOwner() || !confirm('Delete forever? This cannot be undone.')) return;
+  try { await track(FB.R.remove(dbRef('businesses/' + businessId() + '/trash/' + id))); openTrash(); }
+  catch (err) { workError('Could not delete this record.'); }
 }
 
 /* =========================================================
@@ -2701,6 +2662,7 @@ function purchaseRow(c, p) {
   return `<div class="record-line"><div class="split"><div><b>${esc(p.item)}</b><div class="muted">${esc(fmtDate(p.date))}</div></div><b class="money">${fmtMoney(p.amount, p.currency)}</b></div>
     <p class="muted">Paid ${fmtMoney(salePaid(p), p.currency)}${balance > 0 ? ' / Owes ' + fmtMoney(balance, p.currency) : ' / Fully paid'}${p.dueDate ? ' / Due ' + esc(fmtDate(p.dueDate)) : ''}</p>
     <div class="tools">${balance > 0 && p._ledger ? `<button class="btn btn-primary" onclick="openPayment('${c.id}','${p.id}')">Record payment</button>` : ''}
+    ${balance > 0 && p._ledger && p.currency === 'NGN' ? `<button class="btn btn-outline" onclick="openPaymentLink('${c.id}','${p.id}')">Payment link</button>` : ''}
     <button class="btn btn-ghost" onclick="receiptFor('${c.id}','${p.id}')">Receipt</button>
     ${p._ledger && valuesOf(p.payments).length ? `<button class="btn btn-ghost" onclick="openPayments('${c.id}','${p.id}')">Payments</button>` : ''}
     <button class="btn btn-ghost" onclick="deletePurchase('${c.id}','${p.id}')">Remove sale</button></div></div>`;
@@ -3649,7 +3611,59 @@ async function revokeStaff(id) {
 function resumePendingInvite() {
   const token = Store.get('cp_team_invite', '');
   if (!token || !ownerMode()) return;
-  setTimeout(() => { if (ownerMode() && !$('workDialog').open && $('sheet-recovery').classList.contains('hidden')) openTeam(); }, 800);
+  setTimeout(() => { if (ownerMode() && !$('workDialog').open) openTeam(); }, 800);
+}
+async function openVerifyNumber() {
+  if (!ownerMode() || !ACCOUNT) return;
+  const phone = normalizePhone(ACCOUNT.phone);
+  if (!validPhone(phone)) return toast('Add and save your WhatsApp number first.');
+  openWork('Verify your WhatsApp number', `<p class="muted">We will send a code to ${esc(prettyPhone(phone))} on WhatsApp.</p><button type="button" class="btn btn-ghost w-full mt-3" onclick="sendWhatsAppCode('verifyPhone','verifyCodeStatus')">Send code</button><p id="verifyCodeStatus" class="muted mt-1" role="status"></p><input id="verifyPhone" type="hidden" value="${esc('+' + phone)}" /><label class="label mt-3" for="verifyCode">WhatsApp code</label><input id="verifyCode" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="10" /><p id="workError" class="error-text mt-2" role="alert"></p><button type="button" class="btn btn-primary w-full mt-3" onclick="confirmVerifyNumber()">Verify number</button>`, 'verify');
+  $('verifyPhone').dataset.ccReady = '1';
+}
+async function confirmVerifyNumber() {
+  if (!ownerMode() || !ACCOUNT) return;
+  const phone = normalizePhone(ACCOUNT.phone), code = $('verifyCode').value.trim();
+  if (!/^\d{4,10}$/.test(code)) return workError('Type the code you received on WhatsApp.');
+  if (OTP_STATUS !== 'ready') return workError('WhatsApp verification is not configured yet. Ask the app owner to deploy the functions and set the Twilio Verify secrets.');
+  try {
+    await FB.C.verifyWhatsAppCode({ phone, code });
+    await track(FB.R.update(businessRef(), { phoneVerified: true }));
+    ACCOUNT.phoneVerified = true; PROFILE_SNAPSHOT.phoneVerified = true;
+    closeWork(); openBusinessSheet(); toast('WhatsApp number verified');
+  } catch (err) { workError(err.message || 'That WhatsApp code could not be verified.'); }
+}
+async function openPaymentLink(cid, sid) {
+  if (!requireOwner()) return;
+  const c = getCustomer(cid), p = c?.purchases.find(s => s.id === sid); if (!p) return;
+  openWork('Payment link', `<p class="muted">Create a secure Paystack link for the outstanding ${fmtMoney(saleBalance(p), p.currency)}.</p><label class="label mt-3" for="payerEmail">Customer email</label><input id="payerEmail" class="field" type="email" inputmode="email" placeholder="customer@email.com" /><p id="workError" class="error-text mt-2" role="alert"></p><button type="button" class="btn btn-primary w-full mt-3" onclick="makePaymentLink('${cid}','${sid}')">Create payment link</button>`, 'paylink');
+}
+async function makePaymentLink(cid, sid) {
+  const email = $('payerEmail').value.trim().toLowerCase();
+  if (!validEmail(email)) return workError('Type a valid email for the customer.');
+  const button = document.querySelector('#workContent .btn-primary'); button.disabled = true;
+  try {
+    const res = await FB.C.initializePaystackPayment({ saleId: sid, payerEmail: email });
+    const url = res.data?.url, sale = getCustomer(cid)?.purchases.find(s => s.id === sid);
+    if (!url) throw new Error('Paystack did not return a link.');
+    $('workContent').innerHTML = `<p class="muted">Send this secure link to ${esc(getCustomer(cid)?.name || 'your customer')}. The balance updates automatically when Paystack confirms payment.</p><textarea class="field mt-3" rows="3" readonly>${esc(url)}</textarea><div class="tools"><button class="btn btn-primary" onclick="openWhatsAppShare('Pay securely here: ${url.replace(/'/g, '')}')">Send on WhatsApp</button><button class="btn btn-ghost" onclick="copyText(${JSON.stringify(url)})">Copy link</button></div><p class="muted">Paystack amount: ${fmtMoney((saleBalance(sale || { amount: 0 })), 'NGN')}. Cross-checking happens server-side.</p>`;
+  } catch (err) { workError(err.message || 'Payment link could not be created. Deploy the payment functions and set the Paystack key.'); button.disabled = false; }
+}
+async function openBackups() {
+  if (!requireOwner()) return;
+  openWork('Daily backups', '<p class="muted">Loading automatic backups…</p><p id="workError" class="error-text" role="alert"></p>', 'backups');
+  if (!FB?.C?.listBackups) return workError('Automatic backups need the deployed Firebase functions. See Team & workspaces for setup.');
+  try {
+    const res = await FB.C.listBackups();
+    const rows = res.data || [];
+    $('workContent').innerHTML = rows.length
+      ? `<p class="muted">Saved automatically every day at 2am (Africa/Lagos). The last 7 are kept. Restoring replaces current customers and sales.</p>${rows.map(b => `<div class="record-line split"><span><b>${esc(fmtDate(b.date))}</b><span class="mini-label">${b.customerCount} customers</span></span><button class="btn btn-ghost" onclick="restoreBackup('${b.date}')">Restore</button></div>`).join('')}<p id="workError" class="error-text" role="alert"></p>`
+      : `<p class="muted">No automatic backup has run yet. The first one is created after the scheduled function runs.</p><p id="workError" class="error-text" role="alert"></p>`;
+  } catch (err) { workError('Backups are not available yet. Deploy the functions and try again.'); }
+}
+async function restoreBackup(date) {
+  if (!requireOwner() || !confirm('Restore the backup from ' + date + '? Your current customers and sales will be replaced.')) return;
+  try { await FB.C.restoreBackup({ date }); closeWork(); toast('Backup restored'); }
+  catch (err) { workError(err.message || 'Backup could not be restored.'); }
 }
 function openWhatsAppShare(text) {
   const a = document.createElement('a'); a.href = 'https://wa.me/?text=' + encodeURIComponent(text); a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); a.remove();
@@ -3668,10 +3682,20 @@ async function openReferral() {
       <p class="muted mt-2">Your thank-you is a shareable community badge. There is no cash payment, discount or paid-plan reward.</p>
       <label class="label mt-4" for="referralLink">Your invitation link</label><textarea id="referralLink" class="field" rows="2" readonly>${esc(link.href)}</textarea>
       <div class="tools"><button class="btn btn-primary" onclick="shareReferral()">Share on WhatsApp</button><button class="btn btn-ghost" onclick="copyText(REFERRAL_SHARE.url)">Copy link</button></div>
-      ${count ? '<button class="btn btn-outline w-full" onclick="downloadReferralBadge()">Download my thank-you badge</button>' : '<p class="muted">Your badge becomes available when the first referred business registers.</p>'}`, 'referrals');
+      ${count ? '<button class="btn btn-outline w-full mt-2" onclick="claimMyReferralReward()">Claim 30 bonus days</button><button class="btn btn-ghost w-full mt-2" onclick="downloadReferralBadge()">Download my thank-you badge</button>' : '<p class="muted">Your badge and 30 bonus days unlock when the first referred business joins.</p>'}<p id="workError" class="error-text mt-2" role="alert"></p>`, 'referrals');
   } catch (err) { workError('Referrals are not available yet. Publish the updated database rules and try again.'); }
 }
 function shareReferral() { if (REFERRAL_SHARE) openWhatsAppShare('I use CustoPadi to remember customers, track sales and follow up on WhatsApp. Try it for your business: ' + REFERRAL_SHARE.url); }
+async function claimMyReferralReward() {
+  if (!requireOwner()) return;
+  if (!FB?.C?.claimReferralReward) return workError('Referral rewards need the deployed Firebase functions.');
+  try {
+    const res = await FB.C.claimReferralReward();
+    if (res.data?.claimed) toast('30 bonus days added to your business');
+    else toast('This referral reward was already claimed.');
+    openReferral();
+  } catch (err) { workError(err.message || 'This reward is not available for this account.'); }
+}
 function downloadReferralBadge() {
   if (!REFERRAL_SHARE?.count) return;
   const r = REFERRAL_SHARE;
@@ -3767,18 +3791,37 @@ updateBars();
   const base = 'https://www.gstatic.com/firebasejs/13.1.0/';
   (async () => {
     try {
-      const [appMod, A, R] = await Promise.all([
+      const [appMod, A, R, FN] = await Promise.all([
         import(base + 'firebase-app.js'),
         import(base + 'firebase-auth.js'),
-        import(base + 'firebase-database.js')
+        import(base + 'firebase-database.js'),
+        // Optional: if the Functions SDK cannot load, auth and data still work,
+        // and verification/backup/payment features report that setup is needed.
+        import(base + 'firebase-functions.js').catch(() => null)
       ]);
       const app = appMod.initializeApp(firebaseConfig);
       const auth = A.getAuth(app);
       const db = R.getDatabase(app); // uses databaseURL from firebaseConfig
+      let C = {};
+      if (FN) {
+        const functions = FN.getFunctions(app, 'europe-west1');
+        const call = name => FN.httpsCallable(functions, name);
+        C = {
+          sendWhatsAppCode: call('sendWhatsAppCode'),
+          verifyWhatsAppCode: call('verifyWhatsAppCode'),
+          createPhoneBusiness: call('createPhoneBusiness'),
+          resetPhonePassword: call('resetPhonePassword'),
+          whatsappStatus: call('whatsappStatus'),
+          initializePaystackPayment: call('initializePaystackPayment'),
+          listBackups: call('listBackups'),
+          restoreBackup: call('restoreBackup'),
+          claimReferralReward: call('claimReferralReward')
+        };
+      }
       // Safely absorb any redirect left over from an older version of the app.
       try { await A.getRedirectResult(auth); } catch (err) { console.warn('Ignoring old redirect result:', err && err.code); }
       import(base + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if (ok) G.getAnalytics(app); })).catch(() => {});
-      window.boot({ app, auth, db, A, R });
+      window.boot({ app, auth, db, A, R, C, FN });
     } catch (err) { window.bootFailed(err); }
   })();
 </script>

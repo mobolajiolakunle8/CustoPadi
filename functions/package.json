@@ -1,0 +1,12 @@
+{
+  "name": "custopadi-functions",
+  "description": "CustoPadi server-side WhatsApp OTP, Paystack and scheduled services.",
+  "private": true,
+  "engines": { "node": "22" },
+  "main": "index.js",
+  "scripts": { "lint": "node --check index.js" },
+  "dependencies": {
+    "firebase-admin": "^13.5.0",
+    "firebase-functions": "^6.4.0"
+  }
+}
